@@ -278,7 +278,7 @@ public final class GymScorecard {
     public func run() async {
         await call("look (cold)", "look")
         let launched = await call("launch Poki Gym fresh", "do", ["actions": [["launch": ["bundle": .string(gymBundle), "fresh": true]]]], budget: 25)
-        var menu = launched.contains("Gym: menu") ? launched : await call("look (menu)", "look")
+        let menu = launched.contains("Gym: menu") ? launched : await call("look (menu)", "look")
         check(menu.contains("Gym: menu"), "Poki Gym is in front after launch")
 
         // 1. Animation that never idles: the tree must still come, and the Next button must work, in time.

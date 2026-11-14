@@ -90,11 +90,11 @@ struct MessageBubble: View {
         return segments.reduce(Text(verbatim: "")) { line, segment in
             switch segment {
             case .text(let words):
-                return line + Text(verbatim: words)
+                return Text("\(line)\(Text(verbatim: words))")
             case .app(let app, let words):
                 let data = PillTextAttachmentData(app: app, text: words, font: font, onAccent: true)
-                guard let image = PillView.image(data, scale: displayScale, dark: scheme == .dark) else { return line + Text(verbatim: words) }
-                return line + Text(Image(uiImage: image)).baselineOffset(data.baselineOffset)
+                guard let image = PillView.image(data, scale: displayScale, dark: scheme == .dark) else { return Text("\(line)\(Text(verbatim: words))") }
+                return Text("\(line)\(Text(Image(uiImage: image)).baselineOffset(data.baselineOffset))")
             }
         }
     }

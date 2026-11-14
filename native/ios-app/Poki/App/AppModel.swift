@@ -199,6 +199,7 @@ final class AppModel {
     /// Poki Runner or Poki's own process, fixed for this launch (Debug tab).
     let automationPath = AutomationPath.current
     private let core: LiveCore
+    private let inProcessTransport: InProcessWDA?
     private let launcher: RunnerLauncher
     private let pairer: DevicePairing
     private let pairingKeepAlive = KeepAlive()
@@ -300,6 +301,17 @@ final class AppModel {
         return ChatModel.delegatedBusy
     }
 
+    private static var screenSize: CGSize {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        return (scenes.first { $0.activationState == .foregroundActive } ?? scenes.first)?.screen.bounds.size ?? .zero
+    }
+
+    func updateInProcessScreenSize() {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        guard let scene = scenes.first(where: { $0.activationState == .foregroundActive }) ?? scenes.first else { return }
+        inProcessTransport?.updateScreenSize(scene.screen.bounds.size)
+    }
+
     init(launcher: RunnerLauncher = RustLauncher(), pairer: DevicePairing = RustPairing(), automation: InProcessAutomation = PKInProcess.shared()) {
         ActivityController.endAll()
         self.automation = automation
@@ -307,7 +319,18 @@ final class AppModel {
         // setup state did the same in `SetupState.load`), so the owner is not sent through setup again.
         if SetupVault.restorePairingIfMissing() { AppLog.shared.add("pairing", "pairing file restored from the Keychain after a reinstall") }
         else { SetupVault.mirrorPairingFromContainer() }
-        let core = LiveCore(host: host, transport: automationPath == .inProcess ? InProcessWDA(screen: UIScreen.main.bounds.size) : URLSessionTransport())
+        let inProcessTransport: InProcessWDA?
+        let transport: HTTPTransport
+        if automationPath == .inProcess {
+            let local = InProcessWDA(screen: Self.screenSize)
+            inProcessTransport = local
+            transport = local
+        } else {
+            inProcessTransport = nil
+            transport = URLSessionTransport()
+        }
+        self.inProcessTransport = inProcessTransport
+        let core = LiveCore(host: host, transport: transport)
         self.core = core
         // Voice taps get the same rules and approval card as an agent's `do`.
         voice = VoiceModel(clearTap: { text, bundle, name in await core.clearTap(on: text, inApp: bundle, named: name, waiting: VoiceModel.approvalWait) },
@@ -452,12 +475,13 @@ final class AppModel {
         inProcessOpensInFlight = 0
         retriedLocalDDIOnLoopback = false
         endPasscodeWait(opened: false)
+        let automation = self.automation
         DispatchQueue.global(qos: .userInitiated).async { [automation] in
             let result = automation.close()
-            Task { @MainActor [weak self] in
+            Task { @MainActor [self] in
                 let closed = (result["closed"] as? Bool) == true
-                if closed { self?.inProcessUsedUp = true }
-                self?.log.add("runner", closed ? "in-process session closed for \(why) (generation \(result["generation"] ?? 0)); the banner goes with it" : "in-process session was not open (\(why))")
+                if closed { self.inProcessUsedUp = true }
+                self.log.add("runner", closed ? "in-process session closed for \(why) (generation \(result["generation"] ?? 0)); the banner goes with it" : "in-process session was not open (\(why))")
                 then?()
             }
         }
@@ -467,12 +491,13 @@ final class AppModel {
     /// main thread. The log says how, or what the session offers when it found no way.
     private func pauseAutomationMode() {
         guard automationPath == .inProcess, !Self.onSimulator else { return }
+        let automation = self.automation
         DispatchQueue.global(qos: .userInitiated).async { [automation] in
             let result = automation.pauseAutomation()
-            Task { @MainActor [weak self] in
+            Task { @MainActor [self] in
                 let paused = (result["paused"] as? Bool) == true
-                self?.log.add("runner", paused ? "Automation Mode turned off while standing by (\(result["how"] ?? "?")): the banner goes until an agent asks"
-                                               : "Automation Mode could not be turned off alone (\(result["how"] ?? "?"); the session offers: \(result["selectors"] ?? "nothing")): the banner stays while Poki is on")
+                self.log.add("runner", paused ? "Automation Mode turned off while standing by (\(result["how"] ?? "?")): the banner goes until an agent asks"
+                                              : "Automation Mode could not be turned off alone (\(result["how"] ?? "?"); the session offers: \(result["selectors"] ?? "nothing")): the banner stays while Poki is on")
             }
         }
     }
@@ -508,10 +533,10 @@ final class AppModel {
             inProcessSession = .opening
             host.update(runner: coreState(of: runner))
         }
+        let automation = self.automation
         DispatchQueue.global(qos: .userInitiated).async { [automation] in
             let result = InProcessWDA.openThroughGate { automation.prepare() }
-            Task { @MainActor [weak self] in
-                guard let self else { return }
+            Task { @MainActor [self] in
                 guard epoch == self.inProcessEpoch else {
                     self.log.add("runner", "an in-process open for \(why) answered after the session was closed: not taken")
                     return
@@ -650,7 +675,7 @@ final class AppModel {
     /// The one thing to do for the local connection, for the person, as the installer says it.
     var loopbackSentence: String {
         if tunnel.available { return "In Poki, open Setup > Connect to this iPhone and turn on Poki's own connection." }
-        guard let app = ProxyApps.all.first(where: \.isInstalled) else {
+        guard let chosen = setup.proxyApp, let app = ProxyApps.all.first(where: { $0.id == chosen }) else {
             return "Install the free LocalDevVPN from the App Store and tap Connect in it. Another VPN app that can reach 10.7.0.1 also works, such as Karing, Surge, Loon or Shadowrocket: in Poki, open Setup > Connect to this iPhone and follow the line for it."
         }
         switch app.install {
@@ -966,7 +991,7 @@ final class AppModel {
         content.sound = .default
         // Shown at once (the delegate shows banners while Poki is open too); Poki leaves only after
         // iOS has taken the notification, so an exit cannot drop it.
-        UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "nz.zheha.poki.stopped", content: content, trigger: nil)) { error in
+        UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "nz.zheha.poki.stopped", content: content, trigger: nil)) { [weak self] error in
             Task { @MainActor [weak self] in
                 self?.log.add("session", error.map { "the reopen notice was not posted: \($0.localizedDescription)" } ?? "reopen notice posted")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {

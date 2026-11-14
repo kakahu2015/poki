@@ -1,8 +1,6 @@
 import Foundation
-import UIKit
 
-/// The proxy apps that can provide the 10.7.0.1 loopback, so users
-/// keep their own VPN. Detected with canOpenURL (their schemes are listed in LSApplicationQueriesSchemes).
+/// The proxy apps that can provide the 10.7.0.1 loopback, so users keep their own VPN.
 /// The module files live in deploy/proxy-modules/.
 struct ProxyApp: Identifiable, Hashable {
     enum Install: Hashable { case url(URL), toggle(String), snippet(String) }
@@ -16,10 +14,6 @@ struct ProxyApp: Identifiable, Hashable {
     /// loopback tools report (false): the page says so, and the live check above the list is the proof.
     var documented = true
 
-    var isInstalled: Bool {
-        guard let url = URL(string: "\(scheme)://") else { return false }
-        return UIApplication.shared.canOpenURL(url)
-    }
 }
 
 enum ProxyApps {

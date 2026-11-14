@@ -116,7 +116,7 @@ struct TypewriterText: View {
     static func line(_ shown: String, font: Font, color: Color, dot: Bool) -> Text {
         let words = Text(verbatim: shown).font(font).foregroundStyle(color)
         let cursor = Text(verbatim: "\u{00A0}\u{25CF}").font(.system(size: 9)).baselineOffset(1.5).foregroundStyle(dot ? color : Color.clear)
-        return words + cursor
+        return Text("\(words)\(cursor)")
     }
 
     private func type(to target: String) {

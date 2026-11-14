@@ -1,11 +1,10 @@
 import BackgroundTasks
 import Foundation
 
-/// iOS 26's continued processing task: work the person started keeps running after Poki leaves the
+/// iOS 27's continued processing task: work the person started keeps running after Poki leaves the
 /// screen, shown by iOS with its own progress UI, with no silent audio and no location. Poki holds one
 /// while it is on and ends it when it turns off. iOS may end it early (under load, or when the person
 /// stops it from that UI); then BackgroundKeeper falls back to silent audio.
-@available(iOS 26.0, *)
 @MainActor
 final class ContinuedRun {
     static let shared = ContinuedRun()
@@ -40,7 +39,7 @@ final class ContinuedRun {
     private(set) var isRunning = false
 
     /// Asks iOS for the task; must be called while Poki is in front. False when iOS refuses.
-    func begin(subtitle: String) -> Bool {
+    func begin(subtitle: String) async -> Bool {
         guard !isRunning else { return true }
         guard let wildcard = Self.permitted else {
             AppLog.shared.add("background", "continued run: no BGTaskSchedulerPermittedIdentifiers in this build"); return false
@@ -50,14 +49,19 @@ final class ContinuedRun {
         let id = String(wildcard.dropLast()) + UUID().uuidString.prefix(8).lowercased()
         let request = BGContinuedProcessingTaskRequest(identifier: id, title: AppLocalization.text(LocalizedStringResource("Poki is on")), subtitle: subtitle)
         request.strategy = .fail
+        identifier = id
+        isRunning = true
         do {
-            try BGTaskScheduler.shared.submit(request)
+            try await BGTaskScheduler.shared.submitTaskRequest(request)
         } catch {
+            if identifier == id { identifier = nil; isRunning = false }
             AppLog.shared.add("background", "continued run refused: \(error.localizedDescription)")
             return false
         }
-        identifier = id
-        isRunning = true
+        guard isRunning, identifier == id else {
+            BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: id)
+            return false
+        }
         AppLog.shared.add("background", "continued run requested (\(id))")
         return true
     }

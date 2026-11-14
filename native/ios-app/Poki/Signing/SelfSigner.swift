@@ -65,7 +65,7 @@ final class SelfSigner {
     /// Prepare a fresh build when the installed profile has this many days left or fewer.
     static let refreshWithDaysLeft: Double = 3
     /// Home warns, and a notification reminds once a day, when the installed profile has this many days left.
-    static let warnWithDaysLeft: Double = 2
+    nonisolated static let warnWithDaysLeft: Double = 2
 
     private(set) var status: Status?
     private(set) var teams: [Team] = []

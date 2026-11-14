@@ -137,12 +137,12 @@ final class Hold: NSObject, ObservableObject, CLLocationManagerDelegate {
                 let player = AVAudioPlayerNode()
                 engine.attach(player)
                 let format = engine.mainMixerNode.outputFormat(forBus: 0)
-                engine.connect(player, to: engine.mainMixerNode, format: format)
+                try engine.connectNode(player, to: engine.mainMixerNode, format: format)
                 let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(format.sampleRate))!
                 buffer.frameLength = buffer.frameCapacity
                 try engine.start()
                 player.scheduleBuffer(buffer, at: nil, options: .loops)
-                player.play()
+                try player.playAudio()
                 self.engine = engine
                 note("silent audio playing")
             } catch { note("audio: \(error)") }

@@ -618,7 +618,7 @@ extension Computer {
                 if let tree = try? await runner.tree(timeout: min(config.readTimeout, max(0.3, until - now() - 0.1)), format: config.treeFormat) {
                     lastAll = tree.elements
                     lastForeground = tree.foreground
-                    front = tree.foreground ?? front
+                    front = tree.foreground
                     let elements = listable(tree.elements, screen)
                     scan = SensitiveScan(front: front, secureOnScreen: elements.contains(where: \.isSecure), elements: elements)
                 }

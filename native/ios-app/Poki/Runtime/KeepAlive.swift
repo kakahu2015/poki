@@ -10,7 +10,7 @@ final class KeepAlive {
     /// session, so only the last one to stop deactivates it.
     private static var playing = 0
     private var engine: AVAudioEngine?
-    private var interruption: NSObjectProtocol?
+    private var resumptionObserver: NSObjectProtocol?
 
     var isOn: Bool { engine != nil }
 
@@ -23,22 +23,23 @@ final class KeepAlive {
         let player = AVAudioPlayerNode()
         engine.attach(player)
         let format = engine.mainMixerNode.outputFormat(forBus: 0)
-        engine.connect(player, to: engine.mainMixerNode, format: format)
+        try engine.connectNode(player, to: engine.mainMixerNode, format: format)
         guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(format.sampleRate)) else { Self.release(session); return }
         buffer.frameLength = buffer.frameCapacity // zero-filled: silence
         engine.mainMixerNode.outputVolume = 0
         do { try engine.start() } catch { Self.release(session); throw error }
         player.scheduleBuffer(buffer, at: nil, options: .loops)
-        player.play()
+        try player.playAudio()
         self.engine = engine
         Self.playing += 1
-        // Another app's audio can interrupt the session; start again when it ends.
-        interruption = NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: .main) { [weak self] note in
-            guard let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt, AVAudioSession.InterruptionType(rawValue: raw) == .ended else { return }
+        // Another app can deactivate the session; resume only when iOS recommends it.
+        resumptionObserver = NotificationCenter.default.addObserver(forName: AVAudioSession.resumptionRecommendationNotification, object: nil, queue: .main) { [weak self] note in
+            let context = note.userInfo?[AVAudioSession.resumptionContextKey] as? AVAudioSession.ResumptionContext
+            guard context?.recommendation == .shouldResume else { return }
             Task { @MainActor in
                 guard let self, let engine = self.engine else { return }
                 try? AVAudioSession.sharedInstance().setActive(true)
-                if !engine.isRunning { try? engine.start(); player.play() }
+                if !engine.isRunning { try? engine.start(); try? player.playAudio() }
             }
         }
     }
@@ -47,8 +48,8 @@ final class KeepAlive {
     func stop() {
         guard let engine else { return }
         engine.stop(); self.engine = nil
-        if let interruption { NotificationCenter.default.removeObserver(interruption) }
-        interruption = nil
+        if let resumptionObserver { NotificationCenter.default.removeObserver(resumptionObserver) }
+        resumptionObserver = nil
         Self.playing -= 1
         Self.release(AVAudioSession.sharedInstance())
     }

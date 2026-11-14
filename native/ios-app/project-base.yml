@@ -3,7 +3,7 @@ name: Poki
 options:
   bundleIdPrefix: nz.zheha.poki
   deploymentTarget:
-    iOS: "18.0"
+    iOS: "27.0"
   createIntermediateGroups: true
 packages:
   PokiCore:
@@ -64,6 +64,8 @@ targets:
           UIApplicationSupportsMultipleScenes: false
         NSSupportsLiveActivities: true
         NSSupportsLiveActivitiesFrequentUpdates: true
+        # Pairing files are copied into Poki rather than edited in place.
+        LSSupportsOpeningDocumentsInPlace: false
         # Geist (SIL OFL 1.1, Shared/Fonts) for the Live Activity, in both bundles: the widget
         # extension draws the island and falls back to SF Pro without its own copy.
         UIAppFonts: [Geist-Regular.ttf, Geist-Medium.ttf, Geist-SemiBold.ttf, Geist-Bold.ttf, Geist-Black.ttf]
@@ -71,7 +73,7 @@ targets:
         # the relay connection and the launcher, running; silent audio is the fallback. Poki never reads
         # or sends the location itself.
         UIBackgroundModes: [location, audio, processing]
-        # iOS 26: the continued processing task that keeps Poki up while it is on (ContinuedRun). The
+        # iOS 27: the continued processing task that keeps Poki up while it is on (ContinuedRun). The
         # signer rewrites the nz.zheha.poki prefix to the signed bundle id.
         BGTaskSchedulerPermittedIdentifiers: ["$(POKI_BUNDLE_ID).run.*"]
         # Documents/AgentBackup holds the agent's memory backup, which Poki Setup copies off and puts back.
@@ -90,7 +92,6 @@ targets:
           NSAllowsLocalNetworking: true
         # _remotepairing._tcp: Poki reads this iPhone's own remote pairing port from it (iOS moves the port).
         NSBonjourServices: [_remotepairing-pairable-host._tcp, _remotepairing-manual-pairing._tcp, _remotepairing._tcp]
-        LSApplicationQueriesSchemes: [karing, surge, loon, shadowrocket, sing-box, stash, quantumult-x, clashmi]
         # A pairing file sent by AirDrop, Files or Poki Setup opens in Poki (Setup > Pair This iPhone).
         CFBundleDocumentTypes:
           - CFBundleTypeName: Pairing File
@@ -115,6 +116,7 @@ targets:
         product: PiSwiftAgent
       - package: PiSwift
         product: PiSwiftAI
+      - sdk: AppIntents.framework
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(POKI_BUNDLE_ID)

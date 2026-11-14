@@ -3,11 +3,10 @@ import AppIntents
 /// Starts a task in Poki's chat without opening Poki, the way a reply from Poki's notification does.
 /// When Poki has to be in front for it (Poki is off, or the task did not start), or Poki is already
 /// doing something, Poki opens on the chat instead and the task under way keeps running.
-struct SendTaskToPokiIntent: ForegroundContinuableIntent {
+struct SendTaskToPokiIntent: AppIntent {
     static let title = LocalizedStringResource("Send Task to Poki", table: "Entry")
     static let description = IntentDescription(LocalizedStringResource("Poki starts the task on this iPhone and tells you when it is done.", table: "Entry"))
     static let openAppWhenRun = false
-    @available(iOS 26.0, *)
     static var supportedModes: IntentModes { [.background, .foreground(.dynamic)] }
     // The Action Button and the Lock Screen work while the iPhone is locked: no task starts before it is unlocked.
     static let authenticationPolicy: IntentAuthenticationPolicy = .requiresAuthentication
@@ -44,11 +43,7 @@ struct SendTaskToPokiIntent: ForegroundContinuableIntent {
     @MainActor
     private func showPoki(_ words: LocalizedStringResource) async throws -> IntentResultContainer<Never, Never, Never, Never> {
         PokiEntry.shared.ask(.show)
-        if #available(iOS 26.0, *) {
-            try await continueInForeground(IntentDialog(words), alwaysConfirm: false)
-        } else {
-            throw needsToContinueInForegroundError(IntentDialog(words), continuation: nil)
-        }
+        try await continueInForeground(IntentDialog(words), alwaysConfirm: false)
         return .result()
     }
 }

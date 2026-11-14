@@ -4,9 +4,16 @@ import SwiftUI
 // Settings opens from the conversations: a round button in the trailing corner of their foot, beside
 // the new-conversation button (and from Poki's status card). Where it opens is the app's (PokiApp).
 
+private struct OpenPokiSettingsKey: EnvironmentKey {
+    static let defaultValue: (() -> Void)? = nil
+}
+
 extension EnvironmentValues {
     /// Opens Settings (Poki's profile sheet). Nil where nothing has set it: then the entry is not shown.
-    @Entry var openPokiSettings: (() -> Void)? = nil
+    var openPokiSettings: (() -> Void)? {
+        get { self[OpenPokiSettingsKey.self] }
+        set { self[OpenPokiSettingsKey.self] = newValue }
+    }
 }
 
 /// Settings as a round glass button, with an amber dot while something there needs you (no model

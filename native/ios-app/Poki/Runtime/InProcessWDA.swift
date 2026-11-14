@@ -67,7 +67,7 @@ final class InProcessWDA: HTTPTransport, @unchecked Sendable {
     private let native = PKInProcess.shared()
     /// When each request runs: one action or read at a time, screenshots beside them (PokiCore).
     private var lanes: LocalRunner!
-    private let screen: CGSize
+    private let screenSize: OSAllocatedUnfairLock<CGSize>
     private var routes: [String: Route] = [:]
     /// The focused field from the latest `/element/active`, for the value and frame asked right after.
     private var focused: [AnyHashable: Any]?
@@ -113,7 +113,7 @@ final class InProcessWDA: HTTPTransport, @unchecked Sendable {
     }
 
     init(screen: CGSize) {
-        self.screen = screen
+        screenSize = OSAllocatedUnfairLock(initialState: screen)
         routes = [
             "POST /session": { [unowned self] _, _ in
                 // The owner cancelled iOS's passcode screen: no new open (and no new screen) until they
@@ -132,9 +132,9 @@ final class InProcessWDA: HTTPTransport, @unchecked Sendable {
                 return .null
             },
             // Beside another app, the front app's part of the screen is the screen the agent sees (viewport).
-            "GET /wda/screen": { [unowned self, screen] _, _ in
+            "GET /wda/screen": { [unowned self] _, _ in
                 let viewport = self.native.viewport
-                let size = viewport.isNull ? screen : viewport.size
+                let size = viewport.isNull ? self.screenSize.withLock { $0 } : viewport.size
                 return ["screenSize": ["width": .number(size.width), "height": .number(size.height)]]
             },
             "GET /wda/locked": { [unowned self] _, _ in .bool(self.native.screenLocked()) },
@@ -244,6 +244,10 @@ final class InProcessWDA: HTTPTransport, @unchecked Sendable {
             let pid = held["pid"] as? Int ?? 0
             return (pid < 0 ? "a lookup of the app in front" : pid == 0 ? "a request to the accessibility server" : "an accessibility request (pid \(pid))", seconds)
         })
+    }
+
+    func updateScreenSize(_ size: CGSize) {
+        screenSize.withLock { $0 = size }
     }
 
     private struct Refusal: Error {

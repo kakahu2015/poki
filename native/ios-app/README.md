@@ -3,7 +3,7 @@
 One app for everything a user does on the phone: setup (Developer Mode, on-device pairing, UI
 Automation, the loopback, the first-session passcode), starting and stopping a session, the Live
 Activity with Approve/Deny for sensitive actions, the MCP address for each client (text, QR, copy),
-and a Debug tab (the former Poki Probe). Native SwiftUI on the iOS 26 SDK with Liquid Glass.
+and a Debug tab (the former Poki Probe). Requires iOS 27 or later; native SwiftUI on the iOS 27 SDK with Liquid Glass.
 
 Poki automates the phone in its own process: it opens the XCTest automation session itself
 (`Poki/Native/InProcess.m`, answered to PokiCore by `Poki/Runtime/InProcessWDA.swift`), so Poki is
@@ -45,7 +45,7 @@ GitHub Actions (`.github/workflows/ios-app.yml`) builds and tests the app on dem
 workflow, runs it on the iOS Simulator, and uploads screenshots in light and dark mode
 (artifact `simulator-smoke`, folder `shots`). [Release workflows](../../docs/release-channels.md)
 publish Pre-alpha automatically. Alpha, Beta, Stable, and installer uploads require the repository
-owner's approval. Locally on a Mac with Xcode 26 or later:
+owner's approval. Locally on a Mac with Xcode 27 or later:
 
 ```sh
 native/ios-app/scripts/make-assets.sh

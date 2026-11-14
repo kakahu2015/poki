@@ -324,9 +324,9 @@ private struct LoopbackPage: View {
         // The external app is the way (ESP-168): every app's steps can be read at any time.
         Section {
             // The free one first: a new person usually has no proxy app.
-            NavigationLink { LocalDevVPNPage() } label: { proxyLabel("LocalDevVPN", id: "localdevvpn", installed: false, sub: "Free on the App Store") }
+            NavigationLink { LocalDevVPNPage() } label: { proxyLabel("LocalDevVPN", id: "localdevvpn", sub: "Free on the App Store") }
             ForEach(ProxyApps.all) { app in
-                NavigationLink { ProxyAppPage(app: app) } label: { proxyLabel(app.name, id: app.id, installed: app.isInstalled) }
+                NavigationLink { ProxyAppPage(app: app) } label: { proxyLabel(app.name, id: app.id) }
             }
         } header: {
             Text("Use Your Proxy App")
@@ -366,13 +366,12 @@ private struct LoopbackPage: View {
         }
     }
 
-    private func proxyLabel(_ name: String, id: String, installed: Bool, sub: LocalizedStringKey? = nil) -> some View {
+    private func proxyLabel(_ name: String, id: String, sub: LocalizedStringKey? = nil) -> some View {
         let chosen = model.setup.proxyApp == id
         let working = chosen && model.loopback.isWorking
         return LabeledContent {
             if working { Text("Working").foregroundStyle(.green) }
             else if chosen { Text("Not Answering").foregroundStyle(.orange) }
-            else if installed { Text("Installed") }
         } label: {
             // The app's own icon, the size and corners of Settings' app rows.
             HStack(spacing: 12) {
@@ -416,6 +415,7 @@ private struct ProxyAppPage: View {
     @Environment(AppModel.self) private var model
     var app: ProxyApp
     @State private var copied = false
+    @State private var openFailed = false
 
     var body: some View {
         Form {
@@ -435,7 +435,7 @@ private struct ProxyAppPage: View {
             Section {
                 switch app.install {
                 case .url(let url):
-                    Button(app.id == "surge" ? "Install Poki Module" : "Install Poki Plugin") { choose(); UIApplication.shared.open(url) }
+                    Button(app.id == "surge" ? "Install Poki Module" : "Install Poki Plugin") { choose(); open(url) }
                 case .toggle:
                     Button("Open \(app.name)") { choose(); openApp() }
                 case .snippet(let line):
@@ -450,9 +450,20 @@ private struct ProxyAppPage: View {
         }
         .navigationTitle(Text(verbatim: app.name))
         .navigationBarTitleDisplayMode(.inline)
+        .alert("Couldn’t Open \(app.name)", isPresented: $openFailed) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Make sure \(app.name) is installed, then try again.")
+        }
     }
 
-    private func openApp() { if let url = URL(string: "\(app.scheme)://") { UIApplication.shared.open(url) } }
+    private func openApp() { if let url = URL(string: "\(app.scheme)://") { open(url) } }
+
+    private func open(_ url: URL) {
+        UIApplication.shared.open(url) { succeeded in
+            Task { @MainActor in openFailed = !succeeded }
+        }
+    }
 
     private func choose() {
         model.chooseConnection(.proxy)

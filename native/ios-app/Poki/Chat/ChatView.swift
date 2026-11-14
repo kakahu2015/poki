@@ -1551,7 +1551,8 @@ final class FieldDictation {
         let trimmed = current.trimmingCharacters(in: .whitespacesAndNewlines)
         base = trimmed.isEmpty ? "" : trimmed + " "
         text = ""
-        Task {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
             guard await Dictation.allowed() else {
                 starting = false
                 problem = AppLocalization.text(LocalizedStringResource("Poki needs the microphone and speech recognition. Allow them in Settings › Poki."))

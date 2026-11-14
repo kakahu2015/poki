@@ -21,6 +21,10 @@ import UIKit
 /// Documents/gym-pictures (the gym workflow's scorecard-inprocess job).
 @MainActor
 final class InProcessProbe: ObservableObject {
+    private struct TouchBatch: @unchecked Sendable {
+        let fingers: [[PKTouchPoint]]
+    }
+
     static let shared = InProcessProbe()
     static let sample = "poki123 AbC 中文24680"
 
@@ -350,8 +354,9 @@ final class InProcessProbe: ObservableObject {
     }
 
     private func touch(_ fingers: [[PKTouchPoint]], _ what: String) async -> PKOutcome {
+        let batch = TouchBatch(fingers: fingers)
         let outcome = await withCheckedContinuation { (c: CheckedContinuation<PKOutcome, Never>) in
-            queue.async { c.resume(returning: PKInProcess.shared().touch(fingers, timeout: 5)) }
+            queue.async { c.resume(returning: PKInProcess.shared().touch(batch.fingers, timeout: 5)) }
         }
         report(what, outcome)
         return outcome

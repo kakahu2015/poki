@@ -41,27 +41,31 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
     func start() {
         guard !isOn else { return }
         isOn = true
-        // iOS 26 and later: the system's continued processing task keeps Poki up, with no audio and
+        // iOS 27 and later: the system's continued processing task keeps Poki up, with no audio and
         // no location. Silent audio only when iOS refuses it or ends it early.
-        if #available(iOS 26.0, *) {
-            let run = ContinuedRun.shared
-            continued = run
-            run.onExpired = { [weak self] in
-                guard let self, self.isOn else { return }
-                self.startAudio(); self.watchInterruptions()
-            }
-            if run.begin(subtitle: AppLocalization.text(LocalizedStringResource("Agents can reach this iPhone"))) { return }
+        let run = ContinuedRun.shared
+        continued = run
+        run.onExpired = { [weak self] in
+            guard let self, self.isOn else { return }
+            self.startAudio(); self.watchInterruptions()
         }
-        startAudio()
-        watchInterruptions()
+        Task { @MainActor [weak self] in
+            guard let self, self.isOn else { return }
+            let began = await run.begin(subtitle: AppLocalization.text(LocalizedStringResource("Agents can reach this iPhone")))
+            guard self.isOn else { run.end(); return }
+            if began { return }
+            self.startAudio()
+            self.watchInterruptions()
+        }
     }
 
-    /// The iOS 26 continued run (typed loosely so this class builds for iOS 18).
-    private var continued: AnyObject?
+    /// The iOS 27 continued run.
+    private var continued: ContinuedRun?
 
     /// Silent audio could not hold Poki up (it would be suspended): location stands in until it can.
     private(set) var audioLost = false
-    private var interruption: NSObjectProtocol?
+    private var deactivationObserver: NSObjectProtocol?
+    private var resumptionObserver: NSObjectProtocol?
 
     private func startAudio() {
         do { try audio.start(); setAudioLost(false) } catch { setAudioLost(true) }
@@ -75,19 +79,21 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
     }
 
     private func watchInterruptions() {
-        guard interruption == nil else { return }
-        interruption = NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: .main) { [weak self] note in
-            guard let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt, let type = AVAudioSession.InterruptionType(rawValue: raw) else { return }
+        guard deactivationObserver == nil else { return }
+        deactivationObserver = NotificationCenter.default.addObserver(forName: AVAudioSession.didBecomeInactiveNotification, object: nil, queue: .main) { [weak self] _ in
             Task { @MainActor in
                 guard let self, self.isOn, !self.audioPaused else { return }
-                switch type {
-                case .began: self.setAudioLost(true)
-                case .ended:
-                    // KeepAlive restarts its engine on its own; check a moment later.
-                    try? await Task.sleep(for: .seconds(1))
-                    if self.audio.isOn { self.setAudioLost(false) } else { self.audio.stop(); self.startAudio() }
-                @unknown default: break
-                }
+                self.setAudioLost(true)
+            }
+        }
+        resumptionObserver = NotificationCenter.default.addObserver(forName: AVAudioSession.resumptionRecommendationNotification, object: nil, queue: .main) { [weak self] note in
+            let context = note.userInfo?[AVAudioSession.resumptionContextKey] as? AVAudioSession.ResumptionContext
+            guard context?.recommendation == .shouldResume else { return }
+            Task { @MainActor in
+                guard let self, self.isOn, !self.audioPaused else { return }
+                // KeepAlive handles the recommendation too; allow it to restart before using location.
+                try? await Task.sleep(for: .seconds(1))
+                if self.audio.isOn { self.setAudioLost(false) } else { self.audio.stop(); self.startAudio() }
             }
         }
     }
@@ -100,17 +106,20 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
     func resumeAudio() {
         audioPaused = false
         guard isOn else { return }
-        if #available(iOS 26.0, *), (continued as? ContinuedRun)?.isRunning == true { return }
+        if continued?.isRunning == true { return }
         startAudio()
     }
 
     func stop() {
         guard isOn else { return }
         isOn = false
-        if #available(iOS 26.0, *) { (continued as? ContinuedRun)?.end() }
+        continued?.end()
+        continued = nil
         audioLost = false
-        if let interruption { NotificationCenter.default.removeObserver(interruption) }
-        interruption = nil
+        if let deactivationObserver { NotificationCenter.default.removeObserver(deactivationObserver) }
+        if let resumptionObserver { NotificationCenter.default.removeObserver(resumptionObserver) }
+        deactivationObserver = nil
+        resumptionObserver = nil
         if !pairingHold { stopLocation() }
         audio.stop()
     }

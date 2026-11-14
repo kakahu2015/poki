@@ -206,7 +206,7 @@
         }
       }
     },
-    "Allow?" : {
+    "Pending approval" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -3182,7 +3182,7 @@
         }
       }
     },
-    "Type" : {
+    "Type action" : {
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {

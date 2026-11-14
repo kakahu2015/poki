@@ -102,6 +102,7 @@ enum ActivityWords {
         if let rest = after("Type"), rest.hasSuffix(" hidden characters"), let count = Int(rest.prefix { $0.isNumber }) {
             return String(activity: "Type \(count) hidden characters")
         }
+        if label == "Type" { return String(activity: "Type action") }
         let fixed = local(label)
         if fixed != label { return fixed }
         if let rest = after("Press"), rest.hasSuffix(" button") { return String(activity: "Press \(String(rest.dropLast(7))) button") }

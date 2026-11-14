@@ -631,7 +631,7 @@ private final class BearCanvas: UIView {
             joints.apply(move, to: &standing[index])
             eyesBusy = move.shut > 0.05 || move.smile > 0.05
         }
-        if let reaction, !reacting(at: now) { self.reaction = nil }
+        if reaction != nil && !reacting(at: now) { self.reaction = nil }
         for (skin, joints) in zip(skins, standing) { skin.jointTransforms = joints }
         // Breathing and swaying alone are slow: a third of the rate is enough, and a third of the work.
         // A blink is drawn at the full rate from its first frame: the rate goes up a moment before it,

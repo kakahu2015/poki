@@ -57,7 +57,7 @@ final class AppIconStore {
             return installed
         }
         let carried = Self.bundled(id)
-        if let carried, let id { Self.log.info("No installed icon for \(id, privacy: .public); showing the carried one") }
+        if carried != nil, let id { Self.log.info("No installed icon for \(id, privacy: .public); showing the carried one") }
         let found = carried ?? id.flatMap(DiskCache.read)
         if let found { memory[key] = found } else if id == nil { unknown.insert(key) }
         return found

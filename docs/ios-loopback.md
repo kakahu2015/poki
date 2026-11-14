@@ -70,9 +70,10 @@ in Apple's configuration model; compatibility must be measured for the actual co
 
 The Setup item is named "Set Up the Local Connection". It shows whether 10.7.0.1 answers (two
 ports are tried together, and a second 3 s round runs before the state leaves Working), a "Check
-Again" button, and one row per proxy app that says only what Poki can know: Chosen or Installed.
-Which app the loopback comes from cannot be told from inside Poki, so no per-app working state is
-shown.
+Again" button, and one row per proxy app that shows which one the owner chose. Poki does not infer
+which proxy apps are installed. Open actions try the selected app and show an error if iOS cannot
+open it. Which app the loopback comes from cannot be told from inside Poki, so no per-app working
+state is shown.
 
 ### Shadowrocket
 

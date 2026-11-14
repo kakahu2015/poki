@@ -305,7 +305,7 @@ extension PokiState {
                 content: question,
                 bottom: .approval(id: approval.id),
                 thumbnail: hasThumbnail ? .small : .none,
-                compact: .asking(String(activity: "Allow?"), approval.expires))
+                compact: .asking(String(activity: "Pending approval"), approval.expires))
         case .done:
             return ActivityFace(
                 symbol: "checkmark.circle.fill",

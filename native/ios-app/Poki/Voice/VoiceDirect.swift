@@ -122,7 +122,7 @@ final class Dictation: NSObject, AVSpeechSynthesizerDelegate {
         self.request = request
         let input = engine.inputNode
         input.removeTap(onBus: 0)
-        Self.tap(input, into: request)
+        try Self.tap(input, into: request)
         engine.prepare()
         try engine.start()
         recognition = Self.recognize(recognizer, request) { [weak self] text in
@@ -133,8 +133,10 @@ final class Dictation: NSObject, AVSpeechSynthesizerDelegate {
 
     // The audio tap and the recognizer call back on their own threads, so their blocks are made outside
     // the main actor.
-    nonisolated private static func tap(_ input: AVAudioInputNode, into request: SFSpeechAudioBufferRecognitionRequest) {
-        input.installTap(onBus: 0, bufferSize: 1024, format: input.outputFormat(forBus: 0)) { buffer, _ in request.append(buffer) }
+    nonisolated private static func tap(_ input: AVAudioInputNode, into request: SFSpeechAudioBufferRecognitionRequest) throws {
+        try input.installAudioTap(onBus: 0, bufferSize: 1024, format: input.outputFormat(forBus: 0)) { buffer, _ in
+            request.append(AVAudioPCMBuffer(copying: buffer))
+        }
     }
 
     nonisolated private static func recognize(_ recognizer: SFSpeechRecognizer, _ request: SFSpeechAudioBufferRecognitionRequest,

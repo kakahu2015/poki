@@ -100,7 +100,11 @@ final class ChatGPTBrowserLogin: NSObject, ASWebAuthenticationPresentationContex
 
     nonisolated func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         MainActor.assumeIsolated {
-            UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first ?? ASPresentationAnchor()
+            let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            guard let scene = scenes.first(where: { $0.activationState == .foregroundActive }) ?? scenes.first else {
+                fatalError("ChatGPT sign-in requires an active window scene")
+            }
+            return scene.keyWindow ?? UIWindow(windowScene: scene)
         }
     }
 }

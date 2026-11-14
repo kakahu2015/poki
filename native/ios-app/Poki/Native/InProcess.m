@@ -7,6 +7,15 @@
 #import <unistd.h>
 #import <UIKit/UIKit.h>
 
+static CGRect PKActiveScreenBounds(void) {
+    for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+        if ([scene isKindOfClass:UIWindowScene.class] && scene.activationState == UISceneActivationStateForegroundActive) {
+            return ((UIWindowScene *)scene).screen.bounds;
+        }
+    }
+    return CGRectZero;
+}
+
 @interface NSObject (PKObservedPrivateAPI)
 - (id)initForTouchAtPoint:(CGPoint)point offset:(double)offset;
 - (void)moveToPoint:(CGPoint)point atOffset:(double)offset;
@@ -287,7 +296,7 @@ static id PKRequestSnapshot(id ax, id element, NSInteger maxDepth, NSInteger max
 }
 
 static id PKRequestSnapshotWithin(NSTimeInterval seconds, id ax, id element, NSInteger maxDepth, NSInteger maxNodes, NSString **code) {
-    SEL selector = @selector(requestSnapshotForElement:attributes:parameters:error:);
+    SEL selector = NSSelectorFromString(@"requestSnapshotForElement:attributes:parameters:error:");
     if (![ax respondsToSelector:selector] || !PKMatches([ax methodSignatureForSelector:selector], "@", @[@"@", @"@", @"@", @"^@"])) {
         if (code) *code = @"snapshot_api_unavailable";
         return nil;
@@ -396,7 +405,7 @@ static BOOL PKInstanceSignature(Class cls, SEL selector, const char *result, NSA
 /// The screenshot cut to the viewport: the picture is in pixels, the viewport in points.
 static NSData *PKCropped(NSData *png, CGRect viewport) {
     UIImage *image = [UIImage imageWithData:png];
-    CGFloat points = UIScreen.mainScreen.bounds.size.width;
+    CGFloat points = PKActiveScreenBounds().size.width;
     if (!image.CGImage || points <= 0) return png;
     CGFloat scale = image.size.width / points;
     CGRect rect = CGRectIntegral(CGRectMake(viewport.origin.x * scale, viewport.origin.y * scale, viewport.size.width * scale, viewport.size.height * scale));
@@ -863,7 +872,7 @@ static const int PKFrontKey = -1;
 /// the viewport. The Duo's side-by-side apps and iPad windows each have a part of the screen; an
 /// alert or a sheet over a full-screen app still reports the full screen.
 - (void)noteViewport:(CGRect)frame {
-    CGRect screen = UIScreen.mainScreen.bounds;
+    CGRect screen = PKActiveScreenBounds();
     CGRect next = CGRectNull;
     if (!CGRectIsNull(frame) && !CGRectIsEmpty(frame) && !CGRectIsInfinite(frame) &&
         (fabs(frame.size.width - screen.size.width) > 8 || fabs(frame.size.height - screen.size.height) > 8)) {
