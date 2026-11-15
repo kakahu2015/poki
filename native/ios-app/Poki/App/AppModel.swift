@@ -1785,8 +1785,12 @@ final class AppModel {
         // Location keeps Poki running in Settings as well (While Using is enough, started here in front).
         background.holdForPairing()
         log.add("pairing", "staying on with location (\(background.allowed ? "allowed" : "not allowed yet")) and silent audio")
-        do { try pairingKeepAlive.start() }
-        catch { log.add("pairing", "keep-alive did not start (\(error.localizedDescription)); iOS may stop the pairing while Settings is open") }
+        Task { @MainActor [weak self] in
+            guard let self, self.pairingUnderWay else { return }
+            do { try await self.pairingKeepAlive.start() }
+            catch is CancellationError { }
+            catch { self.log.add("pairing", "keep-alive did not start (\(error.localizedDescription)); iOS may stop the pairing while Settings is open") }
+        }
         do {
             try pairer.start(hostName: "Poki", saveTo: AppFiles.pairingFile) { [weak self] event in
                 Task { @MainActor in self?.pairingChanged(event) }

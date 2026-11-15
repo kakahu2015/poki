@@ -94,6 +94,9 @@ final class Dictation: NSObject, AVSpeechSynthesizerDelegate {
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var recognition: SFSpeechRecognitionTask?
     private let speaker = AVSpeechSynthesizer()
+    private var generation = 0
+    private var starting = false
+    private var tapInstalled = false
     private(set) var heard = ""
     var onHeard: ((String) -> Void)?
     var onSpoken: (() -> Void)?
@@ -109,25 +112,37 @@ final class Dictation: NSObject, AVSpeechSynthesizerDelegate {
         return speech && microphone
     }
 
-    func listen() throws {
+    func listen() async throws {
+        try Task.checkCancellation()
+        guard !starting else { return }
+        starting = true
+        generation += 1
+        let number = generation
+        defer { if generation == number { starting = false } }
         speaker.stopSpeaking(at: .immediate)
         heard = ""
         guard let recognizer = SFSpeechRecognizer(), recognizer.isAvailable else { throw VoiceError.realtime(0, AppLocalization.text(LocalizedStringResource("Speech recognition is not available right now."))) }
-        let audio = AVAudioSession.sharedInstance()
-        try audio.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .duckOthers])
-        try audio.setActive(true)
+        try await AudioSessionWork.perform {
+            let audio = AVAudioSession.sharedInstance()
+            try audio.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .duckOthers])
+            try audio.setActive(true)
+        }
+        guard generation == number else { throw CancellationError() }
+        try Task.checkCancellation()
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.shouldReportPartialResults = true
         if recognizer.supportsOnDeviceRecognition { request.requiresOnDeviceRecognition = true }
         self.request = request
         let input = engine.inputNode
-        input.removeTap(onBus: 0)
+        if tapInstalled { input.removeTap(onBus: 0) }
         try Self.tap(input, into: request)
+        tapInstalled = true
         engine.prepare()
         try engine.start()
         recognition = Self.recognize(recognizer, request) { [weak self] text in
-            self?.heard = text
-            self?.onHeard?(text)
+            guard let self, self.request === request else { return }
+            self.heard = text
+            self.onHeard?(text)
         }
     }
 
@@ -149,14 +164,25 @@ final class Dictation: NSObject, AVSpeechSynthesizerDelegate {
 
     /// Stops listening; the words heard so far (a moment later, for the last ones).
     func finish() async -> String {
-        request?.endAudio()
-        engine.stop()
-        engine.inputNode.removeTap(onBus: 0)
+        stopListening()
+        let number = generation
+        let recognition = self.recognition
         try? await Task.sleep(for: .milliseconds(600))
         recognition?.cancel()
-        recognition = nil
-        request = nil
+        if generation == number {
+            self.recognition = nil
+            request = nil
+        }
         return heard.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Stop callers invalidate activation immediately, before their asynchronous cleanup starts.
+    func stopListening() {
+        generation += 1
+        starting = false
+        request?.endAudio()
+        engine.stop()
+        if tapInstalled { engine.inputNode.removeTap(onBus: 0); tapInstalled = false }
     }
 
     func speak(_ text: String) {

@@ -51,6 +51,7 @@ final class VoiceLink: NSObject, VoiceConnection, RTCPeerConnectionDelegate, RTC
     private var remoteAudio: RTCAudioTrack?
     private var volume = 1.0
     private var closing = false
+    private var closed = false
     /// Until the connection is open, a failure is connect's to report (it may try again), not a loss.
     private var opened = false
 
@@ -76,27 +77,33 @@ final class VoiceLink: NSObject, VoiceConnection, RTCPeerConnectionDelegate, RTC
         config.iceServers = [RTCIceServer(urlStrings: ["stun:stun.l.google.com:19302", "stun:stun.cloudflare.com:3478"])]
         config.continualGatheringPolicy = .gatherContinually
         guard let peer = factory.peerConnection(with: config, constraints: constraints, delegate: self) else { throw VoiceError.noWebRTC }
-        self.peer = peer
+        guard lock.withLock({
+            guard !closed else { return false }
+            self.peer = peer
+            return true
+        }) else { peer.close(); throw CancellationError() }
         if microphone {
             // Poki's background keep-alive may have left the shared session in .playback, which cannot
             // record; set voice chat explicitly before the microphone track starts.
-            let session = RTCAudioSession.sharedInstance()
-            session.lockForConfiguration()
-            defer { session.unlockForConfiguration() }
-            do {
-                try session.setConfiguration(RTCAudioSessionConfiguration.webRTC(), active: true)
-            } catch {
-                // After an earlier conversation (or the keep-alive) the shared session can refuse
-                // WebRTC's preferred sample rate, buffer or channel counts (OSStatus -50). Voice chat
-                // needs none of them: set the category and mode, activate, and tell WebRTC.
-                let av = AVAudioSession.sharedInstance()
-                try? av.setActive(false)
-                try av.setCategory(.playAndRecord, mode: .voiceChat, options: [.defaultToSpeaker, .allowBluetoothHFP])
-                try av.setActive(true)
-                session.audioSessionDidActivate(av)
+            try await AudioSessionWork.perform {
+                guard !self.lock.withLock({ self.closed }) else { throw CancellationError() }
+                let session = RTCAudioSession.sharedInstance()
+                session.lockForConfiguration()
+                defer { session.unlockForConfiguration() }
+                do {
+                    try session.setConfiguration(RTCAudioSessionConfiguration.webRTC(), active: true)
+                } catch {
+                    // WebRTC's preferred hardware format can be refused (OSStatus -50); the voice
+                    // category and mode still work without its sample-rate or channel preferences.
+                    let av = AVAudioSession.sharedInstance()
+                    try? av.setActive(false)
+                    try av.setCategory(.playAndRecord, mode: .voiceChat, options: [.defaultToSpeaker, .allowBluetoothHFP])
+                    try av.setActive(true)
+                    session.audioSessionDidActivate(av)
+                }
+                let mic = factory.audioTrack(with: factory.audioSource(with: constraints), trackId: "poki-mic")
+                peer.add(mic, streamIds: ["poki-voice"])
             }
-            let mic = factory.audioTrack(with: factory.audioSource(with: constraints), trackId: "poki-mic")
-            peer.add(mic, streamIds: ["poki-voice"])
         } else {
             let receiveOnly = RTCRtpTransceiverInit()
             receiveOnly.direction = .recvOnly
@@ -104,7 +111,11 @@ final class VoiceLink: NSObject, VoiceConnection, RTCPeerConnectionDelegate, RTC
         }
         let channel = peer.dataChannel(forLabel: "oai-events", configuration: RTCDataChannelConfiguration())
         channel?.delegate = self
-        self.channel = channel
+        guard lock.withLock({
+            guard !closed else { return false }
+            self.channel = channel
+            return true
+        }) else { channel?.close(); throw CancellationError() }
 
         let offer: RTCSessionDescription = try await withCheckedThrowingContinuation { done in
             peer.offer(for: constraints) { sdp, error in
@@ -195,17 +206,26 @@ final class VoiceLink: NSObject, VoiceConnection, RTCPeerConnectionDelegate, RTC
     }
 
     func close() {
-        lock.withLock { closing = true }
-        channel?.close()
-        peer?.close()
-        channel = nil
-        peer = nil
+        let connection = lock.withLock { () -> (RTCDataChannel?, RTCPeerConnection?)? in
+            guard !closed else { return nil }
+            closing = true
+            closed = true
+            let connection = (channel, peer)
+            channel = nil
+            peer = nil
+            return connection
+        }
+        guard let connection else { return }
         // Hand the audio session back through WebRTC, so its count of activations matches and the
         // next conversation can set voice chat again.
-        let session = RTCAudioSession.sharedInstance()
-        session.lockForConfiguration()
-        if session.isActive { try? session.setActive(false) }
-        session.unlockForConfiguration()
+        AudioSessionWork.enqueue {
+            connection.0?.close()
+            connection.1?.close()
+            let session = RTCAudioSession.sharedInstance()
+            session.lockForConfiguration()
+            defer { session.unlockForConfiguration() }
+            if session.isActive { try? session.setActive(false) }
+        }
     }
 
     private func lost(_ reason: String) {

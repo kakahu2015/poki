@@ -551,6 +551,7 @@ final class VoiceModel {
     /// Ends the conversation. Calls already running keep running; the next session hears how they ended.
     func stop() {
         if let dictation {
+            dictation.stopListening()
             dictation.stopSpeaking()
             Task { _ = await dictation.finish() }
             self.dictation = nil
@@ -666,11 +667,24 @@ final class VoiceModel {
 
     // MARK: Dictation
 
+    private var releaseDictationWhenReady = false
+
     /// The button pressed: starts the conversation, or (dictating) listens for the next request.
     func press() async {
         if let dictation {
-            guard phase != .hearing, phase != .thinking else { return }
-            do { try dictation.listen(); phase = .hearing } catch { phase = .lost(VoiceError.reason(for: error)) }
+            guard phase != .hearing, phase != .thinking, phase != .connecting else { return }
+            releaseDictationWhenReady = false
+            phase = .connecting
+            let number = session
+            do {
+                try await dictation.listen()
+                guard number == session, self.dictation === dictation else { return }
+                phase = .hearing
+                if releaseDictationWhenReady { released() }
+            } catch {
+                guard number == session, self.dictation === dictation else { return }
+                phase = .lost(VoiceError.reason(for: error))
+            }
             return
         }
         if !isOn, canTalk { await start() }
@@ -678,7 +692,11 @@ final class VoiceModel {
 
     /// The button let go. Realtime knows by itself when you stopped; dictation sends what it heard.
     func released() {
-        guard let dictation, phase == .hearing else { return }
+        guard let dictation else { return }
+        // Releasing while activation is pending must still end this press once the microphone opens.
+        if phase == .connecting { releaseDictationWhenReady = true; return }
+        guard phase == .hearing else { return }
+        releaseDictationWhenReady = false
         phase = .thinking
         Task {
             let text = await dictation.finish()
@@ -700,7 +718,13 @@ final class VoiceModel {
     }
 
     private func startDictation() async {
-        guard await Dictation.allowed() else { phase = .lost(AppLocalization.text(LocalizedStringResource("Poki needs the microphone and speech recognition: allow them in Settings › Poki."))); return }
+        releaseDictationWhenReady = false
+        phase = .connecting
+        session += 1
+        let number = session
+        let allowed = await Dictation.allowed()
+        guard number == session else { return }
+        guard allowed else { phase = .lost(AppLocalization.text(LocalizedStringResource("Poki needs the microphone and speech recognition: allow them in Settings › Poki."))); return }
         let dictation = Dictation()
         dictation.onHeard = { [weak self] text in
             guard let self, self.phase == .hearing else { return }
@@ -711,10 +735,13 @@ final class VoiceModel {
         self.dictation = dictation
         holdingMicrophone = true
         do {
-            try dictation.listen()
+            try await dictation.listen()
+            guard number == session, self.dictation === dictation else { return }
             phase = .hearing
+            if releaseDictationWhenReady { released() }
             log.add("voice", "dictation to the chat (no Realtime key or bridge)")
         } catch {
+            guard number == session, self.dictation === dictation else { return }
             self.dictation = nil
             holdingMicrophone = false
             phase = .lost(VoiceError.reason(for: error))
@@ -948,7 +975,7 @@ final class VoiceModel {
         // Test runs have no microphone, so no voice-chat audio session keeps Poki running while a step
         // brings another app to the front; a silent one does, as for a Poki session.
         let awake = KeepAlive()
-        try? awake.start()
+        try? await awake.start()
         defer { awake.stop() }
         log.add("voice", "test run \(numbers.lowerBound)-\(numbers.upperBound) started")
         for n in numbers {

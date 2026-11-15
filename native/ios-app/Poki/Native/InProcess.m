@@ -8,12 +8,19 @@
 #import <UIKit/UIKit.h>
 
 static CGRect PKActiveScreenBounds(void) {
-    for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
-        if ([scene isKindOfClass:UIWindowScene.class] && scene.activationState == UISceneActivationStateForegroundActive) {
-            return ((UIWindowScene *)scene).screen.bounds;
+    __block CGRect bounds = CGRectZero;
+    void (^read)(void) = ^{
+        for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+            if ([scene isKindOfClass:UIWindowScene.class] && scene.activationState == UISceneActivationStateForegroundActive) {
+                bounds = ((UIWindowScene *)scene).screen.bounds;
+                break;
+            }
         }
-    }
-    return CGRectZero;
+    };
+    // Screenshot and viewport work run on automation queues; only this UIKit lookup needs main.
+    if (NSThread.isMainThread) read();
+    else dispatch_sync(dispatch_get_main_queue(), read);
+    return bounds;
 }
 
 @interface NSObject (PKObservedPrivateAPI)

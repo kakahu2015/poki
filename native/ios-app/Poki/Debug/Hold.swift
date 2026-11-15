@@ -21,7 +21,8 @@ final class Hold: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var lastBeat: Date?
     private var started: Date?
     private var task: UIBackgroundTaskIdentifier = .invalid
-    private var engine: AVAudioEngine?
+    private let audio = KeepAlive()
+    private var audioStart: Task<Void, Never>?
     private var location: CLLocationManager?
     private var observers: [NSObjectProtocol] = []
     private let file = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("hold-log.txt")
@@ -71,7 +72,8 @@ final class Hold: NSObject, ObservableObject, CLLocationManagerDelegate {
         connection?.cancel(); connection = nil
         heartbeat?.invalidate(); heartbeat = nil
         endTask()
-        engine?.stop(); engine = nil
+        audioStart?.cancel(); audioStart = nil
+        audio.stop()
         location?.stopUpdatingLocation(); location = nil
         for o in observers { NotificationCenter.default.removeObserver(o) }; observers = []
         if holding { note("stopped") }
@@ -130,22 +132,17 @@ final class Hold: NSObject, ObservableObject, CLLocationManagerDelegate {
         switch experiment {
         case .none: break
         case .audio:
-            do {
-                try AVAudioSession.sharedInstance().setCategory(.playback, options: [.mixWithOthers])
-                try AVAudioSession.sharedInstance().setActive(true)
-                let engine = AVAudioEngine()
-                let player = AVAudioPlayerNode()
-                engine.attach(player)
-                let format = engine.mainMixerNode.outputFormat(forBus: 0)
-                try engine.connectNode(player, to: engine.mainMixerNode, format: format)
-                let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(format.sampleRate))!
-                buffer.frameLength = buffer.frameCapacity
-                try engine.start()
-                player.scheduleBuffer(buffer, at: nil, options: .loops)
-                try player.playAudio()
-                self.engine = engine
-                note("silent audio playing")
-            } catch { note("audio: \(error)") }
+            audioStart = Task { @MainActor [weak self] in
+                guard let self, !Task.isCancelled else { return }
+                do {
+                    try await self.audio.start()
+                    guard !Task.isCancelled, self.holding else { return }
+                    self.note("silent audio playing")
+                } catch {
+                    guard !Task.isCancelled, self.holding else { return }
+                    self.note("audio: \(error)")
+                }
+            }
         case .location:
             let manager = CLLocationManager()
             manager.delegate = self

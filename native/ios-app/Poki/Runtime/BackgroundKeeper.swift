@@ -66,9 +66,27 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
     private(set) var audioLost = false
     private var deactivationObserver: NSObjectProtocol?
     private var resumptionObserver: NSObjectProtocol?
+    private var audioStart: Task<Void, Never>?
 
     private func startAudio() {
-        do { try audio.start(); setAudioLost(false) } catch { setAudioLost(true) }
+        guard isOn, !audioPaused, audioStart == nil else { return }
+        audioStart = Task { @MainActor [weak self] in
+            guard let self, !Task.isCancelled, self.isOn, !self.audioPaused else { return }
+            do {
+                try await self.audio.start()
+                guard !Task.isCancelled, self.isOn, !self.audioPaused else { return }
+                self.setAudioLost(false)
+            } catch {
+                guard !Task.isCancelled, self.isOn, !self.audioPaused else { return }
+                self.setAudioLost(true)
+            }
+            self.audioStart = nil
+        }
+    }
+
+    private func stopAudio() {
+        audioStart?.cancel(); audioStart = nil
+        audio.stop()
     }
 
     private func setAudioLost(_ lost: Bool) {
@@ -93,7 +111,7 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
                 guard let self, self.isOn, !self.audioPaused else { return }
                 // KeepAlive handles the recommendation too; allow it to restart before using location.
                 try? await Task.sleep(for: .seconds(1))
-                if self.audio.isOn { self.setAudioLost(false) } else { self.audio.stop(); self.startAudio() }
+                if self.audio.isOn { self.setAudioLost(false) } else { self.stopAudio(); self.startAudio() }
             }
         }
     }
@@ -102,7 +120,7 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
     /// Poki running meanwhile. The silent audio comes back when it ends, if Poki is still on.
     /// While a voice conversation holds the audio session (it keeps Poki running itself).
     private var audioPaused = false
-    func pauseAudio() { audioPaused = true; audio.stop() }
+    func pauseAudio() { audioPaused = true; stopAudio() }
     func resumeAudio() {
         audioPaused = false
         guard isOn else { return }
@@ -121,7 +139,7 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
         deactivationObserver = nil
         resumptionObserver = nil
         if !pairingHold { stopLocation() }
-        audio.stop()
+        stopAudio()
     }
 
     /// While a pairing waits in Settings, location keeps Poki running (with the silent audio), so the
