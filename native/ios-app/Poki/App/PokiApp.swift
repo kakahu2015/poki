@@ -328,6 +328,7 @@ struct RootView: View {
         guard model.voice.canTalkLive else { model.voice.keyAsked = true; return }
         if !model.voice.isOn {
             ApprovalNotice.requestPermission()
+            model.prepareForTask()
             Task { await model.voice.start() }
         }
     }
