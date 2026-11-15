@@ -452,7 +452,7 @@ final class AppModel {
         retriedLocalDDIOnLoopback = false
         endPasscodeWait(opened: false)
         let automation = self.automation
-        DispatchQueue.global(qos: .userInitiated).async { [automation] in
+        DispatchQueue.global(qos: .userInitiated).async { [automation, weak self] in
             let result = keepingSession ? automation.pauseAutomation() : automation.close()
             Task { @MainActor [weak self] in
                 guard let self else { return }
