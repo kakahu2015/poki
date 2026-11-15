@@ -24,7 +24,7 @@ struct SettingsEntryButton: View {
     @Environment(\.drawerSliding) private var sliding
 
     private var needsYou: Bool {
-        !ModelKeys.hasUsableKey || !model.setupComplete || model.signer.updateNotReady || model.signer.next?.kind == "update" || model.relayStatus.isOffline
+        !ModelKeys.hasUsableKey || !model.setupComplete || model.relayStatus.isOffline
     }
 
     var body: some View {

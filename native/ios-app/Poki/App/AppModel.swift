@@ -31,8 +31,8 @@ final class AppModel {
     let tunnel = LoopbackTunnel()
     let background = BackgroundKeeper()
     let diskImage = DiskImageStore()
-    /// Poki keeps its own signing: the Apple Account, the next build ready ahead of time, Install.
-    let signer = SelfSigner()
+    /// Metadata from this app's locally installed provisioning profile. Poki does not sign itself.
+    let signer = InstalledAppProfile()
     let voice: VoiceModel
     private(set) var runner = RunnerStatus.idle
     private(set) var relayStatus = RelayStatus.off
@@ -219,37 +219,6 @@ final class AppModel {
     private var sessionStartTask: Task<Void, Never>?
     private(set) var sessionStarting = false
 
-    /// No task is running, so an install (which ends Poki) disturbs nothing: no agent step under way,
-    /// no approval waiting, and a minute since the agent last did something.
-    var signingIdle: Bool { signingBusyReason == nil }
-
-    /// Why Install waits, or nil when nothing is under way. A step whose end never arrived (the
-    /// session was turned off mid-step, or the call hung) stops counting after two minutes, so a
-    /// lost event cannot keep Install off for good.
-    var signingBusyReason: String? {
-        if !approvals.isEmpty { return AppLocalization.text(LocalizedStringResource("An approval is waiting for you.")) }
-        if sessionStarting { return AppLocalization.text(LocalizedStringResource("Poki is turning on.")) }
-        if let step = stepUnderWay, sessionOn, Date().timeIntervalSince(step.started) < 120 {
-            return AppLocalization.text(LocalizedStringResource("The agent is doing a step, \(step.summary)."))
-        }
-        let since = Date().timeIntervalSince(lastStepAt)
-        if since < 60 { return AppLocalization.text(LocalizedStringResource("The agent acted \(Int(since)) s ago. Install opens a minute after its last step.")) }
-        return nil
-    }
-
-    /// Hands the signer the phone's own services and starts it (at launch).
-    func startSigner() {
-        signer.phone = { [weak self] in
-            guard let self, let path = self.pairingPath, self.loopback.isWorking else { return nil }
-            return ["device_address": "10.7.0.1", "pairing_file": path, "host_name": "Poki"]
-        }
-        signer.isIdle = { [weak self] in self?.signingIdle ?? false }
-        signer.whyUnreachable = { [weak self] in self?.signerUnreachable ?? .loopback }
-        signer.busyReason = { [weak self] in self?.signingBusyReason }
-        signer.beforeExit = { [weak self] in await self?.windDownForUpdate() }
-        signer.start()
-    }
-
     var connectionInUse: Bool {
         if sessionOn || sessionStarting { return true }
         return pairingUnderWay
@@ -267,7 +236,6 @@ final class AppModel {
     func inProcessReadyForProbe() { inProcessSession = .open; host.update(runner: .running); probeDriven = true }
 
     func phoneTool(_ name: String, arguments: String) async -> (text: String, isError: Bool) {
-        if let message = signer.installMessage { return (message, true) }
         let result = await core.tool(name, arguments: arguments)
         return (result.text, result.isError)
     }
@@ -406,12 +374,15 @@ final class AppModel {
             else if problem == tunnelAttention { problem = nil; tunnelAttention = nil }
         }
         if !diskImage.isReady { Task { await diskImage.download() } }
-        // Just installed by Poki Setup on a computer (its signing key still waits in the container, and
-        // the owner never turned Poki on or off): Poki turns on by itself, so it does not stand at Off.
-        if UserDefaults.standard.object(forKey: "wantsOn") == nil, FileManager.default.fileExists(atPath: SelfSigner.handedIdentity.path) {
+        // Poki Setup leaves a marker after installing the app. Older builds left the signing key here;
+        // consume and delete either file, since Poki no longer imports a signing identity.
+        let setupFiles = [InstalledAppProfile.installHandoff, SelfSigner.handedIdentity]
+        let installedBySetup = setupFiles.contains { FileManager.default.fileExists(atPath: $0.path) }
+        if UserDefaults.standard.object(forKey: "wantsOn") == nil, installedBySetup {
             wantsOn = true
             log.add("session", "installed by Poki Setup: Poki turns on by itself")
         }
+        for file in setupFiles { try? FileManager.default.removeItem(at: file) }
         // The installer on the Mac reads the hello and may leave a sealed model key while Poki is in front.
         handoffTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
             Task { @MainActor in if self?.inFront == true { self?.handoffTick() } }
@@ -622,7 +593,6 @@ final class AppModel {
     /// setup step the person just did in Settings.
     func becameActive() {
         inFront = true
-        guard signer.installFinish == .idle else { return }
         InProcessWDA.gate.withLock { $0.inFront = true }
         cameToFront = Date()
         // A pairing file and disk image Poki Setup put in the container while Poki was running (or
@@ -834,7 +804,7 @@ final class AppModel {
             guard let self else { return true }
             defer { self.pairingCheck = nil }
             do {
-                _ = try await SignerBridge.call(["op": "udid", "device_address": "10.7.0.1", "pairing_file": path, "host_name": "Poki"])
+                _ = try await PairingBridge.udid(deviceAddress: "10.7.0.1", pairingFile: path, hostName: "Poki")
                 if self.pairingTrouble != nil { self.log.add("pairing", "check: accepted again") }
                 self.pairingTrouble = nil
                 self.servicesSilent = false
@@ -842,7 +812,7 @@ final class AppModel {
                 return true
             } catch {
                 let text = error.localizedDescription
-                let code = (error as? SignerError)?.code
+                let code = (error as? PairingBridge.Failure)?.code
                 if code == "pairing" {
                     if self.pairingTrouble == nil { self.log.add("pairing", "check: refused: \(text)") }
                     self.pairingTrouble = text.replacingOccurrences(of: " Pair again in Poki's setup.", with: "")
@@ -1024,30 +994,6 @@ final class AppModel {
             UIApplication.shared.perform(NSSelectorFromString("suspend"))
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { exit(0) }
         }
-    }
-
-    /// The update is accepted by iOS. Keep the loopback and wantsOn for the replacement app.
-    func windDownForUpdate() async {
-        sessionStartTask?.cancel()
-        idleTimer?.invalidate(); idleTimer = nil
-        sessionOn = false
-        background.stop()
-        voice.stop()
-        pairer.cancel()
-        pairingKeepAlive.stop()
-        background.releasePairing()
-        if automationPath == .inProcess {
-            await withCheckedContinuation { continuation in
-                closeInProcess("the update") { continuation.resume() }
-            }
-        } else if !Self.onSimulator {
-            await RunnerProbe.shutdown()
-        }
-        core.stop()
-        launcher.stop()
-        await activity.end(dismissalPolicy: .immediate)?.value
-        AttentionNotice.clear()
-        log.add("signing", "update runtime stopped")
     }
 
     func stopSession() {
@@ -1256,7 +1202,6 @@ final class AppModel {
         log.add("loopback", "using remote pairing port \(port) from now on" + (starts ? "; starting the runner now" : ""))
         if starts { launcher.restart() }
         Task { await verifyPairing(force: true) }
-        signer.maintain()
     }
 
     /// The looks for a moved remote pairing port ended without one, or the network changed: a refused
@@ -1294,9 +1239,6 @@ final class AppModel {
             _ = retryLocalDDIOverLoopbackIfNeeded()
             Task { await verifyPairing() }
         }
-        // The signer's check at launch ran before the loopback was up and skipped the download: it
-        // looks again now that it can reach the phone.
-        if !wasWorking, loopback.isWorking { signer.maintain() }
         if sessionOn { host.update(runner: coreState(of: runner)) }
     }
 
@@ -2018,13 +1960,6 @@ final class AppModel {
         case .failed(let code, _):
             return (AppLocalization.text(LocalizedStringResource("Poki could not open its own automation session (\(code)), and the loopback refused the connection. Check the loopback in Setup, then try again.")), true)
         }
-    }
-
-    /// Why the signer cannot reach the phone: the pairing comes first; on cellular the loopback it
-    /// needs waits for Wi-Fi (ESP-448).
-    var signerUnreachable: SelfSigner.Unreachable {
-        if pairingPath == nil { return .unpaired }
-        return loopback.cellularOnly && !loopback.isWorking ? .cellular : .loopback
     }
 
     /// On cellular a new task can still start on the mounted image; otherwise it waits for Wi-Fi.

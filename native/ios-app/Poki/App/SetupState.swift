@@ -96,8 +96,8 @@ enum AppFiles {
     }
 }
 
-/// The setup steps, in the order a new user does them. The Apple Account is not one (ESP-222): Poki
-/// Setup on a Mac signs and installs Poki, so signing in on the phone is optional, in Signing Options.
+/// The setup steps, in the order a new user does them. App signing is handled by Xcode or Poki Setup
+/// on a computer; the iPhone app has no Apple Account sign-in or self-signing feature.
 enum SetupStep: String, CaseIterable, Identifiable {
     case runner, developerMode, loopback, pairing, automation, background
     var id: String { rawValue }

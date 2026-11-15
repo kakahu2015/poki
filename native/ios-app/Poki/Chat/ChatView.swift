@@ -84,16 +84,6 @@ struct ChatView: View {
         chat.running || ["working", "approval", "handoff"].contains(sampleScene ?? "")
     }
 
-    /// A newer Poki is on the channel, or downloaded and ready to install: its version, for the home
-    /// page's hint. `-pokiUpdate <version>` shows the hint for the screenshots.
-    private var update: String? {
-        if let sample = UserDefaults.standard.string(forKey: "pokiUpdate") { return sample }
-        guard sampleScene == nil else { return nil }
-        if model.signer.updateNotReady, let latest = model.signer.latest { return latest.version }
-        if let next = model.signer.next, next.kind == "update" { return next.version }
-        return nil
-    }
-
     /// `-pokiChat backdrop`: the home page's ground alone, to lay beside the design's rendering of it.
     private var bare: Bool { sampleScene == "backdrop" }
 
@@ -121,7 +111,6 @@ struct ChatView: View {
             // The home page stays in the tree while the conversation is in front, neither seen nor
             // touched, so a new conversation brings it back on the same animation.
             HomePage(home: home, writing: writing, rise: flightRise, pick: { draft = $0; writing = true }) {
-                if home, let update { UpdatePill(version: update, open: openUpdates) }
                 if home, let hint = homeHint {
                     SetupHintLine(hint: hint, openSetupStep: openSetupStep, openSetup: openSetup, openModel: openModel,
                                   openAgents: openAgents, openUpdates: openUpdates)
@@ -442,14 +431,13 @@ struct SetupIssueHint: Equatable {
 }
 
 extension SetupIssueHint {
-    /// The home page's line. In the last two days of signing it says Poki stops opening (main's home
-    /// warning, ESP-222): after what keeps the current task from running, ahead of open setup steps.
+    /// The home page's line warns when this installed provisioning profile is close to expiry.
     /// `looks` as in `first`.
     @MainActor static func homeLine(model: AppModel, looks: Bool = false) -> SetupIssueHint? {
         if let now = runnerIssue(model: model) ?? localSessionIssue(model: model) { return now }
         if let warning = ExpiryWarning(expiry: model.signer.expiry) {
             return SetupIssueHint(message: AppLocalization.text(LocalizedStringResource("Poki’s signing ends soon")) + "\n" + warning.message,
-                                  link: AppLocalization.text(LocalizedStringResource("Open Updates ›")), target: .updates)
+                                  link: AppLocalization.text(LocalizedStringResource("Open Setup ›")), target: .updates)
         }
         return first(model: model, looks: looks) ?? relayIssue(model: model)
     }

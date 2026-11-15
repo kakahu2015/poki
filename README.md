@@ -74,7 +74,7 @@ On iOS 27 and later Poki controls the iPhone through its native services. On iOS
 
 **Can I install Poki from Windows?** Yes. Poki Setup for Windows installs, pairs and renews Poki like the Mac version. Install Apple Devices or iTunes first so the PC can find the iPhone. See [Poki Setup](desktop/README.md).
 
-**Do I still need the computer after installing?** Not to run tasks: Poki works on the iPhone alone. With a free Apple Account, keep Poki Setup open on the computer so it can renew the signature each week, or sign in to your Apple Account in Poki so the iPhone renews itself (if sign-in fails, use Poki Setup on the computer). See [What to keep running](skills/install-poki/SKILL.md#what-to-keep-running).
+**Do I still need the computer after installing?** Not to run tasks: Poki works on the iPhone alone. Poki no longer signs or updates itself on the iPhone. Install new builds with Xcode, or use Poki Setup on the computer to renew an installed copy. See [What to keep running](skills/install-poki/SKILL.md#what-to-keep-running).
 
 **Does a free Apple Account work, and what is the 7-day limit?** A free account works, but Apple signs apps from it for 7 days only. While it is open, Poki Setup renews Poki every 6 hours once 2 days or fewer are left, as long as the computer is awake and the iPhone is reachable. Without a renewal, Poki stops opening when the signature ends, so it warns you in its last 2 days. See [No paid developer account](skills/install-poki/SKILL.md#no-paid-developer-account).
 
@@ -88,7 +88,7 @@ On iOS 27 and later Poki controls the iPhone through its native services. On iOS
 
 ## Update Poki
 
-- **On the iPhone.** Open Poki's signing and updates page: Settings > Connection > Signing & Updates in 0.4.0. When a newer build is out, the page offers to download and install it. If it asks you to sign in first, Poki was installed from a computer and the iPhone does not have your Apple Account yet. Sign in with the account you installed with, or update from the computer instead.
+- **With Xcode.** Select your Apple Developer team in Xcode, then build and install Poki on the iPhone. Poki does not sign itself, download builds, or install updates on the phone.
 - **From the computer.** Renew in Poki Setup installs the newest build on its channel over the installed app. On a Mac you can also tell your agent "Update Poki on my iPhone"; the install-poki skill has a separate update path that checks the installed version and signing identity first.
 - If an update stops at "Finishing the update", swipe Poki away in the app switcher and open it again, then check the version in Settings. If the version did not change, update from Poki Setup on the computer. Do not delete Poki to fix an update: deleting it deletes its conversations.
 
@@ -97,7 +97,7 @@ The release channels and how a build moves from Alpha to Beta are in [Release ch
 ## Known issues
 
 - Poki operates your real iPhone. If you ask it to send messages or make payments, it will. Screen contents are sent to the model service you set up.
-- If you cannot sign in to your Apple Account on the iPhone, renew and update from Poki Setup on the computer.
+- Poki no longer has an Apple Account sign-in or self-signing feature on the iPhone. Use Xcode or Poki Setup on a computer to install a fresh signed build.
 - Physical iPhone support has been verified only on iPhones using the Chinese interface, in portrait orientation. Landscape is not supported.
 - This release has not been tested on a physical iPhone below iOS 27, or on an iPad. On older and smaller iPhones, the three-dimensional bear and the home page animations may run warmer or slower. Low Power Mode and Reduce Motion show a still picture of the bear instead.
 - With a free Apple Account the signature lasts 7 days. Keep Poki Setup on the computer able to reach the iPhone, or renew by hand before it expires.

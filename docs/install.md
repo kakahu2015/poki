@@ -139,9 +139,10 @@ To use a physical iPhone, first pair it with your Mac over USB. After that, keep
   When you leave Poki during a task, Poki swipes iOS's background banner up so it does not cover the app.
 - Where iOS asks for the passcode before automation (the XCTest session), it asks when you tap Start,
   while you are there, not in the middle of a task. A session that fails to open is reopened by Poki itself.
-- Before an update installs, Poki ends its Live Activity and background task.
+- Poki does not sign or update itself on the iPhone. Install new builds with Xcode or use Poki Setup
+  on a computer.
 - Settings is grouped into Connection, Models, Agents, Memory and Appearance. Connection holds
-  Approvals and Signing & Updates, where the app updates itself.
+  Approvals and the app's runtime setup.
 - How Poki picks its control method, and what happens without a loopback: see
   [ios-loopback.md](ios-loopback.md#which-method-does-the-work).
 

@@ -118,10 +118,9 @@ struct RootView: View {
                 if threadsOpen { withAnimation(ThreadsDrawerMotion.settle) { threadsOpen = false } }
                 home.append(step)
             }
-        case .setup: openDetails([DetailsRoute.connection])
+        case .setup, .updates: openDetails([DetailsRoute.connection])
         case .model: openDetails([DetailsRoute.model])
         case .agents: openDetails([DetailsRoute.agents])
-        case .updates: openDetails([DetailsRoute.updates])
         }
     }
 
@@ -233,13 +232,7 @@ struct RootView: View {
     }
 
     var body: some View {
-        Group {
-            if let message = model.signer.installMessage {
-                UpdateFinishView(message: message, needsReopen: model.signer.needsReopen)
-            } else {
-                navigation
-            }
-        }
+        Group { navigation }
         .fullScreenCover(isPresented: $welcoming) { FirstRunGuide(link: $welcomeLink, done: { welcoming = false }) }
         .task { InProcessProbe.shared.startFromLaunchArguments(model: model) }
         .alert(model.connectionAsk.map { AppLocalization.text(LocalizedStringResource("Allow \($0.client) to connect?")) } ?? "",
@@ -249,11 +242,6 @@ struct RootView: View {
             Button("Allow") { model.answerConnection(true) }
         } message: { ask in
             Text("\(ask.client) is signing in through \(ask.connector) and returns to \(ask.callback), which isn’t on Poki’s list of known agents. Allow it only if you are connecting it yourself right now. It could then see your screen and act on this iPhone.")
-        }
-        .alert("Poki Will Close to Finish the Update", isPresented: Binding(get: { model.signer.finishNotice }, set: { if !$0 { model.signer.finishNoticeAnswered() } })) {
-            Button("OK") { model.signer.finishNoticeAnswered() }
-        } message: {
-            Text("The update is almost in. Poki will close to finish it. Open Poki again afterwards.")
         }
         // Turning on after Off: Poki exits by itself and has to be opened again.
         .alert("Poki Restarts to Turn On", isPresented: Binding(get: { model.relaunchNotice }, set: { if !$0 { model.relaunchNotice = false } })) {
@@ -272,7 +260,7 @@ struct RootView: View {
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {
                 model.updateInProcessScreenSize()
-                model.becameActive(); AskPoki.refresh(); model.startSigner(); model.signer.maintain()
+                model.becameActive(); AskPoki.refresh()
                 Task { await model.verifyPairing() }
             } else if phase == .background {
                 model.wentToBackground()
@@ -434,7 +422,7 @@ struct RootView: View {
         case "conversations":
             openDetails([DetailsRoute.conversations])
         case "updates":
-            openDetails([DetailsRoute.updates])
+            openDetails([DetailsRoute.connection])
         case "steps":
             openDetails([DetailsRoute.history])
         default: break

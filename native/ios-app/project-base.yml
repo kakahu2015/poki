@@ -19,8 +19,10 @@ packages:
     revision: f8696524cf41ca0a7f42f5b230eafa443daececd
 settings:
   base:
-    POKI_BUNDLE_ID: nz.zheha.poki
-    POKI_APP_GROUP: group.nz.zheha.poki
+    POKI_BUNDLE_ID: org.kakahu.poki
+    POKI_APP_GROUP: group.org.kakahu.poki
+    DEVELOPMENT_TEAM: 5C6T6Y2Y22
+    CODE_SIGN_STYLE: Automatic
     POKI_DISPLAY_NAME: Poki
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"

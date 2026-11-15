@@ -167,42 +167,18 @@ pub struct SignedBuild {
     pub profile_expires_at: i64,
     pub profiles: Vec<Vec<u8>>,
     pub notes: Vec<String>,
-    /// The key and certificate Poki was signed with, handed to Poki so it can re-sign itself.
-    pub identity: identity::Identity,
 }
 
-/// Where Poki looks for the signing identity Poki Setup hands over (inside its container).
-pub const SIGNING_IDENTITY_PATH: &str = "Documents/PokiSetup/signing-identity.json";
+/// Where Poki Setup leaves a non-secret marker for a fresh app install.
+pub const INSTALL_HANDOFF_PATH: &str = "Documents/PokiSetup/install-handoff.json";
 
-/// `poki.signing-identity/1`: what Poki needs to renew its own signature on the phone.
-pub fn signing_identity_json(ident: &identity::Identity, apple_id: &str) -> Result<Vec<u8>> {
-    use base64::Engine;
-    use rsa::pkcs8::{DecodePrivateKey, EncodePrivateKey};
-    let key = rsa::RsaPrivateKey::from_pkcs8_der(&ident.key_pkcs8).map_err(|e| Error::msg(e.to_string()))?;
-    let pem = key.to_pkcs8_pem(rsa::pkcs8::LineEnding::LF).map_err(|e| Error::msg(e.to_string()))?;
-    Ok(serde_json::to_vec_pretty(&serde_json::json!({
-        "schema": "poki.signing-identity/1",
-        "team_id": ident.team_id,
-        "key_pkcs8_pem": pem.as_str(),
-        "certificate_serial": ident.certificate.serial_number,
-        "certificate_id": ident.certificate.certificate_id,
-        "certificate_der_b64": base64::engine::general_purpose::STANDARD.encode(&ident.certificate.der),
-        "apple_id": apple_id,
-    }))?)
-}
-
-/// Writes the signing identity into Poki's container. Failing is not fatal: Poki then needs the
-/// computer for renewals, as before.
+/// Writes a non-secret install marker so Poki can start itself after a fresh computer install.
 #[cfg(feature = "device")]
-async fn hand_signing_identity(phone: &device::Phone, built: &SignedBuild, apple_id: &str, reporter: &Reporter) {
-    let res = async {
-        let bytes = signing_identity_json(&built.identity, apple_id)?;
-        device::container::write_file(phone, &built.bundle_id, SIGNING_IDENTITY_PATH, &bytes).await
-    }
-    .await;
-    match res {
-        Ok(()) => reporter.note("pairing_file", "Gave Poki its signing identity, so it can renew itself"),
-        Err(e) => reporter.note("pairing_file", format!("Could not give Poki its signing identity ({e}); renewals stay on this computer.")),
+async fn hand_install_marker(phone: &device::Phone, bundle_id: &str, reporter: &Reporter) {
+    let bytes = br#"{"schema":"poki.install-handoff/1"}"#;
+    match device::container::write_file(phone, bundle_id, INSTALL_HANDOFF_PATH, bytes).await {
+        Ok(()) => reporter.note("pairing_file", "Left Poki an install marker"),
+        Err(e) => reporter.note("pairing_file", format!("Could not leave Poki an install marker ({e})")),
     }
 }
 
@@ -257,7 +233,7 @@ async fn sign_prepared(portal: &mut Portal<'_>, team: &Team, unpacked: sign::Unp
     for d in &unpacked.dropped_extensions {
         all_notes.push(format!("{d} left out: a team profile cannot carry the packet-tunnel entitlement, so Poki uses your proxy app's loopback instead."));
     }
-    Ok(SignedBuild { ipa: out.to_path_buf(), bundle_id: unpacked.bundles[0].new_id.clone(), app_group: unpacked.app_group.clone(), version: unpacked.version.clone(), build: unpacked.build.clone(), profile_expires_at: expires, profiles: raw_profiles, notes: all_notes, identity: ident })
+    Ok(SignedBuild { ipa: out.to_path_buf(), bundle_id: unpacked.bundles[0].new_id.clone(), app_group: unpacked.app_group.clone(), version: unpacked.version.clone(), build: unpacked.build.clone(), profile_expires_at: expires, profiles: raw_profiles, notes: all_notes })
 }
 
 #[cfg(feature = "device")]
@@ -396,8 +372,7 @@ pub async fn run(signer: &mut Signer, opts: Options, reporter: &Reporter) -> Res
             }
         }
     }
-    let apple_id = signer.account.apple_id().unwrap_or("").to_string();
-    hand_signing_identity(&phone, &built, &apple_id, reporter).await;
+    hand_install_marker(&phone, &built.bundle_id, reporter).await;
     if opts.seed_ddi {
         if let Err(e) = device::ddi::seed_container(&phone, &built.bundle_id, reporter).await {
             reporter.note("pairing_file", format!("Developer disk image not pre-seeded ({e}); Poki downloads it itself."));
@@ -454,8 +429,7 @@ pub async fn renew(signer: &mut Signer, udid: &str, reporter: &Reporter) -> Resu
         let built = sign_for_team(signer, &team, Some((udid, &facts.name)), &ipa, zipp.as_deref(), &out, reporter).await?;
         device::install::install_profiles(&phone, &built.profiles, reporter).await?;
         device::install::install_ipa(&phone, &built.ipa, true, reporter).await?;
-        let apple_id = signer.account.apple_id().unwrap_or("").to_string();
-        hand_signing_identity(&phone, &built, &apple_id, reporter).await;
+        hand_install_marker(&phone, &built.bundle_id, reporter).await;
         Ok(keeper::Record { version: built.version, build: built.build, release_tag: rel.tag, signed_at: keeper::now(), profile_expires_at: built.profile_expires_at, last_checked_at: Some(keeper::now()), last_error: None, wifi_address: facts.wifi_address.clone().or(rec.wifi_address.clone()), ..rec.clone() })
     }
     .await;

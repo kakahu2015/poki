@@ -4,7 +4,7 @@ import SwiftUI
 // Settings (ESP-469; before it Poki's profile, ESP-326 board "09 Poki") opens from the bottom of the
 // conversations. It replaced the earlier details screen and its "More Settings" layer. Every part of Poki a
 // person looks for by name is a row of its own on this page (Connection, Models, Dictation & Mute,
-// Approvals, Agents, Memory, Archived Conversations, Signing & Updates, Notifications, Appearance, Language), and
+// Approvals, Agents, Memory, Archived Conversations, Notifications, Appearance, Language), and
 // what only a few need is on one page, Advanced, by where it came from. Nothing has two ways in: the
 // approval method is changed on Poki's card in the chat only. The rows are PokiSettingsKit's.
 
@@ -97,10 +97,6 @@ struct PokiDetailsView: View {
 
                 // The app itself.
                 Section {
-                    NavigationLink(value: DetailsRoute.updates) {
-                        SettingsRow(title: "Signing & Updates", symbol: "signature", value: updatesValue, warns: updateWaits)
-                    }
-                    .accessibilityIdentifier("moreSettings.updates")
                     Button {
                         if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
                             UIApplication.shared.open(url)
@@ -123,7 +119,10 @@ struct PokiDetailsView: View {
                     .accessibilityIdentifier("details.health")
                     .id(Self.lastRow)
                 } footer: {
-                    Text(verbatim: "Poki \(model.signer.installedVersion) (\(model.signer.installedBuild))")
+                    let info = Bundle.main.infoDictionary ?? [:]
+                    let version = info["CFBundleShortVersionString"] as? String ?? ""
+                    let build = info["CFBundleVersion"] as? String ?? ""
+                    Text(verbatim: "Poki \(version) (\(build))")
                         .monospacedDigit()
                         .frame(maxWidth: .infinity)
                         .padding(.top, 12)
@@ -165,10 +164,6 @@ struct PokiDetailsView: View {
                     AdvancedSettingsView()
                 case .agents:
                     AgentsAndRelayView(path: $path)
-                case .updates:
-                    Form { SigningSection() }
-                        .navigationTitle(AppLocalization.text("Signing & Updates"))
-                        .navigationBarTitleDisplayMode(.inline)
                 case .approvals:
                     ApprovalsSettingsView()
                 case .appearance:
@@ -218,16 +213,12 @@ struct PokiDetailsView: View {
         return count == 0 ? nil : "\(count)"
     }
 
-    private var updateWaits: Bool { !isSample && (model.signer.updateNotReady || model.signer.next?.kind == "update") }
-    /// The version is the page's last line, so the row only speaks up when an update waits.
-    private var updatesValue: String? { updateWaits ? AppLocalization.text(LocalizedStringResource("Update Available")) : nil }
-
     @AppStorage(Appearance.key) private var appearanceChoice = Appearance.automatic.rawValue
     private var appearance: Appearance { Appearance(rawValue: appearanceChoice) ?? .automatic }
 }
 
 enum DetailsRoute: Hashable {
-    case model, history, conversations, voice, connection, advanced, agents, updates, approvals, appearance, language
+    case model, history, conversations, voice, connection, advanced, agents, approvals, appearance, language
     /// Models, with the OpenAI key's form open (or Live Voice, when the key is there but turned off):
     /// where Talk with Poki without a key leads.
     case voiceKey

@@ -705,7 +705,6 @@ struct SetupChecklist: View {
             } footer: {
                 Text(model.setupComplete ? "Everything Poki needs is in place." : "Poki needs every item ticked before an agent or the chat can use this iPhone. Items tick themselves when the phone can check them.")
             }
-            SigningSection()
             Section {
                 Button { guiding = true } label: { Label("Setup Guide", systemImage: "list.number") }
             } footer: {

@@ -293,29 +293,6 @@ struct ChatTopBar: View {
     }
 }
 
-/// A newer Poki waits (its version): said on the home page under the greeting, and a tap opens Updates.
-struct UpdatePill: View {
-    var version: String
-    var open: () -> Void
-
-    var body: some View {
-        Button(action: open) {
-            HStack(spacing: 6) {
-                Image(systemName: "arrow.down.circle.fill").foregroundStyle(Tint.blue)
-                Text("Update Available").foregroundStyle(Color(.label))
-            }
-            .font(.subheadline.weight(.medium)).lineLimit(1).minimumScaleFactor(0.8)
-            .padding(.horizontal, 16).frame(minHeight: 44)
-            .contentShape(.capsule)
-        }
-        .buttonStyle(.plain)
-        .glassSurface(in: Capsule(), interactive: true)
-        .accessibilityValue(Text(verbatim: version))
-        .accessibilityIdentifier("home.update")
-        .glassAppearing()
-    }
-}
-
 // MARK: Home page
 
 /// The default quick actions, until the owner's own take their place (`HomeShortcuts`): each an app
