@@ -54,17 +54,17 @@ enum InProcessSession: Equatable {
         case .open: return .running
         case .opening: return .starting("opening the in-process session; it takes a few seconds the first time")
         case .waitingForPasscode:
-            return .starting("waiting for the owner to enter the iPhone passcode on the phone: iOS asks for it before it allows automation, after Poki restarts and 8 hours after the last time. Only the owner can do this; the Live Activity asks them. Call again in about 10 s")
+            return .starting("waiting for the owner to enter the iPhone passcode on the phone: iOS asks for it before it allows automation, after kaka restarts and 8 hours after the last time. Only the owner can do this; the Live Activity asks them. Call again in about 10 s")
         case .passcodeMissed:
-            return .failed("the owner did not enter the iPhone passcode when iOS asked for it to allow automation (cancelled, or a minute passed). Nothing was sent, and Poki does not ask again by itself: the owner turns Poki off and on to be asked again",
-                           fix: "Turn Poki off and on, then enter the iPhone passcode when iOS asks for it to allow automation")
+            return .failed("the owner did not enter the iPhone passcode when iOS asked for it to allow automation (cancelled, or a minute passed). Nothing was sent, and kaka does not ask again by itself: the owner turns kaka off and on to be asked again",
+                           fix: "Turn kaka off and on, then enter the iPhone passcode when iOS asks for it to allow automation")
         case .failed(let code, let detail):
             if code == "session_unreadable" {
                 return .failed("the automation session opened but could not read the screen (\(detail)). Nothing was sent, and that session was closed; the next call opens a new one",
-                               fix: "Try the step again. If it keeps failing, turn Poki off and on")
+                               fix: "Try the step again. If it keeps failing, turn kaka off and on")
             }
-            return .failed("the in-process session could not be opened (\(code)\(detail.isEmpty ? "" : ": \(detail)")); Poki tries again on the next call",
-                           fix: "Open Poki and, if iOS asks, enter the passcode to allow automation")
+            return .failed("the in-process session could not be opened (\(code)\(detail.isEmpty ? "" : ": \(detail)")); kaka tries again on the next call",
+                           fix: "Open kaka and, if iOS asks, enter the passcode to allow automation")
         }
     }
 }
@@ -113,8 +113,8 @@ final class InProcessWDA: HTTPTransport, @unchecked Sendable {
             return nil
         }
         if let refusal {
-            let detail = refusal == "passcode_declined" ? "the owner cancelled iOS's passcode screen for automation; Poki asks again when they turn it on"
-                : refusal == "open_poki_first" ? "iOS asks for the passcode before the first automation since the iPhone restarted; that happens with Poki open, so the owner opens Poki first"
+            let detail = refusal == "passcode_declined" ? "the owner cancelled iOS's passcode screen for automation; kaka asks again when they turn it on"
+                : refusal == "open_poki_first" ? "iOS asks for the passcode before the first automation since the iPhone restarted; that happens with kaka open, so the owner opens kaka first"
                 : "an open is already asking for the passcode"
             return ["ok": false, "code": refusal, "detail": detail, "seconds": 0.0]
         }
@@ -239,7 +239,7 @@ final class InProcessWDA: HTTPTransport, @unchecked Sendable {
                     (UIPasteboard.general.string, UIPasteboard.general.numberOfItems, UIApplication.shared.applicationState == .active)
                 }
                 guard let text = text ?? (items == 0 && active ? "" : nil) else {
-                    throw Refusal("unable to read clipboard", items > 0 ? "the clipboard holds no text" : "the clipboard cannot be read while Poki is in the background")
+                    throw Refusal("unable to read clipboard", items > 0 ? "the clipboard holds no text" : "the clipboard cannot be read while kaka is in the background")
                 }
                 return .string(Data(text.utf8).base64EncodedString())
             },
@@ -325,7 +325,7 @@ final class InProcessWDA: HTTPTransport, @unchecked Sendable {
     /// Opening an app and the Home button stay: they are how a task leaves Poki.
     private func refuseInPoki() throws {
         guard let own = Bundle.main.bundleIdentifier, native.frontApp()["bundleId"] as? String == own else { return }
-        throw Refusal("unknown error", "not sent: Poki itself is in front, and nothing is tapped or typed in Poki. Open the task's app first (launch)")
+        throw Refusal("unknown error", "not sent: kaka itself is in front, and nothing is tapped or typed in kaka. Open the task's app first (launch)")
     }
 
     private func touch(_ fingers: [[(CGPoint, Double)]]) throws -> JSON {

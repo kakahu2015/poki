@@ -1,13 +1,14 @@
 #!/bin/bash
-# Makes the asset catalogs from docs/images/poki-app-icon.png (macOS, needs swift): the app icon (a finished
-# full-bleed 1024 image; iOS applies its own corner mask) and the round Bear image for the app and the Live Activity.
-# They are generated, not checked in, so the source images in docs/images stay the only copies. The icon is the
+# Makes the asset catalogs from Branding/kaka-app-icon.png and Branding/kaka-mark.png (macOS, needs swift): the app icon (a finished
+# full-bleed 1024 image; iOS applies its own corner mask) and the round Kaka mark for the app and the Live Activity.
+# They are generated, not checked in, so the source images in Branding stay the only copies. The icon is the
 # same picture in light and dark: it is listed again for the dark appearance, because iOS makes its own darker
 # version of an icon that has no dark entry. Run before xcodegen.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
-ICON="$ROOT/docs/images/poki-app-icon.png"
+ICON="$HERE/Branding/kaka-app-icon.png"
+MARK="$HERE/Branding/kaka-mark.png"
 COMPOSE="$ROOT/native/ios-runner/branding/compose.swift"
 meta='{"info":{"version":1,"author":"poki"}}'
 
@@ -30,6 +31,13 @@ bear "$APP"
 mkdir -p "$APP/PokiIcon.imageset"
 sips -Z 192 "$ICON" --out "$APP/PokiIcon.imageset/icon@3x.png" >/dev/null
 echo '{"images":[{"filename":"icon@3x.png","idiom":"universal","scale":"3x"}],"info":{"version":1,"author":"poki"}}' > "$APP/PokiIcon.imageset/Contents.json"
+# The website mark is the small brand image used by the Live Activity on the island and Lock Screen.
+mark() {
+  mkdir -p "$1/KakaMark.imageset"
+  cp "$MARK" "$1/KakaMark.imageset/mark@3x.png"
+  echo '{"images":[{"filename":"mark@3x.png","idiom":"universal","scale":"3x"}],"info":{"version":1,"author":"poki"}}' > "$1/KakaMark.imageset/Contents.json"
+}
+mark "$APP"
 # Provider logos (Poki/ProviderIcons, see its README) as vector template images.
 logos() {
   for svg in "$HERE"/Poki/ProviderIcons/*.svg; do
@@ -65,6 +73,7 @@ bears "$APP"
 WIDGET="$HERE/PokiWidgets/Assets.xcassets"
 catalog "$WIDGET"
 bear "$WIDGET"
+mark "$WIDGET"
 bears "$WIDGET"
 # The calling agent's logo on the Live Activity.
 logos "$WIDGET"

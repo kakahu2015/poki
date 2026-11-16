@@ -30,7 +30,7 @@ struct ModelSettingsView: View {
             } header: {
                 Text("In Use").textCase(nil)
             } footer: {
-                Text("Change the chat model on Poki’s card: tap Poki’s picture at the top of the chat. Dictation in the message field needs no account.")
+                Text("Change the chat model on kaka’s card: tap kaka’s picture at the top of the chat. Dictation in the message field needs no account.")
             }
 
             // With no account yet the card above has Add Account, and an empty group would only be a heading.
@@ -43,7 +43,7 @@ struct ModelSettingsView: View {
             } header: {
                 Text("Accounts").textCase(nil)
             } footer: {
-                Text("Keys and sign-ins stay in this iPhone’s Keychain. Poki sends each one only to its own provider.")
+                Text("Keys and sign-ins stay in this iPhone’s Keychain. kaka sends each one only to its own provider.")
             }
             }
         }
@@ -200,7 +200,7 @@ private struct AccountDetail: View {
                 Text("Use This Account For")
             } footer: {
                 if !ModelAccounts.canChat(provider) {
-                    Text("Poki keeps this key; chatting with \(provider.name) comes in an update.")
+                    Text("kaka keeps this key; chatting with \(provider.name) comes in an update.")
                 } else if !ModelAccounts.canTalkLive(provider) {
                     Text("Live voice runs on OpenAI’s Realtime API, which only an OpenAI API key can open. Dictation in the message field works with this account.")
                 }
@@ -383,7 +383,7 @@ struct KeyEntry: View {
                     Text("\(provider.name) key")
                 } footer: {
                     if !provider.wired {
-                        Text("Poki keeps the key now; chatting with \(provider.name) comes in an update. Until then, choose Anthropic or OpenAI.")
+                        Text("kaka keeps the key now; chatting with \(provider.name) comes in an update. Until then, choose Anthropic or OpenAI.")
                     } else if ModelKeys.hasKey(provider) {
                         Text("A key is saved. Enter a new one to replace it.")
                     } else {

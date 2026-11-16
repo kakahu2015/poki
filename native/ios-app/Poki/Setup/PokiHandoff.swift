@@ -58,13 +58,13 @@ enum PokiHandoff {
         let id = ModelKeySeal.keyID(key.publicKey)
         do {
             let opened = try ModelKeySeal.open(data, publicKey: key.publicKey, bundleID: bundleID, agree: key.agree)
-            guard let provider = ModelProvider(rawValue: opened.provider), provider.wired, !provider.signsIn else { return "a sealed key for \(opened.provider), which Poki cannot use, was dropped" }
+            guard let provider = ModelProvider(rawValue: opened.provider), provider.wired, !provider.signsIn else { return "a sealed key for \(opened.provider), which kaka cannot use, was dropped" }
             try ModelKeys.save(opened.secret, for: provider)
             ModelKeys.selectedProvider = provider
             Keychain.delete(keyAccount)
             let imported = Imported(key_id: id, provider: provider.rawValue, at: ISO8601DateFormatter().string(from: Date()))
             UserDefaults.standard.set(try? JSONEncoder().encode(imported), forKey: importedKey)
-            return "took the \(provider.rawValue) key Poki Setup sealed to this phone"
+            return "took the \(provider.rawValue) key kaka Setup sealed to this phone"
         } catch {
             return "a sealed model key did not open (\(error)); it was dropped"
         }

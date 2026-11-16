@@ -23,7 +23,7 @@ settings:
     POKI_APP_GROUP: group.org.kakahu.poki
     DEVELOPMENT_TEAM: 5C6T6Y2Y22
     CODE_SIGN_STYLE: Automatic
-    POKI_DISPLAY_NAME: Poki
+    POKI_DISPLAY_NAME: kaka
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
@@ -80,15 +80,15 @@ targets:
         BGTaskSchedulerPermittedIdentifiers: ["$(POKI_BUNDLE_ID).run.*"]
         # Documents/AgentBackup holds the agent's memory backup, which Poki Setup copies off and puts back.
         UIFileSharingEnabled: true
-        NSLocationWhenInUseUsageDescription: Poki keeps running in the background while it is on, so agents can reach this iPhone. Poki does not record or send your location.
-        NSLocationAlwaysAndWhenInUseUsageDescription: Poki keeps running in the background while it is on, so agents can reach this iPhone. Poki does not record or send your location.
+        NSLocationWhenInUseUsageDescription: kaka keeps running in the background while it is on, so agents can reach this iPhone. kaka does not record or send your location.
+        NSLocationAlwaysAndWhenInUseUsageDescription: kaka keeps running in the background while it is on, so agents can reach this iPhone. kaka does not record or send your location.
         CFBundleURLTypes:
           - CFBundleURLName: nz.zheha.poki
             CFBundleURLSchemes: [poki]
-        NSLocalNetworkUsageDescription: Poki connects to this iPhone's own developer services to pair with it and to run the automation, and to the voice bridge on your Mac.
-        NSCameraUsageDescription: Poki uses the camera to take photos you send in a message, and to scan the pairing code Poki Setup shows on your computer.
-        NSMicrophoneUsageDescription: Poki listens while you talk to it in Voice, and sends that audio to OpenAI to understand what you ask.
-        NSSpeechRecognitionUsageDescription: Without an OpenAI key, Poki turns what you say in Voice into text on this iPhone and sends the text to your chosen model.
+        NSLocalNetworkUsageDescription: kaka connects to this iPhone's own developer services to pair with it and to run the automation, and to the voice bridge on your Mac.
+        NSCameraUsageDescription: kaka uses the camera to take photos you send in a message, and to scan the pairing code from kaka Setup on your computer.
+        NSMicrophoneUsageDescription: kaka listens while you talk to it in Voice, and sends that audio to OpenAI to understand what you ask.
+        NSSpeechRecognitionUsageDescription: Without an OpenAI key, kaka turns what you say in Voice into text on this iPhone and sends the text to your chosen model.
         # The voice bridge runs on the person's Mac on the local network, over plain HTTP.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
@@ -158,7 +158,7 @@ targets:
     info:
       path: PokiWidgets/Info.plist
       properties:
-        CFBundleDisplayName: Poki
+        CFBundleDisplayName: kaka
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         PokiAppGroup: $(POKI_APP_GROUP)

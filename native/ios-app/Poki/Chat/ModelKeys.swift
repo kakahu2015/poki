@@ -127,7 +127,7 @@ enum ModelProvider: String, CaseIterable, Identifiable, Sendable {
         case .deepseek: AppLocalization.text(LocalizedStringResource("Create a key at platform.deepseek.com, then paste it here."))
         case .gemini: AppLocalization.text(LocalizedStringResource("Create a key at aistudio.google.com, then paste it here."))
         case .openrouter: AppLocalization.text(LocalizedStringResource("Create a key at openrouter.ai/keys, then paste it here."))
-        case .custom: AppLocalization.text(LocalizedStringResource("Any server that speaks the OpenAI chat completions API. Poki sends the key, if any, only to this address."))
+        case .custom: AppLocalization.text(LocalizedStringResource("Any server that speaks the OpenAI chat completions API. kaka sends the key, if any, only to this address."))
         default: ""
         }
     }

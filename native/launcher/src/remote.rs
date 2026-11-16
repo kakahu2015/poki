@@ -1,7 +1,7 @@
 //! The RemotePairing network transport: TCP to the phone's remote pairing service, pair-verify with a
 //! saved RPPairing file, a TLS-PSK CDTunnel, and the RSD handshake inside that tunnel.
 //!
-//! On the phone itself the address is the loopback 10.7.0.1 (Poki's packet tunnel or the user's proxy
+//! On the phone itself the address is the loopback 10.7.0.1 (kaka's packet tunnel or the user's proxy
 //! app reflects it). This path needs no usbmuxd and no lockdown pairing record.
 
 use idevice::{
@@ -40,7 +40,7 @@ pub fn set_port(port: u16) {
 /// Whether the app is looking for a moved remote pairing port in Bonjour. Only then does a refused
 /// connection mean the port moved. Otherwise it keeps its earlier meaning: on cellular iOS refuses
 /// the developer services' loopback itself (GitHub issue 35), and a mounted disk image goes to
-/// Poki's own session. The app never searches on cellular alone, and stops after a few looks.
+/// kaka's own session. The app never searches on cellular alone, and stops after a few looks.
 static SEARCHING: AtomicBool = AtomicBool::new(false);
 
 pub fn searching() -> bool {
@@ -83,11 +83,11 @@ impl fmt::Display for RemoteError {
         match self.stage {
             Stage::Connect => write!(
                 f,
-                "remote pairing connect failed: cannot reach the phone's remote pairing service ({detail}). Is the loopback on (Poki's tunnel, or the 10.7.0.1 setting in your proxy app)?"
+                "remote pairing connect failed: cannot reach the phone's remote pairing service ({detail}). Is the loopback on (kaka's tunnel, or the 10.7.0.1 setting in your proxy app)?"
             ),
             Stage::NotListening => write!(
                 f,
-                "remote pairing connect failed: the loopback reached the phone, and nothing there listens on this port ({detail}). iOS moves its remote pairing service to another port when it starts the service again; Poki looks the port up in Bonjour and tries again by itself."
+                "remote pairing connect failed: the loopback reached the phone, and nothing there listens on this port ({detail}). iOS moves its remote pairing service to another port when it starts the service again; kaka looks the port up in Bonjour and tries again by itself."
             ),
             Stage::Handshake => write!(
                 f,
@@ -95,7 +95,7 @@ impl fmt::Display for RemoteError {
             ),
             Stage::PairVerify => write!(
                 f,
-                "pair-verify failed: the phone does not accept this RPPairing file ({detail}). Pair again in Poki's setup."
+                "pair-verify failed: the phone does not accept this RPPairing file ({detail}). Pair again in kaka's setup."
             ),
             Stage::Listener => write!(
                 f,
@@ -142,13 +142,13 @@ pub fn read_pairing_file(
         .map_err(|error| format!("Cannot read RPPairing file {}: {error}", path.display()))?;
     let file = RpPairingFile::from_bytes(&bytes).map_err(|error| {
         format!(
-            "{} is not a valid RPPairing file ({error}). It needs public_key, private_key and identifier; pair again in Poki's setup.",
+            "{} is not a valid RPPairing file ({error}). It needs public_key, private_key and identifier; pair again in kaka's setup.",
             path.display()
         )
     })?;
     let name = sending_host(&bytes)
         .or_else(|| override_name.map(String::from))
-        .unwrap_or_else(|| "Poki".into());
+        .unwrap_or_else(|| "kaka".into());
     Ok((file, name))
 }
 

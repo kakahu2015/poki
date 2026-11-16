@@ -31,9 +31,9 @@ pub(crate) fn secure_runner_environment(environment: &mut plist::Dictionary) {
 }
 
 /// The runner's session started after the disk image mounted, so Developer Mode is on.
-pub const RUNNER_BLOCKED_FIX: &str = "Poki Runner did not start. In Settings → Developer, turn on UI Automation; in Settings → General → VPN & Device Management, trust the developer of Poki Runner.";
+pub const RUNNER_BLOCKED_FIX: &str = "kaka Runner did not start. In Settings → Developer, turn on UI Automation; in Settings → General → VPN & Device Management, trust the developer of kaka Runner.";
 
-pub const RUNNER_FIX: &str = "Install Poki Runner (poki-runner-unsigned.ipa) with the same signing tool and Apple ID as Poki, then trust its developer in Settings → General → VPN & Device Management.";
+pub const RUNNER_FIX: &str = "Install kaka Runner (poki-runner-unsigned.ipa) with the same signing tool and Apple ID as kaka, then trust its developer in Settings → General → VPN & Device Management.";
 
 /// The runner: the configured bundle, else the installed user app whose id names a WebDriverAgent
 /// runner (AltStore and Sideloadly rename bundles, for example by adding the team id).
@@ -45,7 +45,7 @@ pub async fn find_runner(device: &mut Device, configured: Option<&str>) -> Resul
     let apps = proxy.get_apps(Some("User"), None).await?;
     let mut ids: Vec<String> = apps.keys().filter(|id| id.contains("WebDriverAgentRunner") && id.contains("xctrunner")).cloned().collect();
     ids.sort();
-    ids.into_iter().next().ok_or_else(|| Failure::new("Poki Runner is not installed").fix(RUNNER_FIX).code("runner"))
+    ids.into_iter().next().ok_or_else(|| Failure::new("kaka Runner is not installed").fix(RUNNER_FIX).code("runner"))
 }
 
 pub type Session = JoinHandle<std::result::Result<(), idevice::IdeviceError>>;

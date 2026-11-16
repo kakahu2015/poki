@@ -14,7 +14,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView opaque="NO" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="ActivityBear-ready" translatesAutoresizingMaskIntoConstraints="NO" id="bear">
+                            <imageView opaque="NO" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="KakaMark" translatesAutoresizingMaskIntoConstraints="NO" id="bear">
                                 <rect key="frame" x="128.5" y="358" width="136" height="136"/>
                             </imageView>
                         </subviews>
@@ -32,7 +32,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="ActivityBear-ready" width="136" height="136"/>
+        <image name="KakaMark" width="136" height="136"/>
         <namedColor name="AccentColor">
             <color red="0.12549019607843137" green="0.5176470588235295" blue="0.9921568627450981" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>

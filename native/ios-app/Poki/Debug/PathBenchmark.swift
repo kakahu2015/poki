@@ -32,7 +32,7 @@ extension InProcessProbe {
                 note("runner: not running after 60 s (\(model.runner.title)); only the in-process path is measured", ["step": "runner_missing"])
             }
         } else {
-            note("Poki started with the in-process path, so the runner is not measured", ["step": "runner_skipped"])
+            note("kaka started with the in-process path, so the runner is not measured", ["step": "runner_skipped"])
         }
         var samples: [Sample] = []
         for round in 1...rounds {
@@ -64,7 +64,7 @@ extension InProcessProbe {
         defer { end() }
         guard await prepare() else { return }
         guard model.automationPath == .runner else {
-            note("Poki started with the in-process path; start it with -automationPath runner to read through the runner too", ["step": "runner_skipped"])
+            note("kaka started with the in-process path; start it with -automationPath runner to read through the runner too", ["step": "runner_skipped"])
             return
         }
         if !model.runner.isRunning { model.wakeRunner() }
@@ -84,7 +84,7 @@ extension InProcessProbe {
         let own = Runner(url: url, transport: InProcessWDA(screen: screenSize))
         for (name, runner) in [("inprocess", own), ("runner", Runner(url: url)), ("inprocess-after", own)] {
             let front = await withCheckedContinuation { (c: CheckedContinuation<[String: Any], Never>) in queue.async { c.resume(returning: PKInProcess.shared().frontApp()) } }
-            note("before \(name): front \(front["bundleId"] as? String ?? "?"), Poki \(UIApplication.shared.applicationState == .active ? "in front" : "in the background")",
+            note("before \(name): front \(front["bundleId"] as? String ?? "?"), kaka \(UIApplication.shared.applicationState == .active ? "in front" : "in the background")",
                  ["step": "front", "path": name, "bundle": front["bundleId"] as? String ?? "", "active": UIApplication.shared.applicationState == .active])
             var xml = ""
             let (ms, error) = await timed {

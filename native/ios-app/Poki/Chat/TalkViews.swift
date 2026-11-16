@@ -25,8 +25,8 @@ struct VoiceKeyNotice: View {
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(off ? LocalizedStringKey("Live Voice Is Off") : LocalizedStringKey("No Voice Key Set Up")).font(.body.weight(.semibold)).foregroundStyle(Color(.label))
-                    Text(off ? LocalizedStringKey("Talk with Poki uses Live Voice on your OpenAI account. Turn it on in Settings. Dictate works without it.")
-                             : LocalizedStringKey("Talk with Poki needs an OpenAI API key. Add one in Settings. Dictate works without it."))
+                    Text(off ? LocalizedStringKey("Talk with kaka uses Live Voice on your OpenAI account. Turn it on in Settings. Dictate works without it.")
+                             : LocalizedStringKey("Talk with kaka needs an OpenAI API key. Add one in Settings. Dictate works without it."))
                         .font(.subheadline).foregroundStyle(Color(.secondaryLabel))
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -128,7 +128,7 @@ struct TalkBar: View {
                     round("hand.raised.fill", label: "Interrupt", identifier: "composer.talk.interrupt", action: interrupt)
                         .transition(.scale(scale: 0.6).combined(with: .opacity))
                 }
-                round(muted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: muted ? "Unmute Poki’s Voice" : "Mute Poki’s Voice",
+                round(muted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: muted ? "Unmute kaka’s Voice" : "Mute kaka’s Voice",
                       identifier: "composer.talk.mute", action: toggleMute)
                 // The send button's blue, in light and dark (the owner, 2026-11-13: not white on black).
                 capsule("End", fill: Tint.blue, ink: .white, identifier: "composer.talk.end", action: end)

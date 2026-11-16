@@ -74,9 +74,9 @@ struct SavedSession: Codable, Identifiable, Equatable {
     var name: String {
         if let customName, !customName.isEmpty { return customName }
         switch kind {
-        case .poki: return autoName ?? (title == AppLocalization.text(LocalizedStringResource("New conversation")) ? "Poki" : String(title.prefix(40)))
+        case .poki: return autoName ?? (title == AppLocalization.text(LocalizedStringResource("New conversation")) ? "kaka" : String(title.prefix(40)))
         case .agent: return client ?? AppLocalization.text(LocalizedStringResource("An agent"))
-        case .handoff: return autoName.map { "\(client ?? AppLocalization.text(LocalizedStringResource("An agent"))), \($0)" } ?? "\(client ?? AppLocalization.text(LocalizedStringResource("An agent"))) → Poki"
+        case .handoff: return autoName.map { "\(client ?? AppLocalization.text(LocalizedStringResource("An agent"))), \($0)" } ?? "\(client ?? AppLocalization.text(LocalizedStringResource("An agent"))) → kaka"
         case .voice: return autoName ?? (title.isEmpty ? AppLocalization.text(LocalizedStringResource("Voice chat")) : String(title.prefix(40)))
         }
     }
@@ -550,7 +550,7 @@ enum AgentName {
         if name.contains("chatgpt") || name.contains("openai") { return "ChatGPT" }
         if name.contains("cursor") { return "Cursor" }
         if name.contains("gemini") { return "Gemini" }
-        if name.contains("poki") { return "Poki Agent" }
+        if name.contains("poki") { return "kaka Agent" }
         let words = raw.replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ").split(separator: " ")
         return words.isEmpty ? AppLocalization.text(LocalizedStringResource("An agent")) : words.map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined(separator: " ")
     }

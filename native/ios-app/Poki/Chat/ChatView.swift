@@ -2,17 +2,12 @@ import AVFoundation
 import PhotosUI
 import SwiftUI
 
-/// The chat is the app. Before your first message it is the home page: the fog-blue ground, Poki's
-/// picture at the top, one line of greeting and what you could ask. Your first message turns it into
-/// the conversation: the ground sinks away and your words rise out of the message field. The top bar
-/// stays where it is through all of it: the conversations on the left, Poki in the middle, a new
-/// conversation on the right. An approval or a hand-over shows as a card above the message field,
-/// where iOS hides the Dynamic Island while Poki is in front.
+/// Before your first message, the chat shows the Kaka mark, a greeting and quick actions. The first
+/// message opens the conversation; the top bar keeps only its navigation buttons.
 struct ChatView: View {
     @Environment(AppModel.self) private var model
     @Environment(ChatModel.self) private var chat
-    /// Opens Poki's card: under Poki's picture over the greeting on the home page (the bottom of the
-    /// picture, in global points), under the top bar in the chat (nil).
+    /// Opens the status card under the home mark (its bottom edge in global points).
     var openDetails: (_ under: CGFloat?) -> Void
     var openVoice: () -> Void
     var openSetup: () -> Void
@@ -28,17 +23,12 @@ struct ChatView: View {
     var openUpdates: () -> Void = {}
 
     private var voice: VoiceModel { model.voice }
-    /// The taps on Poki's picture, for the bear to answer.
-    @State private var pokes = 0
-    /// Where Poki's picture over the greeting ends, for the card to open under it.
+    /// Where the home mark ends, for the status card to open under it.
     @State private var homeBottom: CGFloat?
-    /// How far Poki's picture rises from the home page into the top bar.
-    @State private var flightRise: CGFloat = 0
 
-    /// A tap on Poki, on the home page or in the chat: the bear says hi and Poki's card opens.
+    /// A tap on the home mark opens the status card.
     private func tapPoki() {
-        pokes += 1
-        openDetails(isGreeting ? homeBottom : nil)
+        openDetails(homeBottom)
     }
     /// `-pokiDraft <text>` starts with a message already written, for recordings.
     @State private var draft = UserDefaults.standard.string(forKey: "pokiDraft") ?? ""
@@ -95,7 +85,6 @@ struct ChatView: View {
     }
 
     var body: some View {
-        let status = PokiStatus.current(model: model, chat: chat)
         let home = isGreeting
         ZStack {
             ChatTranscript(entries: shown, typing: chat.awaitingModel, canRetry: chat.canRetry, retry: chat.retry, session: chat.sessionID,
@@ -110,7 +99,7 @@ struct ChatView: View {
             }
             // The home page stays in the tree while the conversation is in front, neither seen nor
             // touched, so a new conversation brings it back on the same animation.
-            HomePage(home: home, writing: writing, rise: flightRise, pick: { model.prepareForTask(); draft = $0; writing = true }) {
+            HomePage(home: home, writing: writing, pick: { model.prepareForTask(); draft = $0; writing = true }) {
                 if home, let hint = homeHint {
                     SetupHintLine(hint: hint, openSetupStep: openSetupStep, openSetup: openSetup, openModel: openModel,
                                   openAgents: openAgents, openUpdates: openUpdates)
@@ -124,8 +113,8 @@ struct ChatView: View {
         // scroll edge (`topBar`), with no line under them.
         .topBar {
             if !bare {
-                ChatTopBar(status: status, home: home, busy: busy, openThreads: openThreads,
-                           newConversation: { if home { restarts += 1 } else { chat.newConversation() } }, openDetails: tapPoki)
+                ChatTopBar(home: home, busy: busy, openThreads: openThreads,
+                           newConversation: { if home { restarts += 1 } else { chat.newConversation() } })
             }
         }
         .bottomBar {
@@ -141,8 +130,8 @@ struct ChatView: View {
         .overlayPreferenceValue(PicturePlaceKey.self) { anchors in
             GeometryReader { proxy in
                 if !bare {
-                    PokiFlight(status: status, home: home, writing: writing, places: anchors.mapValues { proxy[$0] }, pokes: pokes,
-                               tap: tapPoki, landed: { homeBottom = $0 }, travel: { flightRise = $0 })
+                    PokiFlight(home: home, writing: writing, places: anchors.mapValues { proxy[$0] },
+                               tap: tapPoki, landed: { homeBottom = $0 })
                 }
             }
         }
@@ -155,8 +144,6 @@ struct ChatView: View {
             }
             .animation(TalkMotion.glow, value: voice.talkState)
         }
-        // The bear says hi as a talk begins.
-        .onChange(of: voice.isOn) { _, on in if on { pokes += 1 } }
         .onChange(of: writing) { _, focused in if focused { model.prepareForTask() } }
         .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { pageHeight = $0 }
         .animation(.snappy, value: voice.isOn)
@@ -247,7 +234,7 @@ struct ChatView: View {
     private var currentSetupHint: SetupIssueHint? {
         if sampleScene == "setupHint" {
             return SetupIssueHint(
-                message: AppLocalization.text(LocalizedStringResource("Poki can’t tap Send yet: UI Automation is off.")),
+                message: AppLocalization.text(LocalizedStringResource("kaka can’t tap Send yet: UI Automation is off.")),
                 link: AppLocalization.text(LocalizedStringResource("Turn On UI Automation ›")),
                 target: .step(.automation)
             )
@@ -318,7 +305,7 @@ struct SetupIssueHint: Equatable {
     @MainActor static func runnerIssue(model: AppModel) -> SetupIssueHint? {
         if let trouble = model.pairingTrouble {
             return SetupIssueHint(
-                message: AppLocalization.text(LocalizedStringResource("The phone no longer accepts Poki’s pairing (\(trouble)). Pair again in Setup, it takes a minute.")),
+                message: AppLocalization.text(LocalizedStringResource("The phone no longer accepts kaka’s pairing (\(trouble)). Pair again in Setup, it takes a minute.")),
                 link: AppLocalization.text(LocalizedStringResource("Pair This iPhone ›")),
                 target: .step(.pairing)
             )
@@ -361,7 +348,7 @@ struct SetupIssueHint: Equatable {
             case "runner":
                 return SetupIssueHint(
                     message: message,
-                    link: AppLocalization.text(LocalizedStringResource("Install Poki Runner ›")),
+                    link: AppLocalization.text(LocalizedStringResource("Install kaka Runner ›")),
                     target: .step(.runner)
                 )
             default:
@@ -391,37 +378,37 @@ struct SetupIssueHint: Equatable {
                 switch step {
                 case .runner:
                     return SetupIssueHint(
-                        message: AppLocalization.text(LocalizedStringResource("Poki can’t act yet: Poki Runner isn’t installed.")),
-                        link: AppLocalization.text(LocalizedStringResource("Install Poki Runner ›")),
+                        message: AppLocalization.text(LocalizedStringResource("kaka can’t act yet: kaka Runner isn’t installed.")),
+                        link: AppLocalization.text(LocalizedStringResource("Install kaka Runner ›")),
                         target: .step(.runner)
                     )
                 case .developerMode:
                     return SetupIssueHint(
-                        message: AppLocalization.text(LocalizedStringResource("Poki can’t act yet: Developer Mode is off.")),
+                        message: AppLocalization.text(LocalizedStringResource("kaka can’t act yet: Developer Mode is off.")),
                         link: AppLocalization.text(LocalizedStringResource("Turn On Developer Mode ›")),
                         target: .step(.developerMode)
                     )
                 case .loopback:
                     return SetupIssueHint(
-                        message: AppLocalization.text(LocalizedStringResource("Poki can’t connect yet: Local Connection is off.")),
+                        message: AppLocalization.text(LocalizedStringResource("kaka can’t connect yet: Local Connection is off.")),
                         link: AppLocalization.text(LocalizedStringResource("Turn On Local Connection ›")),
                         target: .step(.loopback)
                     )
                 case .pairing:
                     return SetupIssueHint(
-                        message: AppLocalization.text(LocalizedStringResource("Poki can’t act yet: this iPhone isn’t paired.")),
+                        message: AppLocalization.text(LocalizedStringResource("kaka can’t act yet: this iPhone isn’t paired.")),
                         link: AppLocalization.text(LocalizedStringResource("Pair This iPhone ›")),
                         target: .step(.pairing)
                     )
                 case .automation:
                     return SetupIssueHint(
-                        message: AppLocalization.text(LocalizedStringResource("Poki can’t tap Send yet: UI Automation is off.")),
+                        message: AppLocalization.text(LocalizedStringResource("kaka can’t tap Send yet: UI Automation is off.")),
                         link: AppLocalization.text(LocalizedStringResource("Turn On UI Automation ›")),
                         target: .step(.automation)
                     )
                 case .background:
                     return SetupIssueHint(
-                        message: AppLocalization.text(LocalizedStringResource("Poki can’t stay on in the background yet.")),
+                        message: AppLocalization.text(LocalizedStringResource("kaka can’t stay on in the background yet.")),
                         link: AppLocalization.text(LocalizedStringResource("Turn On Background ›")),
                         target: .step(.background)
                     )
@@ -430,7 +417,7 @@ struct SetupIssueHint: Equatable {
         }
         if !ModelKeys.hasUsableKey {
             return SetupIssueHint(
-                message: AppLocalization.text(LocalizedStringResource("Poki needs a model account before it can reply.")),
+                message: AppLocalization.text(LocalizedStringResource("kaka needs a model account before it can reply.")),
                 link: AppLocalization.text(LocalizedStringResource("Add an Account ›")),
                 target: .model
             )
@@ -450,7 +437,7 @@ extension SetupIssueHint {
     @MainActor static func homeLine(model: AppModel, looks: Bool = false) -> SetupIssueHint? {
         if let now = runnerIssue(model: model) ?? localSessionIssue(model: model) { return now }
         if let warning = ExpiryWarning(expiry: model.signer.expiry) {
-            return SetupIssueHint(message: AppLocalization.text(LocalizedStringResource("Poki’s signing ends soon")) + "\n" + warning.message,
+            return SetupIssueHint(message: AppLocalization.text(LocalizedStringResource("kaka’s signing ends soon")) + "\n" + warning.message,
                                   link: AppLocalization.text(LocalizedStringResource("Open Setup ›")), target: .updates)
         }
         return first(model: model, looks: looks) ?? relayIssue(model: model)
@@ -891,7 +878,7 @@ struct TypingBubble: View {
             .padding(.vertical, 19).padding(.horizontal, 20)
         }
         .pokiBubble(tail: true)
-        .accessibilityLabel(Text("Poki is typing"))
+        .accessibilityLabel(Text("kaka is typing"))
     }
 }
 
@@ -956,7 +943,7 @@ struct MessageListHeader: View {
     var dark: Bool
     /// The model answering, under the name (the chat); nil on the voice page.
     var subtitle: String? = nil
-    var title: String = "Poki"
+    var title: String = "kaka"
     var back: (() -> Void)? = nil
     var openDetails: () -> Void
 
@@ -1029,8 +1016,8 @@ private struct NoteLine: View {
         switch note {
         case .waiting: AppLocalization.text(LocalizedStringResource("Waiting for your approval"))
         case .approved(let at): AppLocalization.text(LocalizedStringResource("Approved, \(at.formatted(Date.FormatStyle(date: .omitted, time: .shortened).locale(AppLocalization.locale)))"))
-        case .declined: AppLocalization.text(LocalizedStringResource("Not approved, so Poki skipped that step"))
-        case .expired: AppLocalization.text(LocalizedStringResource("The approval ran out, so Poki skipped that step"))
+        case .declined: AppLocalization.text(LocalizedStringResource("Not approved, so kaka skipped that step"))
+        case .expired: AppLocalization.text(LocalizedStringResource("The approval ran out, so kaka skipped that step"))
         case .problem(let text): text
         case .approval(let note): ActivityWords.label(note.summary)
         case .modelChecking: AppLocalization.text(LocalizedStringResource("The model is checking this step"))
@@ -1242,7 +1229,7 @@ struct ComposerInputView: View {
                              onSwipe: { up in if up { focused = true } else if focused { focused = false } }, onSubmit: submit)
                     .overlay(alignment: .topLeading) {
                         if input.isEmpty {
-                            Text(dictation.on ? "Listening…" : attachments.isEmpty ? "Message Poki" : "Add a message")
+                            Text(dictation.on ? "Listening…" : attachments.isEmpty ? "Message kaka" : "Add a message")
                                 .foregroundStyle(Tint.homePlaceholder).lineLimit(1)
                                 .padding(.top, 6).allowsHitTesting(false).accessibilityHidden(true)
                         }
@@ -1482,7 +1469,7 @@ struct ComposerInputView: View {
                 .contentShape(.circle)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text(running ? "Stop" : canSend ? "Send" : "Talk with Poki"))
+        .accessibilityLabel(Text(running ? "Stop" : canSend ? "Send" : "Talk with kaka"))
         .accessibilityIdentifier("composer.main")
         .contextMenu {
             if !running, hasText {
@@ -1563,7 +1550,7 @@ final class FieldDictation {
             guard number == generation else { return }
             guard allowed else {
                 starting = false
-                problem = AppLocalization.text(LocalizedStringResource("Poki needs the microphone and speech recognition. Allow them in Settings › Poki."))
+                problem = AppLocalization.text(LocalizedStringResource("kaka needs the microphone and speech recognition. Allow them in Settings › kaka."))
                 return
             }
             guard starting else { return }
@@ -1623,7 +1610,7 @@ struct LiveVoiceTranscript: View {
         if voice.isOn || !voice.lines.isEmpty {
             let lines = voice.lines
             VStack(spacing: 4) {
-                Label(voice.isOn ? LocalizedStringKey("Talk with Poki") : LocalizedStringKey("Voice conversation"), systemImage: "waveform")
+                Label(voice.isOn ? LocalizedStringKey("Talk with kaka") : LocalizedStringKey("Voice conversation"), systemImage: "waveform")
                     .font(.system(size: 12, weight: .medium)).foregroundStyle(ChatColor.secondary)
                     .padding(.top, 12).padding(.bottom, 4).frame(maxWidth: .infinity)
                 ForEach(Array(lines.enumerated()), id: \.element.id) { i, line in

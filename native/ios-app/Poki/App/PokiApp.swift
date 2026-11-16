@@ -241,14 +241,14 @@ struct RootView: View {
             Button("Don’t Allow", role: .cancel) { model.answerConnection(false) }
             Button("Allow") { model.answerConnection(true) }
         } message: { ask in
-            Text("\(ask.client) is signing in through \(ask.connector) and returns to \(ask.callback), which isn’t on Poki’s list of known agents. Allow it only if you are connecting it yourself right now. It could then see your screen and act on this iPhone.")
+            Text("\(ask.client) is signing in through \(ask.connector) and returns to \(ask.callback), which isn’t on kaka’s list of known agents. Allow it only if you are connecting it yourself right now. It could then see your screen and act on this iPhone.")
         }
         // Turning on after Off: Poki exits by itself and has to be opened again.
-        .alert("Poki Restarts to Turn On", isPresented: Binding(get: { model.relaunchNotice }, set: { if !$0 { model.relaunchNotice = false } })) {
+        .alert("kaka Restarts to Turn On", isPresented: Binding(get: { model.relaunchNotice }, set: { if !$0 { model.relaunchNotice = false } })) {
             Button("Cancel", role: .cancel) { model.relaunchNotice = false }
             Button("Continue") { model.continueRelaunch() }
         } message: {
-            Text("Poki closes by itself so agents can see the screen again. Open Poki again afterwards, from the notification or the Home Screen. It turns on when it opens.")
+            Text("kaka closes by itself so agents can see the screen again. Open kaka again afterwards, from the notification or the Home Screen. It turns on when it opens.")
         }
         // Before the first automation after a restart: iOS's passcode screen is next, and expected.
         .alert("Enter Your Passcode Next", isPresented: Binding(get: { model.passcodeHeadsUp }, set: { if !$0 { model.passcodeHeadsUp = false } })) {

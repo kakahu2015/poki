@@ -115,7 +115,7 @@ enum VoiceError: LocalizedError {
         case .bridge(404, _): "The voice bridge doesn't know this address. Copy it again from the Mac."
         case .bridge(let code, let reason): "The voice bridge answered \(code): \(reason ?? "no reason given")"
         case .realtime(let code, let reason): "OpenAI answered \(code): \(reason)"
-        case .noBridge: "Set up Poki's model first (an OpenAI key talks fastest), or enter a voice bridge address from your Mac."
+        case .noBridge: "Set up kaka's model first (an OpenAI key talks fastest), or enter a voice bridge address from your Mac."
         case .timeout(let what): "\(what) took too long."
         case .noPath: "The voice connection could not reach OpenAI over this network. Check Wi-Fi or cellular, or a VPN or proxy app that blocks calls, then try again."
         case .noWebRTC: "WebRTC could not start"
@@ -130,7 +130,7 @@ enum VoiceError: LocalizedError {
         case .bridge(let code, let reason):
             AppLocalization.text(LocalizedStringResource("The voice bridge answered \(code): \(reason ?? AppLocalization.text(LocalizedStringResource("no reason given")))"))
         case .realtime(let code, let reason): AppLocalization.text(LocalizedStringResource("OpenAI answered \(code): \(reason)"))
-        case .noBridge: AppLocalization.text(LocalizedStringResource("Set up Poki's model first (an OpenAI key talks fastest), or enter a voice bridge address from your Mac."))
+        case .noBridge: AppLocalization.text(LocalizedStringResource("Set up kaka's model first (an OpenAI key talks fastest), or enter a voice bridge address from your Mac."))
         case .timeout(let what): AppLocalization.text(LocalizedStringResource("\(what) took too long."))
         case .noPath: AppLocalization.text(LocalizedStringResource("The voice connection could not reach OpenAI over this network. Check Wi-Fi or cellular, or a VPN or proxy app that blocks calls, then try again."))
         case .noWebRTC: AppLocalization.text(LocalizedStringResource("WebRTC could not start"))
@@ -147,7 +147,7 @@ enum VoiceError: LocalizedError {
             return AppLocalization.text(LocalizedStringResource("The voice connection took too long. Check the network, then try again."))
         case .notConnectedToInternet?, .networkConnectionLost?, .cannotConnectToHost?, .cannotFindHost?, .dnsLookupFailed?,
              .internationalRoamingOff?, .dataNotAllowed?:
-            return AppLocalization.text(LocalizedStringResource("Poki could not reach the voice service. Check the network, then try again."))
+            return AppLocalization.text(LocalizedStringResource("kaka could not reach the voice service. Check the network, then try again."))
         default:
             return error.localizedDescription
         }
@@ -413,7 +413,7 @@ final class VoiceModel {
     var route: String {
         if VoiceDirect.apiKey != nil { return AppLocalization.text(LocalizedStringResource("Your OpenAI key, straight from this iPhone")) }
         if let bridge { return AppLocalization.text(LocalizedStringResource("Voice bridge at \(bridge.display)")) }
-        if VoiceDirect.canDictate { return AppLocalization.text(LocalizedStringResource("Dictation to \(ModelKeys.selectedModelName); Poki reads the answer aloud")) }
+        if VoiceDirect.canDictate { return AppLocalization.text(LocalizedStringResource("Dictation to \(ModelKeys.selectedModelName); kaka reads the answer aloud")) }
         return AppLocalization.text(LocalizedStringResource("Not set up"))
     }
 
@@ -618,7 +618,7 @@ final class VoiceModel {
                 let left = stallLeft()
                 if left > .zero { wait = left; continue }
                 if waitingOnServer {
-                    log.add("voice", "the server said nothing for \(inBackground ? Self.backgroundStall : Self.stall) while Poki waited on it: conversation ended")
+                    log.add("voice", "the server said nothing for \(inBackground ? Self.backgroundStall : Self.stall) while kaka waited on it: conversation ended")
                     lines.append(VoiceLine(role: .note, text: AppLocalization.text(LocalizedStringResource("The server did not answer. The talk ended."))))
                     stop()
                     return
@@ -661,7 +661,7 @@ final class VoiceModel {
     private func carryOver(_ link: VoiceConnection) {
         guard let lastEnd, time.now().timeIntervalSince(lastEnd) < Self.carryOver else { return }
         let turns = lastLines.suffix(Self.carriedLines)
-        let said = turns.map { "\($0.role == .you ? "User" : "Poki"): \($0.text)" }.joined(separator: "\n")
+        let said = turns.map { "\($0.role == .you ? "User" : "kaka"): \($0.text)" }.joined(separator: "\n")
         link.send(Self.note("This continues a conversation from a few minutes ago. What was said, oldest first. Use it only as context for what the user says next; do not answer or repeat it.\n" + said))
     }
 
@@ -704,7 +704,7 @@ final class VoiceModel {
             guard !text.isEmpty else { phase = .listening; return }
             if lines.last?.text != text { lines.append(VoiceLine(role: .you, text: text)) }
             guard let chat = AskPoki.chat else { phase = .lost(VoiceError.noBridge.words); return }
-            if chat.running { lines.append(VoiceLine(role: .note, text: AppLocalization.text(LocalizedStringResource("Poki is still on the last task.")))); phase = .listening; return }
+            if chat.running { lines.append(VoiceLine(role: .note, text: AppLocalization.text(LocalizedStringResource("kaka is still on the last task.")))); phase = .listening; return }
             let before = chat.entries.count
             chat.send(text)
             while chat.running { try? await Task.sleep(for: .milliseconds(200)) }
@@ -724,7 +724,7 @@ final class VoiceModel {
         let number = session
         let allowed = await Dictation.allowed()
         guard number == session else { return }
-        guard allowed else { phase = .lost(AppLocalization.text(LocalizedStringResource("Poki needs the microphone and speech recognition: allow them in Settings › Poki."))); return }
+        guard allowed else { phase = .lost(AppLocalization.text(LocalizedStringResource("kaka needs the microphone and speech recognition: allow them in Settings › kaka."))); return }
         let dictation = Dictation()
         dictation.onHeard = { [weak self] text in
             guard let self, self.phase == .hearing else { return }

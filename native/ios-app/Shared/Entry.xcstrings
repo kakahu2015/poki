@@ -17,151 +17,160 @@
         }
       }
     },
-    "Opens Poki and starts talking." : {
+    "Opens kaka and starts talking." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开 Poki 并开始说话。"
+            "value" : "打开 kaka 并开始说话。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打開 Poki 並開始說話。"
+            "value" : "打開 kaka 並開始說話。"
           }
         }
       }
     },
-    "Opens Poki and starts talking. If Poki is doing a task, it shows that task and leaves it running." : {
+    "Opens kaka and starts talking. If kaka is doing a task, it shows that task and leaves it running." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开 Poki 并开始说话。Poki 正在做任务时，显示这个任务，任务继续进行。"
+            "value" : "打开 kaka 并开始说话。kaka 正在做任务时，显示这个任务，任务继续进行。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打開 Poki 並開始說話。Poki 正在做任務時，顯示這個任務，任務繼續進行。"
+            "value" : "打開 kaka 並開始說話。kaka 正在做任務時，顯示這個任務，任務繼續進行。"
           }
         }
       }
     },
-    "Poki couldn’t start the task. The chat says why." : {
+    "kaka couldn’t start the task. The chat says why." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 没能开始这个任务，原因在聊天里。"
+            "value" : "kaka 没能开始这个任务，原因在聊天里。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 沒能開始這個任務，原因在聊天裡。"
+            "value" : "kaka 沒能開始這個任務，原因在聊天裡。"
           }
         }
       }
     },
-    "Poki is still busy, so this task didn’t start. Here is what Poki is doing." : {
+    "kaka is still busy, so this task didn’t start. Here is what kaka is doing." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 还在忙，这个任务没有开始。这里是 Poki 正在做的事。"
+            "value" : "kaka 还在忙，这个任务没有开始。这里是 kaka 正在做的事。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 還在忙，這個任務沒有開始。這裡是 Poki 正在做的事。"
+            "value" : "kaka 還在忙，這個任務沒有開始。這裡是 kaka 正在做的事。"
           }
         }
       }
     },
-    "Poki started the task. Turn Poki on so it can act on the phone." : {
+    "kaka started the task. Turn kaka on so it can act on the phone." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 已开始这个任务。开启 Poki 后它才能操作手机。"
+            "value" : "kaka 已开始这个任务。开启 kaka 后它才能操作手机。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 已開始這個任務。開啟 Poki 後它才能操作手機。"
+            "value" : "kaka 已開始這個任務。開啟 kaka 後它才能操作手機。"
           }
         }
       }
     },
-    "Poki starts the task on this iPhone and tells you when it is done." : {
+    "kaka starts the task on this iPhone and tells you when it is done." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 在这台 iPhone 上开始做这个任务，做完后告诉你。"
+            "value" : "kaka 在这台 iPhone 上开始做这个任务，做完后告诉你。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 在這台 iPhone 上開始做這個任務，做完後告訴你。"
+            "value" : "kaka 在這台 iPhone 上開始做這個任務，做完後告訴你。"
           }
         }
       }
     },
-    "Poki wasn’t ready. Try again in a moment." : {
+    "kaka wasn’t ready. Try again in a moment." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 还没准备好，请稍后再试。"
+            "value" : "kaka 还没准备好，请稍后再试。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 還沒準備好，請稍後再試。"
+            "value" : "kaka 還沒準備好，請稍後再試。"
           }
         }
       }
     },
-    "Press and hold the Action button to open Poki and start talking. To type a task instead, choose Shortcut there, then Send Task. Control Center and the Lock Screen can hold Talk to Poki too." : {
+    "Press and hold the Action button to open kaka and start talking. To type a task instead, choose Shortcut there, then Send Task. Control Center and the Lock Screen can hold Talk to kaka too." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "按住操作按钮，就会打开 Poki 并开始说话。想改成输入任务，就在那里选「快捷指令」，再选「发任务」。控制中心和锁定屏幕也可以放「和 Poki 说话」。"
+            "value" : "按住操作按钮，就会打开 kaka 并开始说话。想改成输入任务，就在那里选「快捷指令」，再选「发任务」。控制中心和锁定屏幕也可以放「和 kaka 说话」。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "按住動作按鈕，就會打開 Poki 並開始說話。想改成輸入任務，就在那裡選「捷徑」，再選「發任務」。控制中心和鎖定畫面也可以放「和 Poki 說話」。"
+            "value" : "按住動作按鈕，就會打開 kaka 並開始說話。想改成輸入任務，就在那裡選「捷徑」，再選「發任務」。控制中心和鎖定畫面也可以放「和 kaka 說話」。"
           }
         }
       }
     },
-    "Send ${task} to Poki" : {
+    "Send ${task} to kaka" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "把 ${task} 发给 Poki"
+            "value" : "把 ${task} 发给 kaka"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "把 ${task} 發給 Poki"
+            "value" : "把 ${task} 發給 kaka"
           }
         }
       }
     },
     "Send Task" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -177,55 +186,58 @@
         }
       }
     },
-    "Send Task to Poki" : {
+    "Send Task to kaka" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "给 Poki 发任务"
+            "value" : "给 kaka 发任务"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "給 Poki 發任務"
+            "value" : "給 kaka 發任務"
           }
         }
       }
     },
-    "Settings › Action Button › Controls › Talk to Poki" : {
+    "Settings › Action Button › Controls › Talk to kaka" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "设置 › 操作按钮 › 控制 › 和 Poki 说话"
+            "value" : "设置 › 操作按钮 › 控制 › 和 kaka 说话"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "設定 › 動作按鈕 › 控制項目 › 和 Poki 說話"
+            "value" : "設定 › 動作按鈕 › 控制項目 › 和 kaka 說話"
           }
         }
       }
     },
-    "Talk to Poki" : {
+    "Talk to kaka" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "和 Poki 说话"
+            "value" : "和 kaka 说话"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "和 Poki 說話"
+            "value" : "和 kaka 說話"
           }
         }
       }
     },
     "Task" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -241,18 +253,19 @@
         }
       }
     },
-    "What should Poki do?" : {
+    "What should kaka do?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "要 Poki 做什么？"
+            "value" : "要 kaka 做什么？"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "要 Poki 做什麼？"
+            "value" : "要 kaka 做什麼？"
           }
         }
       }

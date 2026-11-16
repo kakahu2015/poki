@@ -92,7 +92,7 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
     private func setAudioLost(_ lost: Bool) {
         guard lost != audioLost else { return }
         audioLost = lost
-        AppLog.shared.add("background", lost ? "silent audio stopped: location keeps Poki running until it is back" : "silent audio back: location off")
+        AppLog.shared.add("background", lost ? "silent audio stopped: location keeps kaka running until it is back" : "silent audio back: location off")
         if lost { startLocation() } else if !pairingHold { stopLocation() }
     }
 

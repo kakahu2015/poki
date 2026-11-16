@@ -32,11 +32,11 @@ struct VoiceView: View {
                     // Dictation runs on this iPhone with every model; its microphone sits beside Send.
                     Toggle(isOn: $dictationButton) { SettingsLabel("Show Dictation Button in Message Field", systemImage: "mic") }
                         .accessibilityIdentifier("voice.dictationButton")
-                    Toggle(isOn: $voice.muted) { SettingsLabel("Mute Poki’s Voice", systemImage: "speaker.slash") }
+                    Toggle(isOn: $voice.muted) { SettingsLabel("Mute kaka’s Voice", systemImage: "speaker.slash") }
                 } footer: {
-                    if micDenied { Text("Poki can't use the microphone. Allow it in Settings, Privacy, Microphone.").foregroundStyle(.orange) }
+                    if micDenied { Text("kaka can't use the microphone. Allow it in Settings, Privacy, Microphone.").foregroundStyle(.orange) }
                     else if voice.canTalkLive {
-                        Text("In the chat, the waveform button starts a live conversation: Poki listens, acts and answers out loud, also while you are in another app. It ends by itself 8 seconds after an answer if nobody speaks. Tap End to stop sooner. The microphone in the message field only dictates.")
+                        Text("In the chat, the waveform button starts a live conversation: kaka listens, acts and answers out loud, also while you are in another app. It ends by itself 8 seconds after an answer if nobody speaks. Tap End to stop sooner. The microphone in the message field only dictates.")
                     } else {
                         Text("A live conversation uses OpenAI’s Realtime voice, which needs an OpenAI API key in Settings › Models. Dictation in the message field works with every model.")
                     }
@@ -104,7 +104,7 @@ struct VoiceAdvancedRows: View {
                     SettingsVault.save()
                 }
             } message: {
-                Text("Talk with Poki then needs an OpenAI API key, or the address entered again.")
+                Text("Talk with kaka then needs an OpenAI API key, or the address entered again.")
             }
         } else {
             TextField("Mac voice bridge address", text: $bridgeText)

@@ -79,7 +79,7 @@ struct Issue: Identifiable {
                 default: .retry
                 }
                 out.append(Issue(id: "runner", title: AppLocalization.text(LocalizedStringResource("The runner stopped")),
-                                 text: fix.isEmpty ? (runner.detail.map { "\($0.prefix(1).uppercased())\($0.dropFirst())." } ?? AppLocalization.text(LocalizedStringResource("Poki starts it again on the next agent request."))) : local(fix), fix: kind))
+                                 text: fix.isEmpty ? (runner.detail.map { "\($0.prefix(1).uppercased())\($0.dropFirst())." } ?? AppLocalization.text(LocalizedStringResource("kaka starts it again on the next agent request."))) : local(fix), fix: kind))
             } else if runner.state == "waiting_network", let fix = runner.fix, fix.contains("internet") {
                 out.append(Issue(id: "network", title: AppLocalization.text(LocalizedStringResource("Waiting for the internet")), text: local(fix), fix: .none))
             } else if let trouble = model.localSessionTrouble {
@@ -92,17 +92,17 @@ struct Issue: Identifiable {
             } else if !model.hasOpenInProcessSession, runner.code != "local_ddi",
                       runner.state == "waiting_network" || !model.loopback.isWorking && model.loopback.state != .checking {
                 out.append(Issue(id: "loopback", title: AppLocalization.text(LocalizedStringResource("Loopback is off")),
-                                 text: AppLocalization.text(LocalizedStringResource("Turn on your proxy app with the Poki module, or connect LocalDevVPN.")), fix: .setup))
+                                 text: AppLocalization.text(LocalizedStringResource("Turn on your proxy app with the kaka module, or connect LocalDevVPN.")), fix: .setup))
             }
             if let trouble = model.pairingTrouble {
                 out.append(Issue(id: "pairing", title: AppLocalization.text(LocalizedStringResource("Pair this iPhone again")),
-                                 text: AppLocalization.text(LocalizedStringResource("The phone no longer accepts Poki’s pairing (\(trouble)). Pair again in Setup; it takes a minute.")), fix: .setup))
+                                 text: AppLocalization.text(LocalizedStringResource("The phone no longer accepts kaka’s pairing (\(trouble)). Pair again in Setup; it takes a minute.")), fix: .setup))
             }
             if model.passcodeHint {
                 out.append(Issue(id: "passcode", title: AppLocalization.text(LocalizedStringResource("Enter the passcode if the iPhone asks")),
                                  text: model.automationPath == .inProcess
-                                    ? AppLocalization.text(LocalizedStringResource("iOS asks for the passcode to allow UI Automation after Poki restarts, or 8 hours after it was last entered. Enter it once; Poki carries on by itself."))
-                                    : AppLocalization.text(LocalizedStringResource("iOS asks for the passcode before UI Automation after Poki Runner was force-closed or the iPhone restarted. Enter it once; Poki carries on by itself.")), fix: .none))
+                                    ? AppLocalization.text(LocalizedStringResource("iOS asks for the passcode to allow UI Automation after kaka restarts, or 8 hours after it was last entered. Enter it once; kaka carries on by itself."))
+                                    : AppLocalization.text(LocalizedStringResource("iOS asks for the passcode before UI Automation after kaka Runner was force-closed or the iPhone restarted. Enter it once; kaka carries on by itself.")), fix: .none))
             }
             if let text = model.handoffText {
                 out.append(Issue(id: "handoff", title: AppLocalization.text(LocalizedStringResource("Your turn")),
@@ -110,11 +110,11 @@ struct Issue: Identifiable {
             }
             if case .offline = model.relayStatus {
                 out.append(Issue(id: "relay", title: AppLocalization.text(LocalizedStringResource("Agents can’t reach this iPhone")),
-                                 text: AppLocalization.text(LocalizedStringResource("Poki is offline. Check that the phone has internet; Poki reconnects by itself.")), fix: .none))
+                                 text: AppLocalization.text(LocalizedStringResource("kaka is offline. Check that the phone has internet; kaka reconnects by itself.")), fix: .none))
             }
             if model.background.denied {
-                out.append(Issue(id: "location", title: AppLocalization.text(LocalizedStringResource("Poki can’t stay on in the background")),
-                                 text: AppLocalization.text(LocalizedStringResource("Allow location access for Poki (Settings › Poki › Location › Always). Poki uses it only to keep running; it never records where you are.")), fix: .settings))
+                out.append(Issue(id: "location", title: AppLocalization.text(LocalizedStringResource("kaka can’t stay on in the background")),
+                                 text: AppLocalization.text(LocalizedStringResource("Allow location access for kaka (Settings › kaka › Location › Always). kaka uses it only to keep running; it never records where you are.")), fix: .settings))
             }
         }
         if !model.sessionOn, model.cellularNeedsWiFi {

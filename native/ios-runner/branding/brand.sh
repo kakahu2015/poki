@@ -1,7 +1,7 @@
 #!/bin/bash
-# Brands a built WebDriverAgentRunner-Runner.app as Poki Runner, at build time on macOS (needs Xcode's
+# Brands a built WebDriverAgentRunner-Runner.app as kaka Runner, at build time on macOS (needs Xcode's
 # actool and ibtool): the runner's own home-screen icon (a full-bleed 1024 px render, distinct from the
-# Poki app's), the display name Poki Runner, and a launch screen with the bear on brand blue. The app is
+# kaka app's), the display name kaka Runner, and a launch screen with the bear on brand blue. The app is
 # unsigned here; it is signed when it is installed.
 #   brand.sh <path/to/WebDriverAgentRunner-Runner.app> <path/to/poki-icon.png> [<path/to/AppIcon-1024.png>]
 # Without the third argument the icon is the bear composed on brand blue.
@@ -38,12 +38,12 @@ for key in CFBundleIcons CFBundleIcons~ipad; do /usr/libexec/PlistBuddy -c "Dele
 xcrun ibtool --compile "$APP/LaunchScreen.storyboardc" "$HERE/LaunchScreen.storyboard" \
   --minimum-deployment-target "$MIN" --target-device iphone --target-device ipad --errors --warnings
 # The test host has no screen of its own (opened by hand it is black), so it gets this one as its main
-# interface: the bear and a line saying Poki starts it. It changes nothing for the test session.
+# interface: the bear and a line saying kaka starts it. It changes nothing for the test session.
 xcrun ibtool --compile "$APP/RunnerInfo.storyboardc" "$HERE/RunnerInfo.storyboard" \
   --minimum-deployment-target "$MIN" --target-device iphone --target-device ipad --errors --warnings
 
 set_key() { plutil -replace "$1" -string "$2" "$PLIST"; }
-set_key CFBundleDisplayName "Poki Runner"
+set_key CFBundleDisplayName "kaka Runner"
 set_key UILaunchStoryboardName LaunchScreen
 set_key UIMainStoryboardFile RunnerInfo
 # The XCTest host declares a scene (delegate _XCTRunnerAppDelegate), so UIKit takes the storyboard from

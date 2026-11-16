@@ -23,7 +23,7 @@ enum SettingsVault {
             defaults.set(value, forKey: key)
             restored += 1
         }
-        if restored > 0 { NSLog("Poki: restored %d settings from the Keychain", restored) }
+        if restored > 0 { NSLog("kaka: restored %d settings from the Keychain", restored) }
     }
 
     /// The current kept settings, written to the Keychain.

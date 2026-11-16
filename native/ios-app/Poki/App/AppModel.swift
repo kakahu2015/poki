@@ -133,7 +133,7 @@ final class AppModel {
         setup.pairingFile = AppFiles.pairingFile.path
         SetupVault.mirrorPairingFromContainer()
         pairingTrouble = nil; pairingVerifiedAt = nil
-        log.add("pairing", "pairing file from Poki Setup found")
+        log.add("pairing", "pairing file from kaka Setup found")
     }
     /// Why the phone refused the pairing the last time the runner started, until it is accepted again.
     private(set) var pairingTrouble: String?
@@ -151,7 +151,7 @@ final class AppModel {
     /// The note before iOS's passcode screen is showing; Continue turns Poki on.
     var passcodeHeadsUp = false
     /// The note's text (PokiApp's alert). Its translations are looked up by this exact English key.
-    static let passcodeHeadsUpMessage: LocalizedStringResource = "This is the first time Poki starts automation since your iPhone restarted, so iOS will ask for your passcode on the next screen. That screen belongs to iOS. Poki can’t see or read what you enter, and it asks only once until the next restart."
+    static let passcodeHeadsUpMessage: LocalizedStringResource = "This is the first time kaka starts automation since your iPhone restarted, so iOS will ask for your passcode on the next screen. That screen belongs to iOS. kaka can’t see or read what you enter, and it asks only once until the next restart."
     private var passcodeHeadsUpReconnect = true
     private var passcodeHeadsUpSeen = 0.0
     private static let automationBootKey = "automationStartedBoot"
@@ -380,7 +380,7 @@ final class AppModel {
         let installedBySetup = setupFiles.contains { FileManager.default.fileExists(atPath: $0.path) }
         if UserDefaults.standard.object(forKey: "wantsOn") == nil, installedBySetup {
             wantsOn = true
-            log.add("session", "installed by Poki Setup: Poki turns on by itself")
+            log.add("session", "installed by kaka Setup: kaka turns on by itself")
         }
         for file in setupFiles { try? FileManager.default.removeItem(at: file) }
         // The installer on the Mac reads the hello and may leave a sealed model key while Poki is in front.
@@ -565,7 +565,7 @@ final class AppModel {
                 // Cancelled (or left) iOS's passcode screen: Poki does not open it again by itself.
                 if !ok, passcodeMissed {
                     InProcessWDA.gate.withLock { $0.declined = true }
-                    self.log.add("runner", "the passcode for automation was not entered: Poki will not ask again until it is turned on again")
+                    self.log.add("runner", "the passcode for automation was not entered: kaka will not ask again until it is turned on again")
                 }
                 self.inProcessSession = ok ? .open : passcodeMissed ? .passcodeMissed : .failed(code: "\(result["code"] ?? "unknown")", detail: detail)
             }
@@ -623,22 +623,22 @@ final class AppModel {
         lookForHandedPairing()
         handoffTick()
         diskImage.notice()
-        warmInProcess("Poki came to the front")
-        openWhileInFront("Poki came to the front")
+        warmInProcess("kaka came to the front")
+        openWhileInFront("kaka came to the front")
         closeBecausePokiOpened()
         loopback.resume()
         // Swiped away, ended by iOS, or Poki turned on from the background (where iOS starts none):
         // the Live Activity comes back while Poki is on, so the next thing that needs the owner pops up.
         if sessionOn, !activity.isRunning {
             activity.start(deviceName: deviceName)
-            if activity.isRunning { log.add("activity", "Live Activity started again (Poki came to the front)") }
+            if activity.isRunning { log.add("activity", "Live Activity started again (kaka came to the front)") }
         }
         // Poki in front while an agent's step is under way: nobody opened it on purpose. A tap near the
         // top of the screen hit the expanded Dynamic Island (iOS opens the activity's app), or the agent
         // tapped the activity's own label in the tree. Logged so the phone log shows it; PokiCore sends
         // the agent back to the app it was in.
         if sessionOn, let step = stepUnderWay, Date().timeIntervalSince(step.started) < 20 {
-            log.add("app", "Poki came to the front during a step (\(step.summary)): a tap hit the Live Activity")
+            log.add("app", "kaka came to the front during a step (\(step.summary)): a tap hit the Live Activity")
         }
         turnOnIfWanted()
         if let step = guiding, isDone(step) { stopGuide() }
@@ -666,14 +666,14 @@ final class AppModel {
 
     /// The one thing to do for the local connection, for the person, as the installer says it.
     var loopbackSentence: String {
-        if tunnel.available { return "In Poki, open Setup > Connect to this iPhone and turn on Poki's own connection." }
+        if tunnel.available { return "In kaka, open Setup > Connect to this iPhone and turn on kaka's own connection." }
         guard let chosen = setup.proxyApp, let app = ProxyApps.all.first(where: { $0.id == chosen }) else {
-            return "Install the free LocalDevVPN from the App Store and tap Connect in it. Another VPN app that can reach 10.7.0.1 also works, such as Karing, Surge, Loon or Shadowrocket: in Poki, open Setup > Connect to this iPhone and follow the line for it."
+            return "Install the free LocalDevVPN from the App Store and tap Connect in it. Another VPN app that can reach 10.7.0.1 also works, such as Karing, Surge, Loon or Shadowrocket: in kaka, open Setup > Connect to this iPhone and follow the line for it."
         }
         switch app.install {
-        case .url: return "In Poki, open Setup > Connect to this iPhone > \(app.name), tap Install, then confirm in \(app.name)."
+        case .url: return "In kaka, open Setup > Connect to this iPhone > \(app.name), tap Install, then confirm in \(app.name)."
         case .toggle(let setting): return "In \(app.name), set \(setting), and keep \(app.name) connected."
-        case .snippet: return "In Poki, open Setup > Connect to this iPhone > \(app.name) and add the lines it shows to \(app.name)."
+        case .snippet: return "In kaka, open Setup > Connect to this iPhone > \(app.name) and add the lines it shows to \(app.name)."
         }
     }
 
@@ -685,7 +685,7 @@ final class AppModel {
         // The idle time counts from here: Poki in front was not idle (it stands by only away from it).
         if sessionOn { lastAgentActivity = max(lastAgentActivity, Date()) }
         sessionOn ? loopback.resume(every: 6) : loopback.pause()
-        if pairingUnderWay { log.add("pairing", "Poki in the background while pairing; keep-alive \(pairingKeepAlive.isOn ? "playing" : "off")") }
+        if pairingUnderWay { log.add("pairing", "kaka in the background while pairing; keep-alive \(pairingKeepAlive.isOn ? "playing" : "off")") }
     }
     private var inFront = true
     private var cameToFront = Date()
@@ -696,7 +696,7 @@ final class AppModel {
         // The Live Activity goes with the app; the pause below gives its end time to reach iOS.
         ActivityController.endAll()
         guard sessionOn else { Thread.sleep(forTimeInterval: 0.5); return }
-        log.add("app", "Poki is closing: ending the runner")
+        log.add("app", "kaka is closing: ending the runner")
         if automationPath == .inProcess { _ = automation.close() }
         launcher.stop()
         Thread.sleep(forTimeInterval: 2.5)
@@ -826,7 +826,7 @@ final class AppModel {
             guard let self else { return true }
             defer { self.pairingCheck = nil }
             do {
-                _ = try await PairingBridge.udid(deviceAddress: "10.7.0.1", pairingFile: path, hostName: "Poki")
+                _ = try await PairingBridge.udid(deviceAddress: "10.7.0.1", pairingFile: path, hostName: "kaka")
                 if self.pairingTrouble != nil { self.log.add("pairing", "check: accepted again") }
                 self.pairingTrouble = nil
                 self.servicesSilent = false
@@ -837,7 +837,7 @@ final class AppModel {
                 let code = (error as? PairingBridge.Failure)?.code
                 if code == "pairing" {
                     if self.pairingTrouble == nil { self.log.add("pairing", "check: refused: \(text)") }
-                    self.pairingTrouble = text.replacingOccurrences(of: " Pair again in Poki's setup.", with: "")
+                    self.pairingTrouble = text.replacingOccurrences(of: " Pair again in kaka's setup.", with: "")
                     return false
                 }
                 // iOS 27 and later take only a pairing made on the phone over the loopback: a lockdown
@@ -876,7 +876,7 @@ final class AppModel {
         }
         if setup.loopback == .builtIn, !tunnel.connected {
             guard reconnectLocal else {
-                problem = "The local connection is off. Turn Poki on to reconnect, or choose an external connection in Setup."
+                problem = "The local connection is off. Turn kaka on to reconnect, or choose an external connection in Setup."
                 return
             }
             sessionStarting = true
@@ -942,7 +942,7 @@ final class AppModel {
         standBy(reason: nil)
         if let relay { core.start(relay: relay) }
         idleTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in Task { @MainActor in self?.checkIdle() } }
-        openWhileInFront("turned on with Poki in front")
+        openWhileInFront("turned on with kaka in front")
     }
 
     /// The separate Runner path keeps its existing foreground startup behavior.
@@ -960,10 +960,10 @@ final class AppModel {
     private func exitAfterStop() {
         guard !Self.onSimulator, !sessionOn, !exitingAfterStop else { return }
         exitingAfterStop = true
-        log.add("session", "turned off: Poki exits, and opening it again starts the next task")
+        log.add("session", "turned off: kaka exits, and opening it again starts the next task")
         let content = UNMutableNotificationContent()
-        content.title = AppLocalization.text(LocalizedStringResource("Open Poki Again to Start Another Task"))
-        content.body = AppLocalization.text(LocalizedStringResource("Poki closed after you stopped it. Open it to turn it on again."))
+        content.title = AppLocalization.text(LocalizedStringResource("Open kaka Again to Start Another Task"))
+        content.body = AppLocalization.text(LocalizedStringResource("kaka closed after you stopped it. Open it to turn it on again."))
         content.interruptionLevel = .timeSensitive
         content.userInfo = ["poki_link": "poki://chat"]
         content.sound = .default
@@ -989,11 +989,11 @@ final class AppModel {
     }
 
     private func relaunchForFreshSession() {
-        log.add("session", "turning on after the automation session was closed: Poki restarts so agents can see the screen")
+        log.add("session", "turning on after the automation session was closed: kaka restarts so agents can see the screen")
         wantsOn = true
         let content = UNMutableNotificationContent()
-        content.title = AppLocalization.text(LocalizedStringResource("Tap to Open Poki"))
-        content.body = AppLocalization.text(LocalizedStringResource("Poki restarted so agents can see the screen again. It turns on when it opens."))
+        content.title = AppLocalization.text(LocalizedStringResource("Tap to Open kaka"))
+        content.body = AppLocalization.text(LocalizedStringResource("kaka restarted so agents can see the screen again. It turns on when it opens."))
         content.interruptionLevel = .timeSensitive
         content.userInfo = ["poki_link": "poki://chat"]
         UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "nz.zheha.poki.relaunch", content: content,
@@ -1126,7 +1126,7 @@ final class AppModel {
         }
     }
 
-    private static let stuckNotice = "Poki Runner is still running after Stop. Swipe it away in the app switcher; the banner goes with it."
+    private static let stuckNotice = "kaka Runner is still running after Stop. Swipe it away in the app switcher; the banner goes with it."
     private func clearStuckNotice() { if problem == Self.stuckNotice { problem = nil } }
 
     func pauseByOwner() {
@@ -1165,8 +1165,8 @@ final class AppModel {
     private func closeBecausePokiOpened() {
         guard automationPath == .inProcess, sessionOn, !runnerPaused, inProcessSession == .open, !inProcessWarming,
               stepUnderWay == nil, approvals.isEmpty, !probeDriven, endingTasks == 0 else { return }
-        log.add("runner", "Poki is in front: closing the automation session at once; the banner goes with it")
-        closeInProcess("Poki in front")
+        log.add("runner", "kaka is in front: closing the automation session at once; the banner goes with it")
+        closeInProcess("kaka in front")
         standBy(reason: nil, keepingDone: true)
     }
 
@@ -1186,8 +1186,8 @@ final class AppModel {
     private func tellOwner(agentWasHere agent: String) {
         log.add("notice", "telling the owner that \(agent) used the iPhone")
         let content = UNMutableNotificationContent()
-        content.title = "Poki"
-        content.body = AppLocalization.text(LocalizedStringResource("\(agent) used this iPhone through Poki. Open Poki to see what it did."))
+        content.title = "kaka"
+        content.body = AppLocalization.text(LocalizedStringResource("\(agent) used this iPhone through kaka. Open kaka to see what it did."))
         content.sound = .default
         content.interruptionLevel = .timeSensitive
         content.userInfo = ["poki_link": "poki://chat"]
@@ -1322,8 +1322,8 @@ final class AppModel {
             if loopback.cellularRefused {
                 let since = loopback.droppedAt.map { " since \(Self.clock.string(from: $0))" } ?? ""
                 return .starting(cellularNeedsWiFi
-                    ? "waiting for the local developer connection\(since): the phone has only cellular, and the developer disk image is not mounted. Mounting it (once after each iPhone restart) needs Wi-Fi. Ask the owner to connect to Wi-Fi; Poki carries on by itself"
-                    : "the phone has only cellular\(since): Poki is opening its own automation session on the mounted developer disk image. Call again in about 10 s; nothing is lost and no action is needed from you")
+                    ? "waiting for the local developer connection\(since): the phone has only cellular, and the developer disk image is not mounted. Mounting it (once after each iPhone restart) needs Wi-Fi. Ask the owner to connect to Wi-Fi; kaka carries on by itself"
+                    : "the phone has only cellular\(since): kaka is opening its own automation session on the mounted developer disk image. Call again in about 10 s; nothing is lost and no action is needed from you")
             }
             return .waitingForLoopback(since: loopback.droppedAt.map(Self.clock.string(from:)),
                                        tunnelWithoutAnswer: loopback.state == .noAnswer,
@@ -1614,9 +1614,9 @@ final class AppModel {
                 // Coming forward takes a moment after the return is answered.
                 try? await Task.sleep(for: .seconds(1.5))
                 guard let self, UIApplication.shared.applicationState != .active else { return }
-                self.log.add("chat", "the task ended away from Poki: time-sensitive notification sent")
+                self.log.add("chat", "the task ended away from kaka: time-sensitive notification sent")
                 // The result stays in Poki: a reply can hold what the task just read on the screen.
-                self.postReply(AppLocalization.text(LocalizedStringResource("The task has ended. Open Poki to see the result.")), timeSensitive: true)
+                self.postReply(AppLocalization.text(LocalizedStringResource("The task has ended. Open kaka to see the result.")), timeSensitive: true)
             }
         }
         activity.finishNow(alert: true)
@@ -1626,7 +1626,7 @@ final class AppModel {
     /// notification is where the owner reads it. A tap opens Poki.
     private func postReply(_ reply: String, timeSensitive: Bool = false) {
         let content = UNMutableNotificationContent()
-        content.title = "Poki"
+        content.title = "kaka"
         content.body = reply
         content.sound = .default
         if timeSensitive {
@@ -1642,8 +1642,8 @@ final class AppModel {
         if probeDriven { return await core.callTool(name, arguments: arguments) }
         if !sessionOn { startSession() }
         guard sessionOn else {
-            let why = problem ?? "Poki is off."
-            return PokiCore.ToolAnswer(text: "not_sent: Poki could not turn on: \(why) Nothing was sent. Tell the owner what to fix.", jpeg: nil, isError: true)
+            let why = problem ?? "kaka is off."
+            return PokiCore.ToolAnswer(text: "not_sent: kaka could not turn on: \(why) Nothing was sent. Tell the owner what to fix.", jpeg: nil, isError: true)
         }
         lastAgentActivity = Date(); lastStepAt = Date()
         return await core.callTool(name, arguments: arguments)
@@ -1794,8 +1794,8 @@ final class AppModel {
             "developer_mode": "Developer Mode Off",
             "no_cryptexd": "Check Developer Mode",
             "ios_too_old": "Update iOS",
-            "runner": "Poki Runner Missing",
-            "runner_blocked": "Poki Runner Didn’t Start",
+            "runner": "kaka Runner Missing",
+            "runner_blocked": "kaka Runner Didn’t Start",
         ]
         return code.flatMap { short[$0] } ?? firstPart(fix)
     }
@@ -1901,7 +1901,7 @@ final class AppModel {
             catch { self.log.add("pairing", "keep-alive did not start (\(error.localizedDescription)); iOS may stop the pairing while Settings is open") }
         }
         do {
-            try pairer.start(hostName: "Poki", saveTo: AppFiles.pairingFile) { [weak self] event in
+            try pairer.start(hostName: "kaka", saveTo: AppFiles.pairingFile) { [weak self] event in
                 Task { @MainActor in self?.pairingChanged(event) }
             }
         } catch { pairingChanged(.failed("\(error)")) }
@@ -1932,7 +1932,7 @@ final class AppModel {
         // Only a move inside Poki counts. iOS can take pages down while Poki is in the background
         // (the person is in Settings typing the code) or while it comes back; that is not leaving.
         guard inFront, UIApplication.shared.applicationState == .active, Date().timeIntervalSince(cameToFront) > 2 else {
-            log.add("pairing", "pairing page went away while Poki was not in front; the pairing goes on")
+            log.add("pairing", "pairing page went away while kaka was not in front; the pairing goes on")
             return
         }
         log.add("pairing", "cancelled: the pairing step was left")
@@ -1985,7 +1985,7 @@ final class AppModel {
         let steps = SetupStep.shown
         activity.update {
             $0.phase = .setup
-            $0.headline = "Setting up Poki"
+            $0.headline = "Setting up kaka"
             $0.guide = .init(number: (steps.firstIndex(of: step) ?? 0) + 1, count: steps.count, title: step.activityTitle)
         }
     }
@@ -2067,11 +2067,11 @@ final class AppModel {
         case .idle, .closing, .opening, .open, .waitingForPasscode, .failed("open_poki_first", _), .failed("open_under_way", _):
             return nil
         case .passcodeMissed, .failed("passcode_declined", _):
-            return (AppLocalization.text(LocalizedStringResource("iOS asked for the iPhone passcode to allow automation, but it was not entered. Turn Poki off and on, then enter the passcode.")), false)
+            return (AppLocalization.text(LocalizedStringResource("iOS asked for the iPhone passcode to allow automation, but it was not entered. Turn kaka off and on, then enter the passcode.")), false)
         case .failed(let code, _) where loopback.cellularOnly:
-            return (AppLocalization.text(LocalizedStringResource("Poki could not open its own automation session (\(code)). Connect to Wi-Fi and try again.")), false)
+            return (AppLocalization.text(LocalizedStringResource("kaka could not open its own automation session (\(code)). Connect to Wi-Fi and try again.")), false)
         case .failed(let code, _):
-            return (AppLocalization.text(LocalizedStringResource("Poki could not open its own automation session (\(code)), and the loopback refused the connection. Check the loopback in Setup, then try again.")), true)
+            return (AppLocalization.text(LocalizedStringResource("kaka could not open its own automation session (\(code)), and the loopback refused the connection. Check the loopback in Setup, then try again.")), true)
         }
     }
 
@@ -2085,7 +2085,7 @@ final class AppModel {
 
     // MARK: Relay and connectors
 
-    static let noRelay = "Enter your relay’s address first in Settings › Agents › Address. Poki has no default relay."
+    static let noRelay = "Enter your relay’s address first in Settings › Agents › Address. kaka has no default relay."
 
     /// Saves the relay address the person entered; false when it is not one. A running session moves
     /// to the new relay at once.

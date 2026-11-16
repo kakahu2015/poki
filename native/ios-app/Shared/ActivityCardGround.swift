@@ -71,21 +71,21 @@ struct TalkGlow: View {
     }
 }
 
-/// The card's ground: the mesh and the halo behind the bear. It stands still: a Live Activity may
+/// The card's ground: the mesh and the halo behind the brand mark. It stands still: a Live Activity may
 /// not run an animation of its own. Whether a Live Activity draws a `MeshGradient` on a phone is not
 /// known (it does on the iOS 27 simulator), so the mesh's middle row lies under it as a plain
 /// left-to-right gradient: if the mesh draws nothing, the card is still the same blues.
 struct CardArt: View {
     var skin: CardSkin
-    /// The bear's picture: its side, how far it stands from the left edge, and the middle of its head
-    /// and hand as shares of the side. Its lower edge is the card's.
-    var bearSide: Double
-    var bearInset: Double
-    var bearMiddle: CGPoint
+    /// The brand mark's picture: its side, inset from the left edge and center as shares of the side.
+    /// Its lower edge is the card's.
+    var brandSide: Double
+    var brandInset: Double
+    var brandMiddle: CGPoint
 
     var body: some View {
         GeometryReader { proxy in
-            let radius = CardSkin.haloRadius * bearSide * GlowFalloff.reach
+            let radius = CardSkin.haloRadius * brandSide * GlowFalloff.reach
             ZStack {
                 LinearGradient(stops: skin.across, startPoint: .leading, endPoint: .trailing)
                 MeshGradient(width: CardSkin.across.count, height: skin.rows.count, points: skin.points, colors: skin.colours,
@@ -93,7 +93,7 @@ struct CardArt: View {
                 EllipticalGradient(stops: GlowFalloff.stops(Color(hex: skin.halo.colour), strength: skin.halo.strength),
                                    center: .center, startRadiusFraction: 0, endRadiusFraction: 0.5)
                     .frame(width: radius * 2, height: radius * 2)
-                    .position(x: bearInset + bearMiddle.x * bearSide, y: proxy.size.height - bearSide + bearMiddle.y * bearSide)
+                    .position(x: brandInset + brandMiddle.x * brandSide, y: proxy.size.height - brandSide + brandMiddle.y * brandSide)
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
             .clipped()

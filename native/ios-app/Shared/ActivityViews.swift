@@ -43,9 +43,9 @@ enum ActivityMetrics {
     /// whole inside it. Measured at the bottom edge on the iOS 27 simulator; the other sides are taken
     /// to be the same. Not yet measured on a phone.
     static let compactClip: CGFloat = 4.33
-    /// The compact island's left block, and the side of the bear's whole picture in it.
+    /// The compact island's left block, and the side of the brand mark in it.
     static let compactBlock: CGFloat = 51
-    static let compactBear: CGFloat = 27.2
+    static let compactMark: CGFloat = 27.2
     /// The compact island's right block during a run: one width from step to step, so the island
     /// keeps its size while the words change.
     static let compactWords: CGFloat = 52
@@ -54,9 +54,8 @@ enum ActivityMetrics {
     static let narrowIcon: CGFloat = 18
     /// Short of room, every block fits a circle this wide.
     static let narrowCircle: CGFloat = 28
-    /// The bear's whole picture in that circle and in the minimal circle: one side for every pose, so
-    /// the bear does not grow or shrink when the state changes.
-    static let circleBear: CGFloat = 22.6
+    /// The brand mark's picture in the narrow and minimal circles.
+    static let circleMark: CGFloat = 22.6
     static let button: CGFloat = 38
     static let stopCircle: CGFloat = 46
     static let stopCapsule: CGFloat = 34
@@ -64,24 +63,24 @@ enum ActivityMetrics {
     static let smallThumbnailCorner: CGFloat = 7
 
     struct Sizes {
-        var island: CGFloat, islandBear: CGFloat, islandLeft: CGFloat
-        var lock: CGFloat, lockBear: CGFloat, lockLeft: CGFloat
-        /// The short cards keep the bear 4 points off the left edge; the tall ones let it touch.
-        var lockBearInset: CGFloat
+        var island: CGFloat, islandMark: CGFloat, islandLeft: CGFloat
+        var lock: CGFloat, lockMark: CGFloat, lockLeft: CGFloat
+        /// The short cards keep the mark 4 points off the left edge; the tall ones let it touch.
+        var lockMarkInset: CGFloat
     }
 
     static func sizes(_ face: ActivityFace) -> Sizes {
         switch face.size {
         case .low:
-            Sizes(island: 106, islandBear: 96, islandLeft: 104, lock: 112, lockBear: 104, lockLeft: 122, lockBearInset: 4)
+            Sizes(island: 106, islandMark: 96, islandLeft: 104, lock: 112, lockMark: 104, lockLeft: 122, lockMarkInset: 4)
         case .working:
             // Before the run is in an app it has no line yet (the runner waking): the lower island.
-            Sizes(island: (face.bottom.hasLine ? 118 : 106) + 18, islandBear: 96, islandLeft: 104,
-                  lock: face.bottom.hasLine ? 134 : 124, lockBear: 116, lockLeft: 122, lockBearInset: 4)
+            Sizes(island: (face.bottom.hasLine ? 118 : 106) + 18, islandMark: 96, islandLeft: 104,
+                  lock: face.bottom.hasLine ? 134 : 124, lockMark: 116, lockLeft: 122, lockMarkInset: 4)
         case .asking:
-            Sizes(island: 150, islandBear: 128, islandLeft: 130, lock: 154, lockBear: 134, lockLeft: 138, lockBearInset: 0)
+            Sizes(island: 150, islandMark: 128, islandLeft: 130, lock: 154, lockMark: 134, lockLeft: 138, lockMarkInset: 0)
         case .tall:
-            Sizes(island: 160, islandBear: 134, islandLeft: 134, lock: 160, lockBear: 136, lockLeft: 138, lockBearInset: 0)
+            Sizes(island: 160, islandMark: 134, islandLeft: 134, lock: 160, lockMark: 136, lockLeft: 138, lockMarkInset: 0)
         }
     }
 
@@ -120,7 +119,7 @@ extension ActivityFace {
 // MARK: Lock Screen & Non-Dynamic Island Top Banner
 
 /// The Lock Screen card (and the banner on a phone without the island): the website's blue with
-/// only white on it, the bear rising from its bottom-left corner. The widget adds the blue itself.
+/// only white on it, the Kaka mark in its bottom-left corner. The widget adds the blue itself.
 struct LockScreenCard: View {
     var face: ActivityFace
     @Environment(\.isLuminanceReduced) private var dimmed
@@ -135,8 +134,8 @@ struct LockScreenCard: View {
         let skin = CardSkin.skin(dark: outside ?? (scheme == .dark || dimmed))
         let palette = theme.lock(on: skin)
         ZStack(alignment: .bottomLeading) {
-            RisingBear(bear: face.bear, side: sizes.lockBear, rim: 26, colour: palette.rim)
-                .padding(.leading, sizes.lockBearInset)
+            RisingMark(side: sizes.lockMark)
+                .padding(.leading, sizes.lockMarkInset)
             words(palette)
                 .padding(.leading, sizes.lockLeft).padding(.trailing, 18)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -146,10 +145,9 @@ struct LockScreenCard: View {
         .foregroundStyle(palette.text)
         .environment(\.colorScheme, .dark)
         .background {
-            CardArt(skin: skin, bearSide: sizes.lockBear, bearInset: sizes.lockBearInset,
-                    bearMiddle: CGPoint(x: face.bear.middle.x, y: face.bear.middle.y))
+            CardArt(skin: skin, brandSide: sizes.lockMark, brandInset: sizes.lockMarkInset,
+                    brandMiddle: CGPoint(x: 0.436, y: 0.600))
         }
-        .animation(dimmed ? nil : ActivityMotion.phase, value: face.bear)
         .animation(dimmed ? nil : ActivityMotion.step, value: face.content)
         .accessibilityElement(children: .contain)
     }
@@ -243,7 +241,7 @@ struct IslandTrailing: View {
     }
 }
 
-/// Under the camera: the bear from the bottom edge, and the words and the control beside it.
+/// Under the camera: the Kaka mark at the bottom edge, and the words and the control beside it.
 struct IslandBottom: View {
     var face: ActivityFace
     @Environment(\.isLuminanceReduced) private var dimmed
@@ -254,11 +252,8 @@ struct IslandBottom: View {
         let palette = theme.island
         let height = sizes.island - ActivityMetrics.cameraRow
         ZStack(alignment: .bottomLeading) {
-            // Taller than this region in the two low states: the ears reach up beside the camera.
-            // The bear stands on the system's line: moved in from the left edge by as much as iOS
-            // cuts away, so its cheek is whole, and shaded where the line cuts it below.
-            RisingBear(bear: face.bear, side: sizes.islandBear, rim: 22, lift: ActivityMetrics.islandClip, colour: palette.rim)
-                .frame(width: sizes.islandBear, height: height, alignment: .bottom)
+            RisingMark(side: sizes.islandMark)
+                .frame(width: sizes.islandMark, height: height, alignment: .bottom)
                 .padding(.leading, ActivityMetrics.islandClip)
             words(palette)
                 .padding(.leading, sizes.islandLeft)
@@ -282,7 +277,6 @@ struct IslandBottom: View {
         .foregroundStyle(palette.text)
         .environment(\.colorScheme, .dark)
         .animation(dimmed ? nil : ActivityMotion.phase, value: face.talkGlow)
-        .animation(dimmed ? nil : ActivityMotion.phase, value: face.bear)
         .animation(dimmed ? nil : ActivityMotion.step, value: face.content)
     }
 
@@ -330,33 +324,20 @@ struct IslandBottom: View {
 
 // MARK: Dynamic Island, compact and minimal
 
-/// The whole small bear (ESP-503): ears, head and outline inside the 4.33 points the system cuts off,
-/// a soft shade over its lower edge. A new state changes the pose where the bear stands. Short of
-/// room, the bear in a circle 28 points across.
+/// The Kaka mark in the compact island, centered inside the system's clipped area.
 struct CompactLeading: View {
     var face: ActivityFace
-    @Environment(\.isLuminanceReduced) private var dimmed
     var body: some View {
-        let side = ActivityMetrics.compactBear
-        let origin = face.bear.compactOrigin
+        let side = ActivityMetrics.compactMark
         LimitedWidth { narrow in
             if narrow {
-                NarrowBear(bear: face.bear)
+                NarrowMark()
             } else {
-                ZStack {
-                    Image(face.bear.image).resizable().interpolation(.high)
-                        .frame(width: side, height: side)
-                        .overlay(alignment: .bottom) { Rim(colour: .black.opacity(0.45), height: 6) }
-                        .offset(x: origin.x, y: origin.y)
-                        .frame(width: ActivityMetrics.compactBlock, height: ActivityMetrics.compactHeight, alignment: .topLeading)
-                        .id(face.bear)
-                        .transition(.opacity)
-                }
-                .frame(width: ActivityMetrics.compactBlock, height: ActivityMetrics.compactHeight)
+                BrandMark(side: side)
+                    .frame(width: ActivityMetrics.compactBlock, height: ActivityMetrics.compactHeight)
                 .clipped()
             }
         }
-        .animation(dimmed ? nil : ActivityMotion.pose, value: face.bear)
         .accessibilityHidden(true)
     }
 }
@@ -446,93 +427,50 @@ struct CompactTrailing: View {
     }
 }
 
-/// The bear where the island is short of room: the whole bear in a circle 28 points across, placed
-/// per pose (`ActivityBear.circleOrigin`).
-private struct NarrowBear: View {
-    var bear: ActivityBear
+/// The Kaka mark where the island is short of room: centered in a circle 28 points across.
+private struct NarrowMark: View {
     var body: some View {
-        let side = ActivityMetrics.circleBear
-        let origin = bear.circleOrigin
+        let side = ActivityMetrics.circleMark
         let circle = ActivityMetrics.narrowCircle
-        ZStack {
-            Image(bear.image).resizable().interpolation(.high)
-                .frame(width: side, height: side)
-                .offset(x: origin.x, y: origin.y)
-                .frame(width: circle, height: circle, alignment: .topLeading)
-                .id(bear)
-                .transition(.opacity)
-        }
-        .frame(width: circle, height: circle)
+        BrandMark(side: side).frame(width: circle, height: circle)
         .clipShape(.circle)
     }
 }
 
-/// Another app's activity shares the island: only the bear, no ring, the whole bear inside the
-/// circle's visible part (the circle less the 4.33 points the system cuts off), placed per pose.
+/// Another app's activity shares the island: the Kaka mark centered inside the visible circle.
 struct MinimalView: View {
     var face: ActivityFace
-    @Environment(\.isLuminanceReduced) private var dimmed
     var body: some View {
-        let side = ActivityMetrics.circleBear
-        let inset = ActivityMetrics.compactClip
-        let origin = face.bear.circleOrigin
+        let side = ActivityMetrics.circleMark
         let circle = ActivityMetrics.compactHeight
         LimitedWidth { narrow in
             if narrow {
-                NarrowBear(bear: face.bear)
+                NarrowMark()
             } else {
-                ZStack {
-                    Image(face.bear.image).resizable().interpolation(.high)
-                        .frame(width: side, height: side)
-                        .offset(x: inset + origin.x, y: inset + origin.y)
-                        .frame(width: circle, height: circle, alignment: .topLeading)
-                        .id(face.bear)
-                        .transition(.opacity)
-                }
-                .frame(width: circle, height: circle)
+                BrandMark(side: side).frame(width: circle, height: circle)
                 .clipShape(.circle)
             }
         }
-        .animation(dimmed ? nil : ActivityMotion.pose, value: face.bear)
         .accessibilityHidden(true)
     }
 }
 
 // MARK: Pieces
 
-/// The bear in a corner: the whole square picture, its lower edge on the surface's, darkening
-/// towards that edge as if it came up from inside. A new state changes the pose where the bear stands.
-private struct RisingBear: View {
-    var bear: ActivityBear
+/// The Kaka mark in a corner of the Live Activity.
+private struct RisingMark: View {
     var side: CGFloat
-    var rim: CGFloat
-    /// How far above the bottom edge the shade ends: where the surface's clip cuts the bear.
-    var lift: CGFloat = 0
-    var colour: Color
     var body: some View {
-        ZStack {
-            Image(bear.image).resizable().interpolation(.high)
-                .frame(width: side, height: side)
-                .id(bear)
-                .transition(.opacity)
-        }
-        // The shade covers the bear alone: over a gradient a whole strip would show as a rectangle
-        // beside it. While one pose fades into the next, it follows the next one's outline.
-        .overlay(alignment: .bottom) {
-            Rim(colour: colour, height: rim).padding(.bottom, lift)
-                .mask(alignment: .bottom) { Image(bear.image).resizable().interpolation(.high).frame(width: side, height: side) }
-        }
-        .accessibilityHidden(true)
+        BrandMark(side: side)
     }
 }
 
-private struct Rim: View {
-    var colour: Color
-    var height: CGFloat
+private struct BrandMark: View {
+    var side: CGFloat
     var body: some View {
-        LinearGradient(colors: [colour.opacity(0), colour], startPoint: .top, endPoint: .bottom)
-            .frame(height: height)
-            .allowsHitTesting(false)
+        Image("KakaMark").resizable().interpolation(.high)
+            .frame(width: side, height: side)
+            .accessibilityHidden(true)
     }
 }
 
@@ -696,7 +634,7 @@ private struct Control: View {
                 .transition(.activityRow)
         case .openPoki:
             Link(destination: face.link) {
-                Text(String(activity: "Open Poki"))
+                Text(String(activity: "Open kaka"))
                     .font(theme.button)
                     .foregroundStyle(palette.text)
                     .frame(maxWidth: .infinity, minHeight: ActivityMetrics.button, maxHeight: ActivityMetrics.button)

@@ -117,12 +117,12 @@ enum SetupStep: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .runner: "Install Poki Runner"
+        case .runner: "Install kaka Runner"
         case .developerMode: "Turn on Developer Mode"
         case .loopback: "Connect to this iPhone"
         case .pairing: "Pair this iPhone"
         case .automation: "Allow UI Automation"
-        case .background: "Let Poki stay on"
+        case .background: "Let kaka stay on"
         }
     }
 
@@ -139,22 +139,22 @@ enum SetupStep: String, CaseIterable, Identifiable {
 
     var summary: String {
         switch self {
-        case .runner: "The helper app that taps and types for your agent. Poki starts it; you never open it."
-        case .developerMode: Self.inProcess ? "Lets Poki use this iPhone’s developer services." : "Lets this iPhone run Poki Runner."
-        case .loopback: "Use Poki's local connection, or a compatible VPN app you already have."
-        case .pairing: Self.onDevicePairing ? "Gives Poki its own key to this iPhone. Made and kept on the phone, no computer needed." : "Gives Poki its own key to this iPhone. On this iOS version the key is made on a computer with Poki Setup, then sent here."
-        case .automation: Self.inProcess ? "Lets Poki use other apps." : "Lets Poki Runner use other apps."
-        case .background: "Keeps Poki connected while it is in the background, and shows what it does on the Lock Screen."
+        case .runner: "The helper app that taps and types for your agent. kaka starts it; you never open it."
+        case .developerMode: Self.inProcess ? "Lets kaka use this iPhone’s developer services." : "Lets this iPhone run kaka Runner."
+        case .loopback: "Use kaka's local connection, or a compatible VPN app you already have."
+        case .pairing: Self.onDevicePairing ? "Gives kaka its own key to this iPhone. Made and kept on the phone, no computer needed." : "Gives kaka its own key to this iPhone. On this iOS version the key is made on a computer with kaka Setup, then sent here."
+        case .automation: Self.inProcess ? "Lets kaka use other apps." : "Lets kaka Runner use other apps."
+        case .background: "Keeps kaka connected while it is in the background, and shows what it does on the Lock Screen."
         }
     }
 
     /// One line for the Live Activity while the person is in Settings.
     var hint: String {
         switch self {
-        case .runner: "Install Poki Runner, then trust it: Settings > General > VPN & Device Management."
+        case .runner: "Install kaka Runner, then trust it: Settings > General > VPN & Device Management."
         case .developerMode: "Settings > Privacy & Security > Developer Mode. Turn it on, restart, then tap Turn On."
-        case .loopback: "In Poki's Setup, enable the local connection or choose an external connection."
-        case .pairing: Self.onDevicePairing ? "Settings > Privacy & Security > Developer Mode > Pair with Poki, then type the code shown here." : "Pair from Poki Setup on your computer, then send the pairing file to this iPhone."
+        case .loopback: "In kaka's Setup, enable the local connection or choose an external connection."
+        case .pairing: Self.onDevicePairing ? "Settings > Privacy & Security > Developer Mode > Pair with kaka, then type the code shown here." : "Pair from kaka Setup on your computer, then send the pairing file to this iPhone."
         case .automation: "Settings > Developer > Enable UI Automation."
         case .background: "Allow location While Using the App, and keep Live Activities on."
         }
@@ -166,7 +166,7 @@ extension SetupStep {
     /// language): a name, not what to do, which the setup screen says.
     var activityTitle: String {
         switch self {
-        case .runner: "Poki Runner"
+        case .runner: "kaka Runner"
         case .developerMode: "Developer Mode"
         case .loopback: "Loopback"
         case .pairing: "Pairing"

@@ -29,9 +29,9 @@ pub async fn mount(device: &mut Device, dir: &str) -> Result<()> {
         return Err(without_cryptexd(device.developer_mode().await));
     }
     if !files_present(dir) {
-        return Err(Failure::new("the developer disk image has not been downloaded").fix("Open Poki and let it download the developer disk image (about 20 MB), once."));
+        return Err(Failure::new("the developer disk image has not been downloaded").fix("Open kaka and let it download the developer disk image (about 20 MB), once."));
     }
-    let assets = Cryptex1Assets::load(dir).await.map_err(|e| Failure::new(format!("the developer disk image in the app is unreadable: {e}")).fix("Open Poki and download the developer disk image again."))?;
+    let assets = Cryptex1Assets::load(dir).await.map_err(|e| Failure::new(format!("the developer disk image in the app is unreadable: {e}")).fix("Open kaka and download the developer disk image again."))?;
     install_ddi(&mut device.adapter, &mut device.rsd, &assets).await.map_err(|e| classify(&e))?;
     Ok(())
 }

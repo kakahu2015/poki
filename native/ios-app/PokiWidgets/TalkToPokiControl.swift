@@ -8,10 +8,10 @@ struct TalkToPokiControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: "PokiTalk") {
             ControlWidgetButton(action: TalkToPokiIntent()) {
-                Label(String(localized: "Talk to Poki", table: "Entry"), systemImage: "waveform.circle")
+                Label(String(localized: "Talk to kaka", table: "Entry"), systemImage: "waveform.circle")
             }
         }
-        .displayName(LocalizedStringResource("Talk to Poki", table: "Entry"))
-        .description(LocalizedStringResource("Opens Poki and starts talking.", table: "Entry"))
+        .displayName(LocalizedStringResource("Talk to kaka", table: "Entry"))
+        .description(LocalizedStringResource("Opens kaka and starts talking.", table: "Entry"))
     }
 }
