@@ -437,6 +437,7 @@ private struct OpenAIIDTokenClaims: Decodable {
     let email: String?
     let exp: Double
     let iat: Double
+    let nbf: Double?
     let nonce: String
     let sid: String?
     let azp: String?
@@ -510,13 +511,28 @@ private enum OpenAIIDToken {
         }
         let claims = try JSONDecoder().decode(OpenAIIDTokenClaims.self, from: payloadData)
         let now = Date().timeIntervalSince1970
-        guard claims.iss == configuration.issuer, claims.aud.contains(clientId),
-              !claims.aud.isMultiple || claims.azp == clientId,
-              claims.exp > now - 5, claims.iat <= now + 5, claims.iat < claims.exp,
-              claims.nonce == nonce,
-              claims.sid.map({ !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) ?? true,
-              !claims.sub.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            throw ChatGPTOAuthFailure("OpenAI’s ID token did not match this sign-in attempt.")
+        guard claims.iss == configuration.issuer else {
+            throw ChatGPTOAuthFailure("OpenAI’s ID token issuer did not match.")
+        }
+        guard claims.aud.contains(clientId) else {
+            throw ChatGPTOAuthFailure("OpenAI’s ID token audience did not match this ChatGPT registration.")
+        }
+        if let authorizedParty = claims.azp, authorizedParty != clientId {
+            throw ChatGPTOAuthFailure("OpenAI’s ID token authorized party did not match this ChatGPT registration.")
+        }
+        guard claims.exp.isFinite, claims.exp > now - 5,
+              claims.iat.isFinite, claims.iat < claims.exp,
+              claims.nbf.map({ $0.isFinite && $0 <= now + 5 }) ?? true else {
+            throw ChatGPTOAuthFailure("OpenAI’s ID token is expired or not yet valid. Check the iPhone’s date and time.")
+        }
+        guard claims.nonce == nonce else {
+            throw ChatGPTOAuthFailure("OpenAI’s ID token nonce did not match this sign-in attempt.")
+        }
+        guard claims.sid.map({ !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) ?? true else {
+            throw ChatGPTOAuthFailure("OpenAI’s ID token session identifier was invalid.")
+        }
+        guard !claims.sub.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw ChatGPTOAuthFailure("OpenAI’s ID token did not contain a valid account subject.")
         }
         return OpenAIIdentity(subject: claims.sub, email: claims.email)
     }
