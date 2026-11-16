@@ -2,18 +2,15 @@ import AVFoundation
 import PhotosUI
 import SwiftUI
 
-/// The chat is the app. Before your first message it is the home page: the fog-blue ground, kaka's
-/// picture at the top, one line of greeting and what you could ask. Your first message turns it into
-/// the conversation: the ground sinks away and your words rise out of the message field. The top bar
-/// stays where it is through all of it: the conversations on the left, kaka in the middle, a new
-/// conversation on the right. An approval or a hand-over shows as a card above the message field,
-/// where iOS hides the Dynamic Island while kaka is in front.
+/// The chat is the app. Before your first message it is the home page: the fog-blue ground, one line
+/// of greeting and what you could ask. Your first message turns it into the conversation: the ground
+/// sinks away and your words rise out of the message field. An approval or a hand-over shows as a card
+/// above the message field, where iOS hides the Dynamic Island while kaka is in front.
 struct ChatView: View {
     @Environment(AppModel.self) private var model
     @Environment(ChatModel.self) private var chat
     var sharedDraft: Binding<String>? = nil
-    /// Opens kaka's card: under kaka's picture over the greeting on the home page (the bottom of the
-    /// picture, in global points), under the top bar in the chat (nil).
+    /// Opens kaka's card from the chat header.
     var openDetails: (_ under: CGFloat?) -> Void
     var openVoice: () -> Void
     var openSetup: () -> Void
@@ -27,18 +24,6 @@ struct ChatView: View {
     var openAgents: () -> Void = {}
 
     private var voice: VoiceModel { model.voice }
-    /// The taps on kaka's picture, for the bear to answer.
-    @State private var pokes = 0
-    /// Where kaka's picture over the greeting ends, for the card to open under it.
-    @State private var homeBottom: CGFloat?
-    /// How far kaka's picture rises from the home page into the top bar.
-    @State private var flightRise: CGFloat = 0
-
-    /// A tap on kaka, on the home page or in the chat: the bear says hi and kaka's card opens.
-    private func tapPoki() {
-        pokes += 1
-        openDetails(isGreeting ? homeBottom : nil)
-    }
     /// The message field has the keyboard.
     @State private var writing = false
     @State private var standaloneDraft = ""
@@ -52,7 +37,7 @@ struct ChatView: View {
 
     private var sampleScene: String? { UserDefaults.standard.string(forKey: "pokiChat") }
 
-    /// No message of yours yet: the page is the bear and what you could ask, not a transcript.
+    /// No message of yours yet: the greeting and suggestions show instead of a transcript.
     private var isGreeting: Bool {
         guard !chat.running, !voice.isOn, voice.lines.isEmpty else { return false }
         return !chat.entries.contains(where: Self.isContent)
@@ -109,7 +94,7 @@ struct ChatView: View {
             }
             // The home page stays in the tree while the conversation is in front, neither seen nor
             // touched, so a new conversation brings it back on the same animation.
-            HomePage(home: home, writing: writing, rise: flightRise, pick: { model.prepareForTask(); draft.wrappedValue = $0; writing = true }) {
+            HomePage(home: home, writing: writing, pick: { model.prepareForTask(); draft.wrappedValue = $0; writing = true }) {
                 if home, let hint = homeHint {
                     SetupHintLine(hint: hint, openSetupStep: openSetupStep, openSetup: openSetup, openModel: openModel,
                                   openAgents: openAgents)
@@ -124,7 +109,7 @@ struct ChatView: View {
         .topBar {
             if !bare {
                 ChatTopBar(status: status, home: home, busy: busy, openThreads: openThreads,
-                           newConversation: { if home { restarts += 1 } else { chat.newConversation() } }, openDetails: tapPoki)
+                           newConversation: { if home { restarts += 1 } else { chat.newConversation() } }, openDetails: { openDetails(nil) })
             }
         }
         .bottomBar(softEdge: true) {
@@ -142,14 +127,6 @@ struct ChatView: View {
             .frame(maxWidth: 720) }
         }
         .background { HomeBackdrop(home: home, working: busy, frozen: bare) }
-        .overlayPreferenceValue(PicturePlaceKey.self) { anchors in
-            GeometryReader { proxy in
-                if !bare {
-                    PokiFlight(status: status, home: home, writing: writing, places: anchors.mapValues { proxy[$0] }, pokes: pokes,
-                               tap: tapPoki, landed: { homeBottom = $0 }, travel: { flightRise = $0 })
-                }
-            }
-        }
         // While you talk with kaka: its light along the bottom edge, over the page, following the talk.
         .overlay {
             ZStack {
@@ -159,8 +136,6 @@ struct ChatView: View {
             }
             .animation(TalkMotion.glow, value: voice.talkState)
         }
-        // The bear says hi as a talk begins.
-        .onChange(of: voice.isOn) { _, on in if on { pokes += 1 } }
         .onChange(of: writing) { _, focused in if focused { model.prepareForTask() } }
         .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { pageHeight = $0 }
         .animation(.snappy, value: voice.isOn)
@@ -298,10 +273,6 @@ extension View {
         if #available(iOS 26.0, *) { scrollEdgeEffectStyle(.soft, for: .top) } else { self }
     }
 
-    /// Marks the bear kaka's profile zooms out of.
-    @ViewBuilder func profileSource(_ namespace: Namespace.ID?, id: String = "poki") -> some View {
-        if let namespace { matchedTransitionSource(id: id, in: namespace) } else { self }
-    }
 }
 
 /// A setup or account issue surfaced inline in the chat, with a direct link to the exact item.

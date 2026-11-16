@@ -1,26 +1,16 @@
 import PokiCore
 import SwiftUI
 
-// The home page and the way from it into the conversation (ESP-376, and the owner's home of
-// 2026-11-12: no large bear, kaka's picture at the top as in the conversation). The chat page
-// (`ChatView`) owns the state and puts these pieces together: `HomePage` under the top bar and
-// `ChatTopBar` in it, the same on both pages.
+// The home page and the way from it into the conversation. `ChatView` owns the state and puts these
+// pieces together: `HomePage` under the top bar and `ChatTopBar` in it, the same on both pages.
 
 // MARK: Timing
 
-/// The change from the home page to the conversation, counted from Send: kaka's picture rises into
-/// the top bar and the greeting rises under it, fading, both on one animation (`flight`, 0.35 s); the
-/// pills fade and sink 14 points in 180 ms, the light takes from 60 to 510 ms to sink to the bottom
-/// edge, the new-conversation button turns up on 300 to 480 ms, and your words rise out of the message
-/// field on their own spring (response 0.45, damping 0.85). Every piece is driven by the
-/// one fact "the conversation has begun", so the change can be turned round at any moment. With
-/// Reduce Motion the page cross-fades in 200 ms.
+/// The change from the home page to the conversation: the greeting fades, the pills sink, the light
+/// moves to the bottom edge, and your words rise out of the message field; the new-conversation button
+/// turns up after the change. Every piece is driven by the one fact "the conversation has begun", so
+/// the change can be turned round at any moment. With Reduce Motion the page cross-fades in 200 ms.
 enum HomeMotion {
-    /// The side of kaka's picture in the top bar, and of the round buttons beside it.
-    static let avatar: CGFloat = 56
-    /// The side of kaka's picture over the greeting on the home page (board 头像位置 丙), 16 points
-    /// above the greeting.
-    static let homeAvatar: CGFloat = 80
     static let button: CGFloat = 48
     private static let fade = Animation.easeInOut(duration: 0.2)
     /// The two rows of suggestions, in points a second: positive goes left, negative right. Slow, and
@@ -31,11 +21,9 @@ enum HomeMotion {
     /// Every animation of the change goes through here, delays included.
     static func paced(_ animation: Animation) -> Animation { slow > 1 ? animation.speed(1 / slow) : animation }
 
-    /// kaka's picture and the greeting under it go together, on one animation: up into the top bar
-    /// as the conversation begins, the greeting fading as it rises, and back down for a new one.
-    static func flight(_ reduce: Bool) -> Animation { paced(reduce ? fade : .smooth(duration: 0.35)) }
-    /// The message field taking the home page up, or letting it down: the greeting and kaka's picture
-    /// over it move on this one animation.
+    /// The greeting fades as the conversation opens and returns for a new one.
+    static func pageTransition(_ reduce: Bool) -> Animation { paced(reduce ? fade : .smooth(duration: 0.35)) }
+    /// The message field taking the home page up, or letting it down.
     static let lift = Animation.smooth(duration: 0.3)
 
     static func ground(_ reduce: Bool) -> Animation { paced(reduce ? fade : .easeInOut(duration: 0.45).delay(0.06)) }
@@ -48,193 +36,44 @@ enum HomeMotion {
     }
 }
 
-/// The portrait and both of its anchors must use the same scale during the home-to-chat flight.
+/// The round controls keep a consistent size across Dynamic Type settings.
 struct HomeSizes: DynamicProperty {
     @ScaledMetric(relativeTo: .body) private var factor = 1.0
     private var scale: CGFloat { min(1.2, max(0.9, factor)) }
-    var avatar: CGFloat { HomeMotion.avatar * scale }
-    var homeAvatar: CGFloat { HomeMotion.homeAvatar * scale }
     var button: CGFloat { max(44, HomeMotion.button * scale) }
 }
 
-// MARK: kaka's picture
-
-/// kaka's round picture: the bear for its state, on a pale blue ground. Every state is played by the
-/// three-dimensional bear (`PokiMood.act`), which takes up each state's stance from where it is, reacts
-/// when a task is done or goes wrong, and says hi to a tap (`ModelBear`). The flat faces, which blink and
-/// hop when the state changes (`BlinkingFace`), stand in only until the model is drawn, or where it
-/// cannot be.
-struct PokiPortrait: View {
-    var mood: PokiMood
-    var side: CGFloat = HomeMotion.avatar
-    /// Counts the taps on the picture.
-    var pokes = 0
-
-    var body: some View {
-        #if DEBUG
-        // `-pokiMoodCycle ready,done,ready,tripped` shows those states in turn, four seconds each, to
-        // watch the bear change between them.
-        if let cycle = Self.cycle {
-            TimelineView(.periodic(from: .now, by: 4)) { context in
-                portrait(cycle[Int(context.date.timeIntervalSinceReferenceDate / 4) % cycle.count])
-            }
-        } else {
-            portrait(mood)
-        }
-        #else
-        portrait(mood)
-        #endif
-    }
-
-    #if DEBUG
-    private static let cycle: [PokiMood]? = UserDefaults.standard.string(forKey: "pokiMoodCycle")
-        .map { $0.split(separator: ",").compactMap { PokiMood(rawValue: String($0)) } }.flatMap { $0.isEmpty ? nil : $0 }
-    #endif
-
-    private func portrait(_ mood: PokiMood) -> some View {
-        ZStack {
-            Circle().fill(Tint.portrait)
-            // The board's bear is 50 points in the 56-point circle, 6 points down, so the circle
-            // cuts it at the chest.
-            ModelBear(act: mood.act, side: side * 50 / 56, pokes: pokes) {
-                BlinkingFace(mood: mood, side: side * 50 / 56)
-            }
-            .frame(width: side * 50 / 56, height: side * 50 / 56)
-            .offset(y: side * 3 / 56)
-        }
-        .frame(width: side, height: side)
-        .clipShape(.circle)
-        .accessibilityHidden(true)
-    }
-}
-
-/// kaka's picture as it shows on a page: its round pale blue ground with a soft blue shadow, and no
-/// white ring around it (boards 定稿 07 and 头像位置 丙 drew one; the owner had it taken off). It is
-/// drawn at the home page's 80 points and scaled, so one picture, and one three-dimensional bear, goes
-/// from the home page to the top of the chat without being made again.
-struct PokiPicture: View {
-    var mood: PokiMood
-    var side: CGFloat
-    /// Counts the taps on kaka, for the bear to answer.
-    var pokes = 0
-    @Environment(\.colorScheme) private var scheme
-
-    var body: some View {
-        let dark = scheme == .dark
-        PokiPortrait(mood: mood, side: HomeMotion.homeAvatar, pokes: pokes)
-            .scaleEffect(side / HomeMotion.homeAvatar)
-            .frame(width: side, height: side)
-            .shadow(color: dark ? Color(hex: 0x3C8DFF).opacity(0.35) : Color(hex: 0x0177FD).opacity(0.18), radius: dark ? 8 : 7, y: 4)
-    }
-}
-
-/// The two places kaka's picture sits: over the greeting on the home page, and at the top of the chat.
-enum PicturePlace: Hashable { case home, top }
-
-struct PicturePlaceKey: PreferenceKey {
-    static let defaultValue: [PicturePlace: Anchor<CGRect>] = [:]
-    static func reduce(value: inout [PicturePlace: Anchor<CGRect>], nextValue: () -> [PicturePlace: Anchor<CGRect>]) {
-        value.merge(nextValue()) { _, new in new }
-    }
-}
-
-extension View {
-    /// Marks where kaka's picture sits on this page; the chat draws the one picture there (`PokiFlight`).
-    func picturePlace(_ place: PicturePlace) -> some View {
-        anchorPreference(key: PicturePlaceKey.self, value: .bounds) { [place: $0] }
-    }
-}
-
-/// The one picture of kaka, over the greeting on the home page at 80 points and at the top of the
-/// chat at 56. Sending the first message moves it up and makes it smaller, with the greeting rising
-/// under it on the same animation (`HomeMotion.flight`), and a new conversation brings both back;
-/// with Reduce Motion it is just there. While the message field takes the home page up, the picture
-/// moves with the greeting on the page's own animation. It is one view all the way, and the bear in it
-/// is drawn at one size, so nothing is made again on the way. A tap says hi and opens kaka's
-/// card. In the chat VoiceOver reads the top bar's kaka instead, which is the same button.
-struct PokiFlight: View {
-    var sizes = HomeSizes()
-    var status: PokiStatus
-    var home: Bool
-    var writing = false
-    var places: [PicturePlace: CGRect]
-    var pokes: Int
-    var tap: () -> Void
-    /// The bottom of the picture over the greeting, in global points, for kaka's card to open under it.
-    var landed: (CGFloat) -> Void = { _ in }
-    /// How far the picture rises from over the greeting to the top bar, for the greeting to rise with it.
-    var travel: (CGFloat) -> Void = { _ in }
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    var body: some View {
-        let side = home ? sizes.homeAvatar : sizes.avatar
-        if let place = places[home ? .home : .top] {
-            Button(action: tap) {
-                PokiPicture(mood: status.mood, side: side, pokes: pokes).contentShape(.circle)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(Text(verbatim: "kaka, " + PokiStatusCopy.word(status)))
-            .accessibilityIdentifier("home.poki")
-            .accessibilityHidden(!home)
-            .onGeometryChange(for: CGFloat?.self) { home ? $0.frame(in: .global).maxY : nil } action: {
-                if let bottom = $0 { landed(bottom) }
-            }
-            .position(x: place.midX, y: place.midY)
-            // The greeting's own animations, so the two move as one. A place that moves for any other
-            // reason (the keyboard) moves in that change's animation, as the greeting does.
-            .animation(reduceMotion ? nil : HomeMotion.lift, value: writing)
-            .animation(reduceMotion ? nil : HomeMotion.flight(false), value: home)
-            .onChange(of: rise, initial: true) { if home, let rise { travel(rise) } }
-        }
-    }
-
-    private var rise: CGFloat? {
-        guard let from = places[.home], let to = places[.top] else { return nil }
-        return from.midY - to.midY
-    }
-}
-
-/// The middle of the chat's top bar (board 定稿 07): the place for kaka's picture, which the chat
-/// draws there (`PokiFlight`), and under it kaka's name on a capsule of glass. Where kaka stands shows
-/// in the picture's face; the word for it is at the top of kaka's card and in what VoiceOver reads.
-/// On the home page the picture is over the greeting and the bar's middle is empty.
+/// The chat's title in the middle of the top bar.
 struct PokiHead: View {
     var sizes = HomeSizes()
     var home: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        VStack(spacing: 6) {
-            Color.clear.frame(width: sizes.avatar, height: sizes.avatar).picturePlace(.top)
-            // Glass in a group is drawn by the group, so the capsule comes and goes rather than fading;
-            // its place stays, and the bar keeps its height on both pages.
-            ZStack {
-                if !home {
-                    Text(verbatim: "kaka")
-                        .font(.caption.weight(.semibold)).foregroundStyle(Color(.label))
-                        .padding(.horizontal, 12).frame(minHeight: 24)
-                        .glassSurface(in: Capsule())
-                        .glassAppearing()
-                }
+        ZStack {
+            if !home {
+                Text(verbatim: "kaka")
+                    .font(.caption.weight(.semibold)).foregroundStyle(Color(.label))
+                    .padding(.horizontal, 12).frame(minHeight: 24)
+                    .glassSurface(in: Capsule())
+                    .glassAppearing()
             }
-            .frame(minHeight: 24)
-            .animation(HomeMotion.landing(home, reduceMotion), value: home)
         }
+        .frame(height: sizes.button)
+        .animation(HomeMotion.landing(home, reduceMotion), value: home)
     }
 }
 
 // MARK: Top bar
 
-// The middle of the bar, kaka's picture over its state, is IMessageChannelHeaderModifier from
+// The layout for the bar is IMessageChannelHeaderModifier from
 // GetStream/stream-tutorial-projects (commit 04c8dbb, AI/AgentSkills/iMessageCloneWithSkills/
 // IMessageScreens.swift; the repository has no licence file). Changed: a bar of its own instead of a
-// toolbar item; the picture at the board's 56 points, with no white ring; a dot and kaka's state under it
-// (board 定稿 07).
+// toolbar item; the title stays centred between the two round controls.
 
 /// The chat's top as Messages draws a conversation's (ESP-468): the two round glass buttons float at
 /// the sides, the conversations on the left and a new conversation on the right, and between them
-/// in the conversation kaka's picture and name (on the home page the picture is over the greeting,
-/// and the middle is empty). A tap on kaka opens its card. There is no bar behind them: the conversation passes under them through the system's scroll
+/// the conversation title. A tap on kaka opens its card. There is no bar behind them: the conversation passes under them through the system's scroll
 /// edge effect. The new-conversation button looks the same on the home page: there, the page already
 /// being a new conversation, a tap starts the message instead (`newConversation` decides what).
 struct ChatTopBar: View {
@@ -246,7 +85,7 @@ struct ChatTopBar: View {
     /// Opens the conversations (the drawer on iPhone); nil where the list is always beside the chat.
     var openThreads: (() -> Void)?
     var newConversation: () -> Void
-    /// A tap on kaka: the bear says hi while its card opens.
+    /// Opens kaka's card from the centered title.
     var openDetails: () -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Taps on New Conversation on the home page, for a light tap in the hand.
@@ -282,7 +121,6 @@ struct ChatTopBar: View {
                     Label("New Conversation", systemImage: "square.and.pencil")
                 }
             }
-            .padding(.top, (sizes.avatar - sizes.button) / 2)
             Button(action: openDetails) {
                 PokiHead(home: home).contentShape(.rect)
             }
@@ -391,7 +229,7 @@ enum HomeGreeting {
 }
 
 /// The greeting as the home page draws it, for the time `date` falls in: the hello in ink and the
-/// question in grey under it, centred under kaka's picture. System Semibold 28 tracked in by 0.6,
+/// question in grey under it. System Semibold 28 tracked in by 0.6,
 /// with no space between the lines.
 struct HomeGreetingView: View {
     var date: Date
@@ -417,17 +255,13 @@ struct HomeGreetingView: View {
     }
 }
 
-/// The home page, before your first message (board 定稿 01): under kaka's picture at the top, two
-/// lines of greeting a little above the middle, and things you could ask as two
+/// The home page, before your first message: two lines of greeting a little above the middle, and things you could ask as two
 /// rows of glass pills over the message field. A pill fills the message field; nothing is sent until
 /// you send it.
 struct HomePage<Footer: View>: View {
-    var sizes = HomeSizes()
     var home: Bool
     /// Suggestions yield their space while the message field has focus.
     var writing = false
-    /// How far kaka's picture rises into the top bar as the conversation begins: the greeting rises with it.
-    var rise: CGFloat = 0
     var pick: (String) -> Void
     @ViewBuilder var footer: () -> Footer
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -497,25 +331,18 @@ struct HomePage<Footer: View>: View {
     private func content(inset: CGFloat, height: CGFloat, scrolls: Bool) -> some View {
         VStack(spacing: 0) {
             VStack(spacing: 12) {
-                // kaka's picture, 16 points over the greeting (board 头像位置 丙); the chat draws it here.
-                Color.clear.frame(width: sizes.homeAvatar, height: sizes.homeAvatar)
-                    .picturePlace(.home)
-                    .padding(.bottom, 4)
                 HomeGreetingView(date: greetedAt)
                 footer()
             }
             .multilineTextAlignment(.center)
             .padding(.horizontal, 24)
-            // The board's picture 258 points from the screen's top, the greeting 354: under the top
-            // bar, whose middle keeps the chat's picture and name in height, that is 112 points.
             // A fixed top layout keeps the regular greeting out of the keyboard's layout pass.
             // In a scrollable layout, reserve the actual space so large text stays reachable.
             .padding(.top, scrolls && !writing ? inset : 24)
             .offset(y: scrolls || writing ? 0 : inset - 24)
             .animation(reduceMotion ? nil : HomeMotion.lift, value: writing)
             .opacity(home ? 1 : 0)
-            .offset(y: home || reduceMotion ? 0 : -rise)
-            .animation(HomeMotion.flight(reduceMotion), value: home)
+            .animation(HomeMotion.pageTransition(reduceMotion), value: home)
             .onChange(of: home) { _, shown in if shown { greetedAt = .now } }
 
             Spacer(minLength: 24)

@@ -9,7 +9,7 @@ import SwiftUI
 // approval method is changed on kaka's card in the chat only. The rows are PokiSettingsKit's.
 
 /// Settings: kaka on top, as a group of rows like the groups under it (the owner, 2026-11-13: not a
-/// card of its own): the bear and its name, where kaka stands, and the Activity Log. Then any problem
+/// card of its own): kaka's name and status, and the Activity Log. Then any problem
 /// that keeps kaka from working, and the parts of kaka in three groups of rows.
 struct PokiDetailsView: View {
     @Environment(AppModel.self) private var model
@@ -33,7 +33,7 @@ struct PokiDetailsView: View {
             List {
                 Section {
                     // The first two rows only show: Connection's Automation switch turns kaka on and pauses it.
-                    PokiNameRow(mood: status.mood)
+                    PokiNameRow()
                     SettingsRow(title: "Status", symbol: "dot.radiowaves.left.and.right", value: PokiStatusCopy.word(status), dot: status.mood.dot)
                         .accessibilityElement(children: .combine)
                         .accessibilityIdentifier("details.status")
@@ -300,30 +300,15 @@ private struct ConversationsSettingsView: View {
     }
 }
 
-/// The first row of Settings: the bear's face where the rows under it have their icon, and kaka's name.
+/// The first row of Settings keeps kaka's name without a mascot image.
 private struct PokiNameRow: View {
-    var mood: PokiMood
-    @ScaledMetric(relativeTo: .body) private var face = SettingsRowMetrics.iconSize
-    @ScaledMetric(relativeTo: .body) private var iconSpacing = SettingsRowMetrics.iconSpacing
-
     var body: some View {
-        HStack(spacing: min(18, iconSpacing)) {
-            Group {
-                if let image = PokiMood.cutout(mood, small: true) {
-                    Image(uiImage: image).resizable().interpolation(.high).scaledToFit()
-                }
-            }
-            .frame(width: min(SettingsRowMetrics.maximumIconSize, face), height: min(SettingsRowMetrics.maximumIconSize, face))
-            .background(mood == .paused ? Tint.night : Tint.portrait, in: .circle)
-            .clipShape(.circle)
-            .overlay(Circle().strokeBorder(Tint.ring, lineWidth: 1))
-            .padding(.vertical, SettingsRowMetrics.iconLineInset)
-            .accessibilityHidden(true)
+        HStack {
             Text(verbatim: "kaka").font(.body.weight(.semibold)).foregroundStyle(Color(.label))
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 8)
         }
-        .animation(.easeInOut(duration: 0.3), value: mood)
+        .padding(.leading, SettingsRowMetrics.iconSize + SettingsRowMetrics.iconSpacing)
     }
 }
 

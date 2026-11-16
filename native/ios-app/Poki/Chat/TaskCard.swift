@@ -26,6 +26,22 @@ enum TaskCardState: Equatable {
 /// How the card's marks read: on the blue card, amber while the task waits for you, plain once it is over.
 private enum TaskTone { case blue, amber, plain }
 
+private struct TaskMarkIcon: View {
+    var symbol: String
+    var size: CGFloat
+    var foreground: Color
+    var background: Color
+
+    var body: some View {
+        Image(systemName: symbol)
+            .font(.system(size: size * 0.48, weight: .semibold))
+            .foregroundStyle(foreground)
+            .frame(width: size, height: size)
+            .background(background, in: RoundedRectangle(cornerRadius: size * 0.28, style: .continuous))
+            .accessibilityHidden(true)
+    }
+}
+
 /// One task's steps. While kaka has the phone it is the blue card: the only large blue block in the
 /// chat, with what kaka sees of the screen beside the steps. The moment it stops to wait for you the
 /// card goes back to plain and its marks turn amber; over, it folds to one row that opens on a tap.
@@ -151,18 +167,18 @@ struct TaskCard: View {
     @ViewBuilder private var mark: some View {
         switch state {
         case .running:
-            // On the blue card the face needs no edge: its own blue is the card's.
-            PokiBear(mood: .onYourPhone, small: true).frame(width: 34, height: 34)
-                .clipShape(.rect(cornerRadius: 10, style: .continuous))
-        case .needsYou: PokiAvatar(size: 34, mood: .needsYou)
-        case .yourTurn: PokiAvatar(size: 34, mood: .yourTurn)
+            TaskMarkIcon(symbol: "iphone.gen3", size: 34, foreground: .white, background: .clear)
+        case .needsYou:
+            TaskMarkIcon(symbol: "checkmark.shield.fill", size: 34, foreground: Tint.amberInk, background: Tint.amberSoft)
+        case .yourTurn:
+            TaskMarkIcon(symbol: "hand.tap.fill", size: 34, foreground: Tint.amberInk, background: Tint.amberSoft)
         case .done, .failed, .stopped:
             if let app, !app.isEmpty {
                 AppIconView(app: app, size: 32)
             } else if usedBrowser {
                 BrowserIcon()
             } else {
-                BearAvatar(size: 32)
+                TaskMarkIcon(symbol: "checklist", size: 32, foreground: Tint.blueText, background: Tint.blueSoft)
             }
         }
     }
@@ -402,18 +418,18 @@ struct ApprovalAskCard: View {
         // as an alert's buttons.
         let answers = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 8)) : AnyLayout(AnswerRow())
         VStack(alignment: .leading, spacing: 14) {
-            // At the accessibility sizes the question has the card's whole width under the bear and the
+            // At the accessibility sizes the question has the card's whole width under the status icon and the
             // countdown, so a word is never broken in the middle ("Allow pay-ment?").
             if typeSize.isAccessibilitySize {
                 HStack(alignment: .center, spacing: 12) {
-                    PokiAvatar(size: 48, mood: .needsYou)
+                    TaskMarkIcon(symbol: "checkmark.shield.fill", size: 48, foreground: Tint.amberInk, background: Tint.amberSoft)
                     Spacer(minLength: 0)
                     countdown
                 }
                 question
             } else {
                 HStack(alignment: .center, spacing: 12) {
-                    PokiAvatar(size: 48, mood: .needsYou)
+                    TaskMarkIcon(symbol: "checkmark.shield.fill", size: 48, foreground: Tint.amberInk, background: Tint.amberSoft)
                     question
                     countdown
                 }
@@ -549,7 +565,7 @@ struct TurnCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .center, spacing: 12) {
-                PokiAvatar(size: 48, mood: .yourTurn)
+                TaskMarkIcon(symbol: "hand.tap.fill", size: 48, foreground: Tint.amberInk, background: Tint.amberSoft)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
                         Image(systemName: "lock").font(.subheadline.weight(.semibold)).accessibilityHidden(true)

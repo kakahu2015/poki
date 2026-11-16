@@ -63,7 +63,11 @@ struct SettingsHome: View {
         Form {
             Section {
                 HStack(spacing: 12) {
-                    BearAvatar(size: 44)
+                    Image(systemName: "iphone.gen3")
+                        .font(.title3)
+                        .foregroundStyle(.blue)
+                        .frame(width: 44, height: 44)
+                        .background(Color.blue.opacity(0.1), in: Circle())
                     VStack(alignment: .leading, spacing: 2) {
                         Text("This iPhone").font(.headline)
                         Text(verbatim: model.identity.label.isEmpty ? "—" : "\(model.identity.label.prefix(12))…")

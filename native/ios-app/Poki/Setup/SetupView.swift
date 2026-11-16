@@ -285,10 +285,9 @@ private struct NoteLine: View {
 
 // MARK: 3, loopback
 
-/// The loopback, checked live, and the proxy apps that can provide it. Sections of the step's Form.
+/// The loopback status and built-in connection options, as sections of the step's Form.
 private struct LoopbackPage: View {
     @Environment(AppModel.self) private var model
-    @State private var copied: String?
 
     var body: some View {
         let monitor = model.loopback
@@ -321,23 +320,6 @@ private struct LoopbackPage: View {
             }
         }
 
-        // The external app is the way (ESP-168): every app's steps can be read at any time.
-        Section {
-            // The free one first: a new person usually has no proxy app.
-            NavigationLink { LocalDevVPNPage() } label: { proxyLabel("LocalDevVPN", id: "localdevvpn", sub: "Free on the App Store") }
-            ForEach(ProxyApps.all) { app in
-                NavigationLink { ProxyAppPage(app: app) } label: { proxyLabel(app.name, id: app.id) }
-            }
-        } header: {
-            Text("Use Your Proxy App")
-        } footer: {
-            if let chosen = model.setup.proxyApp, !monitor.isWorking, !localReady, model.setup.loopback == .proxy {
-                let name = ProxyApps.all.first { $0.id == chosen }?.name ?? "LocalDevVPN"
-                Text("\(name) is chosen, but nothing answers at 10.7.0.1 right now. Open \(name), make sure it is connected with the loopback on, then come back; this page updates by itself.")
-            }
-        }
-        .disabled(externalLocked)
-
         if model.tunnel.available {
             Section {
                 switch model.tunnel.state {
@@ -366,31 +348,7 @@ private struct LoopbackPage: View {
         }
     }
 
-    private func proxyLabel(_ name: String, id: String, sub: LocalizedStringKey? = nil) -> some View {
-        let chosen = model.setup.proxyApp == id
-        let working = chosen && model.loopback.isWorking
-        return LabeledContent {
-            if working { Text("Working").foregroundStyle(.green) }
-            else if chosen { Text("Not Answering").foregroundStyle(.orange) }
-        } label: {
-            // The app's own icon, the size and corners of Settings' app rows.
-            HStack(spacing: 12) {
-                Image("Proxy-\(id)")
-                    .resizable()
-                    .frame(width: 29, height: 29)
-                    .clipShape(.rect(cornerRadius: 6.5, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 6.5, style: .continuous).strokeBorder(Color(.separator), lineWidth: 0.5))
-                    .accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(verbatim: name)
-                    if let sub { Text(sub).font(.footnote).foregroundStyle(Color(.secondaryLabel)) }
-                }
-            }
-        }
-    }
-
     private var connectionLocked: Bool { model.connectionInUse || model.tunnel.busy }
-    private var externalLocked: Bool { model.setup.loopback == .builtIn && connectionLocked }
 
     private var enableButton: some View {
         Button("Enable Local Connection") {
@@ -407,90 +365,6 @@ private struct LoopbackPage: View {
         case .checking: "Checking…"
         case .off: "Off"
         }
-    }
-}
-
-/// One proxy app's steps and its install action.
-private struct ProxyAppPage: View {
-    @Environment(AppModel.self) private var model
-    var app: ProxyApp
-    @State private var copied = false
-
-    var body: some View {
-        Form {
-            Section {
-                ForEach(Array(app.steps.enumerated()), id: \.offset) { i, line in
-                    Label { Text(LocalizedStringKey(line)) } icon: { Image(systemName: "\(i + 1).circle") }
-                }
-            } header: {
-                Text("How To")
-            } footer: {
-                if !app.documented {
-                    Text("As reported by users of \(app.name); not checked against its documentation. The status on the Loopback page tells whether it works.")
-                } else if !app.minimumVersion.isEmpty {
-                    Text("\(app.name) \(app.minimumVersion) or later.")
-                }
-            }
-            Section {
-                switch app.install {
-                case .url(let url):
-                    Button(app.id == "surge" ? "Install kaka Module" : "Install kaka Plugin") { choose(); UIApplication.shared.open(url) }
-                case .toggle:
-                    Button("Open \(app.name)") { choose(); openApp() }
-                case .snippet(let line):
-                    Text(verbatim: line).font(.system(.footnote, design: .monospaced)).textSelection(.enabled)
-                    Button(copied ? "Copied" : "Copy", systemImage: copied ? "checkmark" : "doc.on.doc") {
-                        choose(); UIPasteboard.general.string = line; copied = true
-                    }
-                    Button("Open \(app.name)") { openApp() }
-                }
-            }
-            Section { LoopbackStatusRow() }
-        }
-        .navigationTitle(Text(verbatim: app.name))
-        .navigationBarTitleDisplayMode(.inline)
-    }
-
-    private func openApp() { if let url = URL(string: "\(app.scheme)://") { UIApplication.shared.open(url) } }
-
-    private func choose() {
-        model.chooseConnection(.proxy)
-        model.setup.proxyApp = app.id
-        model.guide(.loopback)
-    }
-}
-
-private struct LocalDevVPNPage: View {
-    @Environment(AppModel.self) private var model
-    var body: some View {
-        Form {
-            Section("How To") {
-                Label("No proxy app? Install LocalDevVPN, a free loopback app built for this.", systemImage: "1.circle")
-                Label("Open it and tap Connect, then return to kaka. It may disconnect another VPN app.", systemImage: "2.circle")
-            }
-            Section {
-                Button("Get LocalDevVPN on the App Store") {
-                    model.chooseConnection(.proxy); model.setup.proxyApp = "localdevvpn"; model.guide(.loopback)
-                    UIApplication.shared.open(URL(string: "https://apps.apple.com/app/id6755608044")!)
-                }
-            }
-            Section { LoopbackStatusRow() }
-        }
-        .navigationTitle(Text(verbatim: "LocalDevVPN"))
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-/// The live loopback check, one row.
-private struct LoopbackStatusRow: View {
-    @Environment(AppModel.self) private var model
-    var body: some View {
-        let working = model.loopback.isWorking
-        LabeledContent("Loopback") {
-            Text(model.loopback.text)
-                .foregroundStyle(working ? Color.green : Color.secondary)
-        }
-        .onAppear { model.loopback.resume() }
     }
 }
 

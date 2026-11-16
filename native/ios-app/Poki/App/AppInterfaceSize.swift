@@ -202,13 +202,6 @@ private struct InterfaceSizePreview: View {
                 .frame(maxWidth: 720)
         }
         .background { HomeBackdrop(home: false, working: false, frozen: true) }
-        .overlayPreferenceValue(PicturePlaceKey.self) { anchors in
-            GeometryReader { proxy in
-                PokiFlight(status: PokiStatus(.ready), home: false, writing: false,
-                           places: anchors.mapValues { proxy[$0] }, pokes: 0, tap: {})
-            }
-            .allowsHitTesting(false)
-        }
         .clipShape(.rect(cornerRadius: 24))
         .overlay(RoundedRectangle(cornerRadius: 24).strokeBorder(Color(.separator).opacity(0.4), lineWidth: 0.5))
         .accessibilityIdentifier("interfaceSize.preview")

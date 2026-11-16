@@ -377,9 +377,20 @@ private struct FirstRunPortrait: View {
     var body: some View {
         let dark = scheme == .dark
         // Grows with the text, up to half as large again: at the accessibility sizes the words need the room.
-        PokiPortrait(mood: mood, side: min(side, 156))
-            .overlay(Circle().strokeBorder(Color.white.opacity(dark ? 0.85 : 1), lineWidth: 2.5))
-            .shadow(color: dark ? Color(hex: 0x3C8DFF).opacity(0.35) : Color(hex: 0x0177FD).opacity(0.18), radius: dark ? 10 : 9, y: 5)
+        let portraitSide = min(side, 156)
+        ZStack {
+            Circle().fill(Tint.portrait)
+            ModelBear(act: mood.act, side: portraitSide * 50 / 56) {
+                BlinkingFace(mood: mood, side: portraitSide * 50 / 56)
+            }
+            .frame(width: portraitSide * 50 / 56, height: portraitSide * 50 / 56)
+            .offset(y: portraitSide * 3 / 56)
+        }
+        .frame(width: portraitSide, height: portraitSide)
+        .clipShape(.circle)
+        .accessibilityHidden(true)
+        .overlay(Circle().strokeBorder(Color.white.opacity(dark ? 0.85 : 1), lineWidth: 2.5))
+        .shadow(color: dark ? Color(hex: 0x3C8DFF).opacity(0.35) : Color(hex: 0x0177FD).opacity(0.18), radius: dark ? 10 : 9, y: 5)
     }
 }
 

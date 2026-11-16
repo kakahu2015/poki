@@ -33,8 +33,6 @@ struct PokiApp: App {
         #endif
         // A memory backup kaka Setup put back (Documents/AgentBackup) is merged in before any agent asks.
         _ = RoutineStore.shared.importRestoredBackup()
-        // The three-dimensional bear loads while the app starts, to be there when kaka's picture first shows.
-        BearModel.shared.load()
         let model = AppModel()
         _model = State(initialValue: model)
         let chat = ChatModel(app: model)
@@ -58,7 +56,7 @@ struct PokiApp: App {
 
 /// The chat is the app (ESP-326): it opens on kaka's conversation. The conversations slide in from the
 /// leading edge in narrow windows and stand beside the chat when both columns fit. An outside agent's
-/// session, the voice page and a setup step push over the chat. kaka's profile opens from the bear.
+/// session, the voice page and a setup step push over the chat. kaka's profile opens from the chat header.
 struct RootView: View {
     @Environment(AppModel.self) private var model
     @Environment(ChatModel.self) private var chat

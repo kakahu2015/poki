@@ -107,6 +107,11 @@ _No response_
 
 These rules are for agents changing this repository. The full release flow is in [docs/release-channels.md](docs/release-channels.md).
 
+### Local Kaka customizations
+
+- Treat the existing Kaka app copy and `native/ios-app/**/*.xcstrings` catalogs as locally owned and frozen. When syncing upstream, do not overwrite, regenerate, or import changes to these localization catalogs; continue syncing other upstream files.
+- Keep the mascot removed from Settings and the main chat, and keep the “Use Your Proxy App” section removed from Loopback settings.
+
 1. **Branch from `main`.** `main` is the only long-lived branch and it is protected: never push to it, force-push it, or rebase it. Name your branch `dev/<topic>` (one change per branch), never `claude/...` or a session name. Older branches such as `standalone` and `poki/ios-integration` are retired; do not base new work on them.
 2. **Open a pull request into `main`.** Fill in [the template](.github/PULL_REQUEST_TEMPLATE.md). The `PR checks` workflow runs on Linux (Poki Setup core tests, Cargo lockfiles, actionlint) and must pass. After a change to `desktop/` or `native/launcher/` dependencies, run `cargo metadata --locked` for that manifest before pushing.
 3. **A fix for a version already in Beta** lands on `main` first, then a separate PR cherry-picks it into `release/X.Y`. Release branches never take features.
