@@ -172,12 +172,17 @@ private struct AccountDetail: View {
     @State private var editing = false
     @State private var signingIn = false
     @State private var version = ModelKeys.saved
+    @State private var deleting = false
+    @State private var deleteProblem: String?
 
     var body: some View {
         Form {
             Section {
                 LabeledContent("Type", value: provider.name)
                 LabeledContent("Connection", value: ModelAccounts.method(provider))
+                if provider == .chatgpt, let email = ChatGPTAccount.currentAccount()?.email {
+                    LabeledContent("ChatGPT Account", value: email)
+                }
                 if provider == .custom { LabeledContent("Address", value: ModelKeys.customURL) }
                 Button(provider.signsIn ? "Sign In Again" : provider == .custom ? "Edit Address and Key" : "Replace Key") {
                     if provider.signsIn { signingIn = true } else { editing = true }
@@ -207,15 +212,47 @@ private struct AccountDetail: View {
                 }
             }
 
-            Section {
-                Button(provider.signsIn ? "Sign Out" : "Delete Account", role: .destructive) {
-                    if provider == .custom { ModelKeys.customURL = ""; ModelKeys.customModel = "" }
-                    ModelKeys.remove(provider)
-                    if ModelKeys.selectedProvider == provider, let other = ModelProvider.allCases.first(where: { ModelAccounts.isSetUp($0) && ModelAccounts.canChat($0) }) {
-                        ModelKeys.selectedProvider = other
-                    }
-                    dismiss()
+            if provider == .chatgpt {
+                Section {
+                    Link("Manage usage", destination: ChatGPTAccount.usageURL)
+                } footer: {
+                    Text("Review ChatGPT plan usage and manage this app’s access in OpenAI settings.")
                 }
+            }
+
+            Section {
+                if let deleteProblem { Text(verbatim: deleteProblem).foregroundStyle(Color(.systemRed)) }
+                Button(deleting ? "Signing Out…" : provider.signsIn ? "Sign Out" : "Delete Account", role: .destructive) {
+                    deleteProblem = nil
+                    if provider == .chatgpt {
+                        deleting = true
+                        Task {
+                            let result = await ChatGPTAccount.signOut()
+                            deleting = false
+                            switch result {
+                            case .localClearFailed:
+                                deleteProblem = AppLocalization.text(LocalizedStringResource("Could not clear the saved ChatGPT credentials from this iPhone."))
+                            case .signedOut(let remoteRevoked):
+                                if ModelKeys.selectedProvider == provider,
+                                   let other = ModelProvider.allCases.first(where: { $0 != .chatgpt && ModelAccounts.isSetUp($0) && ModelAccounts.canChat($0) }) {
+                                    ModelKeys.selectedProvider = other
+                                }
+                                if remoteRevoked {
+                                    dismiss()
+                                } else {
+                                    deleteProblem = AppLocalization.text(LocalizedStringResource("Signed out on this iPhone, but OpenAI did not confirm remote revocation. You can disconnect kaka in ChatGPT Settings → Usage."))
+                                }
+                            }
+                        }
+                    } else {
+                        if provider == .custom { ModelKeys.customURL = ""; ModelKeys.customModel = "" }
+                        ModelKeys.remove(provider)
+                        if ModelKeys.selectedProvider == provider, let other = ModelProvider.allCases.first(where: { ModelAccounts.isSetUp($0) && ModelAccounts.canChat($0) }) {
+                            ModelKeys.selectedProvider = other
+                        }
+                        dismiss()
+                    }
+                }.disabled(deleting)
             }
         }
         // Reads the version so the page redraws with the new keys and models, without rebuilding it

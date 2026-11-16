@@ -1527,6 +1527,17 @@ struct ComposerInputView: View {
                     focused = true
                 }
             }
+            if ModelKeys.selectedProvider == .chatgpt, ChatGPTAccount.signedIn {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles").foregroundStyle(Color(.secondaryLabel))
+                    Text("Using ChatGPT plan").font(.footnote.weight(.medium))
+                    Spacer(minLength: 8)
+                    Link("Manage usage", destination: ChatGPTAccount.usageURL)
+                        .font(.footnote.weight(.medium))
+                }
+                .padding(.horizontal, 14)
+                .accessibilityElement(children: .contain)
+            }
         }
     }
 
