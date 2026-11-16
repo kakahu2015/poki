@@ -2,9 +2,9 @@ import Foundation
 import PokiCore
 import UIKit
 
-/// What Poki did and why, for the Debug tab's Copy log: runner starts, stops and restarts (with the
+/// What kaka did and why, for the Debug tab's Copy log: runner starts, stops and restarts (with the
 /// reason), agent steps, approvals, relay and Live Activity changes. Kept in memory (the last 600
-/// lines) and in a file in Caches so a log survives Poki being closed. Never holds typed text or
+/// lines) and in a file in Caches so a log survives kaka being closed. Never holds typed text or
 /// keys: each line passes through PokiCore's `StepLabels.withoutTypedText` before it is kept.
 @MainActor
 @Observable

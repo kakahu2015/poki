@@ -1,12 +1,12 @@
-// PokiRunnerHost: a small library loaded into Poki Runner (Xcode's XCTRunner host) before its own code.
+// PokiRunnerHost: a small library loaded into kaka Runner (Xcode's XCTRunner host) before its own code.
 //
-// Started by Poki (through testmanagerd, with the XCTest session in the environment), XCTRunner runs
-// as always, and this library draws Poki Runner's in-use screen over XCTRunner's black window as soon
+// Started by kaka (through testmanagerd, with the XCTest session in the environment), XCTRunner runs
+// as always, and this library draws kaka Runner's in-use screen over XCTRunner's black window as soon
 // as the scene is up: the person sees what is going on and that the runner must stay open. The WDA
 // test calls PokiRunnerShowInUse too, once it serves.
 //
 // Opened by hand from the home screen, XCTRunner's app delegate is emptied, so it starts no test: no
-// UI Automation, no passcode prompt. It shows a short screen with an Open Poki button.
+// UI Automation, no passcode prompt. It shows a short screen with an Open kaka button.
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
@@ -154,7 +154,7 @@ static UIView *PokiTip(NSString *symbol, NSString *text) {
 - (UIStatusBarStyle)preferredStatusBarStyle { return UIStatusBarStyleLightContent; }
 @end
 
-// MARK: In use (started by Poki)
+// MARK: In use (started by kaka)
 
 static UIWindow *PokiInUseWindow;
 
@@ -182,7 +182,7 @@ __attribute__((visibility("default"))) void PokiRunnerShowInUse(void) {
 static BOOL PokiYes(id self, SEL _cmd, ...) { return YES; }
 static id PokiNothing(id self, SEL _cmd, ...) { return nil; }
 
-/// Opened by hand, each scene gets Poki Runner's own screen, kept in XCTRunner's window property.
+/// Opened by hand, each scene gets kaka Runner's own screen, kept in XCTRunner's window property.
 static void PokiSceneWillConnect(id self, SEL _cmd, UIScene *scene, UISceneSession *session, UISceneConnectionOptions *options) {
   if (![scene isKindOfClass:UIWindowScene.class]) { return; }
   UIWindow *window = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
@@ -190,7 +190,7 @@ static void PokiSceneWillConnect(id self, SEL _cmd, UIScene *scene, UISceneSessi
   if ([self respondsToSelector:@selector(setWindow:)]) { [self performSelector:@selector(setWindow:) withObject:window]; }
   objc_setAssociatedObject(self, @selector(setWindow:), window, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
   [window makeKeyAndVisible];
-  NSLog(@"PokiRunnerHost: showing Poki Runner's screen");
+  NSLog(@"PokiRunnerHost: showing kaka Runner's screen");
 }
 
 /// Runs when the library loads, before XCTRunner's main. (Running a whole app from here instead would

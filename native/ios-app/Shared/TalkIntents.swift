@@ -1,7 +1,7 @@
 import AppIntents
 import Foundation
 
-/// End on the Live Activity while you talk with Poki: ends the talk without opening Poki, the same way
+/// End on the Live Activity while you talk with kaka: ends the talk without opening kaka, the same way
 /// as End in the message field. The widget runs this in its own process, so it only rings the app, as
 /// StopRunnerIntent does; TalkActivity hears the ring and ends the talk. No authentication: ending a
 /// talk is always safe. Ending a talk from the island is the interaction of pull request #250; this code

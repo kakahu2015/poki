@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Every action Poki ran on this iPhone and every approval it asked for, for the owner's own record:
+/// Every action kaka ran on this iPhone and every approval it asked for, for the owner's own record:
 /// kept on this device, with no way to delete an entry from the app. Each entry names the session it
-/// came from (Poki's chat or an outside agent's), so a tap opens that run. The log keeps its latest
+/// came from (kaka's chat or an outside agent's), so a tap opens that run. The log keeps its latest
 /// `keep` entries: older ones are dropped when the file is trimmed.
 @MainActor
 @Observable
@@ -20,7 +20,7 @@ final class ActionLog {
         var app: String?
         var ok: Bool
         var session: String?
-        /// The outside agent that asked for it; nil for Poki's own chat.
+        /// The outside agent that asked for it; nil for kaka's own chat.
         var caller: String? = nil
         /// nil for an action; an approval's entry says how it was answered in `detail`.
         var kind: Kind? = nil
@@ -123,6 +123,7 @@ final class ActionLog {
 /// Agents › Activity Log: every action and approval, newest first, by day and by run. A run opens to
 /// its steps; the filters narrow it to approvals, failures or one agent; a tap opens the run's chat.
 struct ActionLogView: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     var openSession: (String) -> Void
     private var log: ActionLog { ActionLog.shared }
 
@@ -139,7 +140,7 @@ struct ActionLogView: View {
     }
 
     @State private var show = Show.all
-    /// nil: everyone. "": Poki's own chat. Otherwise an outside agent's name.
+    /// nil: everyone. "": kaka's own chat. Otherwise an outside agent's name.
     @State private var who: String?
     @State private var search = ""
     @State private var shownDays = 7
@@ -267,7 +268,7 @@ struct ActionLogView: View {
     }
 
     private func badge(_ caller: String?, ok: Bool, approval: Bool) -> some View {
-        // Who asked for it: the agent's badge, or Poki's own.
+        // Who asked for it: the agent's badge, or kaka's own.
         Group {
             if let caller { CallerBadge(name: caller, size: 28) } else { PokiAvatar(size: 28) }
         }
@@ -285,11 +286,12 @@ struct ActionLogView: View {
         var parts = [AppLocalization.text(LocalizedStringResource("\(count) entries"))]
         if run.failed > 0 { parts.append(AppLocalization.text(LocalizedStringResource("\(run.failed) failed"))) }
         if run.approvals > 0 { parts.append(AppLocalization.text(LocalizedStringResource("\(run.approvals) approvals"))) }
-        return HStack(alignment: .center, spacing: 10) {
+        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 10))
+        return layout {
             badge(run.caller, ok: run.failed == 0, approval: false)
             VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: title(run)).foregroundStyle(Color(.label)).lineLimit(1)
-                Text(verbatim: parts.joined(separator: ", ")).font(.footnote).foregroundStyle(Color(.secondaryLabel)).lineLimit(1)
+                Text(verbatim: title(run)).foregroundStyle(Color(.label)).lineLimit(typeSize.isAccessibilitySize ? nil : 1)
+                Text(verbatim: parts.joined(separator: ", ")).font(.footnote).foregroundStyle(Color(.secondaryLabel)).lineLimit(typeSize.isAccessibilitySize ? nil : 1)
             }
             Spacer(minLength: 4)
             if let first = run.entries.first {
@@ -299,16 +301,17 @@ struct ActionLogView: View {
     }
 
     private func row(_ entry: ActionLog.Entry) -> some View {
-        HStack(alignment: .center, spacing: 10) {
+        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 10))
+        return layout {
             badge(entry.caller, ok: entry.ok, approval: entry.kind == .approval)
             VStack(alignment: .leading, spacing: 2) {
-                Text(ActivityWords.label(entry.text)).foregroundStyle(Color(.label)).lineLimit(2)
+                Text(ActivityWords.label(entry.text)).foregroundStyle(Color(.label)).lineLimit(typeSize.isAccessibilitySize || !entry.ok ? nil : 2)
                 if let detail = entry.detail {
-                    Text(verbatim: detail).font(.footnote).foregroundStyle(entry.ok ? Color(.secondaryLabel) : Color.orange).lineLimit(2)
+                    Text(verbatim: detail).font(.footnote).foregroundStyle(entry.ok ? Color(.secondaryLabel) : Color.orange).lineLimit(typeSize.isAccessibilitySize || !entry.ok ? nil : 2)
                 }
                 let context = [AppName.display(entry.app), entry.session.flatMap { SessionStore.shared.session($0)?.name }].compactMap { $0 }.joined(separator: ", ")
                 if !context.isEmpty {
-                    Text(context).font(.footnote).foregroundStyle(Color(.secondaryLabel)).lineLimit(1)
+                    Text(context).font(.footnote).foregroundStyle(Color(.secondaryLabel)).lineLimit(typeSize.isAccessibilitySize ? nil : 1)
                 }
             }
             Spacer(minLength: 4)

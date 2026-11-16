@@ -1,7 +1,7 @@
 import Foundation
 import PokiCore
 
-/// The chat agent's tools for Poki's own browser (ESP-145): open an address, read the page's elements,
+/// The chat agent's tools for kaka's own browser (ESP-145): open an address, read the page's elements,
 /// tap one, type into one, and hand the page to the owner. They work on `PokiBrowser`, never on the
 /// phone's screen, so the owner keeps the phone while the agent works a website.
 enum WebTools {
@@ -77,7 +77,7 @@ enum WebTools {
             if banner["accept"] as? Bool == true, let reject = banner["reject"] as? String {
                 return answer("This notice has “\(banner["rejectName"] as? String ?? "")” [\(reject)]: tap that instead. Accept, continue or close a notice only when it has no reject or necessary-only choice.", error: true)
             }
-            // A notice Poki dismisses is named in its step, so the owner sees what Poki closed.
+            // A notice kaka dismisses is named in its step, so the owner sees what kaka closed.
             let notice = banner["banner"] as? Bool == true && banner["dismiss"] as? Bool == true ? banner["kind"] as? String ?? "" : ""
             let site = browser.host, button = short(label)
             let title = switch notice {

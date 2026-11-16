@@ -1,7 +1,7 @@
 import SwiftUI
 import VisionKit
 
-/// Scans the pairing code Poki Setup shows on the computer (a `poki://pairing?…` QR code) with the
+/// Scans the pairing code kaka Setup shows on the computer (a `poki://pairing?…` QR code) with the
 /// system's data scanner, so the pairing file arrives without the Camera app or AirDrop.
 struct PairingScanner: UIViewControllerRepresentable {
     var found: (URL) -> Void

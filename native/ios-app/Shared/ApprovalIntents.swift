@@ -1,7 +1,7 @@
 // Allow and Deny on the Live Activity. The bridge and the two LiveActivityIntents are ported from
 // AgentApprovalIntents.swift in Clarklevis1995/dsh-mobile (commit ebe19764,
 // DeepSeekHarnessMobile/LiveActivity/AgentApprovalIntents.swift), MIT License, Copyright (c) 2026
-// Chaofan Li. Poki keys a decision by its approval id alone and keeps an App Group mailbox for an
+// Chaofan Li. kaka keys a decision by its approval id alone and keeps an App Group mailbox for an
 // intent that runs outside the app. See THIRD_PARTY_NOTICES.md.
 import AppIntents
 import Foundation
@@ -9,6 +9,8 @@ import Foundation
 struct ApprovalDecision: Hashable, Sendable {
     let approvalID: String
     let approved: Bool
+    /// Allow this step and turn asking off (Don’t Ask Again).
+    var stopAsking = false
 }
 
 /// A LiveActivityIntent runs in the app's process, so the button hands its decision straight to
@@ -30,8 +32,8 @@ enum ApprovalIntentBridge {
 }
 
 /// PokiCore sends no input at all while an approval is pending, so the automation cannot press this
-/// button itself. Allow asks for Face ID or the passcode first. None of the three intents opens
-/// Poki (`openAppWhenRun` is false): the owner stays in the app the agent is working in, and the
+/// button itself. Allow asks for Face ID or the passcode first. None of the approval intents opens
+/// kaka (`openAppWhenRun` is false): the owner stays in the app the agent is working in, and the
 /// next step lands there.
 struct ApproveActionIntent: LiveActivityIntent {
     static let title: LocalizedStringResource = "Allow action"
@@ -48,6 +50,27 @@ struct ApproveActionIntent: LiveActivityIntent {
     @MainActor
     func perform() async throws -> some IntentResult {
         ApprovalIntentBridge.submit(ApprovalDecision(approvalID: approvalID, approved: true))
+        return .result()
+    }
+}
+
+/// Don’t Ask Again: lets this step through and turns approvals off, so it allows more than Allow does
+/// and asks for Face ID or the passcode the same way.
+struct StopAskingIntent: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Allow and stop asking"
+    static let description = IntentDescription("Lets the agent do the step that is waiting for you and turns approvals off.")
+    static let authenticationPolicy: IntentAuthenticationPolicy = .requiresLocalDeviceAuthentication
+    static let openAppWhenRun = false
+    static let isDiscoverable = false
+
+    @Parameter(title: "Approval") var approvalID: String
+
+    init() {}
+    init(approvalID: String) { self.approvalID = approvalID }
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        ApprovalIntentBridge.submit(ApprovalDecision(approvalID: approvalID, approved: true, stopAsking: true))
         return .result()
     }
 }
@@ -105,7 +128,7 @@ struct HandoffDoneIntent: LiveActivityIntent {
 
 /// Swallows a tap on the Live Activity's plain areas. iOS opens the activity's app on any tap that no
 /// control takes; this intent, laid under every surface (see TapShield), takes it instead and does
-/// nothing, so the agent's run is never interrupted by Poki coming to the front. Poki's own buttons
+/// nothing, so the agent's run is never interrupted by kaka coming to the front. kaka's own buttons
 /// sit above it and still work.
 struct NoTapIntent: LiveActivityIntent {
     static let title: LocalizedStringResource = "Nothing"
@@ -129,18 +152,26 @@ enum ApprovalMailbox {
         return id
     }
     private static let key = "approval.decisions"
+    /// The ids among them answered with Don’t Ask Again.
+    private static let stopKey = "approval.decisions.stop"
 
     static func post(_ decision: ApprovalDecision) {
         var decisions = SharedContainer.defaults.dictionary(forKey: key) as? [String: Bool] ?? [:]
         decisions[decision.approvalID] = decision.approved
         SharedContainer.defaults.set(decisions, forKey: key)
+        if decision.stopAsking {
+            let stopping = SharedContainer.defaults.stringArray(forKey: stopKey) ?? []
+            SharedContainer.defaults.set(stopping + [decision.approvalID], forKey: stopKey)
+        }
         CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFNotificationName(notification as CFString), nil, nil, true)
     }
 
     /// Takes every decision posted so far, once.
     static func drain() -> [ApprovalDecision] {
         let decisions = SharedContainer.defaults.dictionary(forKey: key) as? [String: Bool] ?? [:]
+        let stopping = Set(SharedContainer.defaults.stringArray(forKey: stopKey) ?? [])
         SharedContainer.defaults.removeObject(forKey: key)
-        return decisions.map { ApprovalDecision(approvalID: $0.key, approved: $0.value) }
+        SharedContainer.defaults.removeObject(forKey: stopKey)
+        return decisions.map { ApprovalDecision(approvalID: $0.key, approved: $0.value, stopAsking: stopping.contains($0.key)) }
     }
 }

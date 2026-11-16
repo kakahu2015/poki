@@ -3,25 +3,25 @@ import OSLog
 import SwiftUI
 import UIKit
 
-// The real icon of an app, by its bundle ID or the name Poki saw on screen ("Notes", "备忘录", "WeChat"),
+// The real icon of an app, by its bundle ID or the name kaka saw on screen ("Notes", "备忘录", "WeChat"),
 // for anything that names an app: the conversations list, the home page's shortcuts. One file with no
 // other dependency than the asset catalog, so any screen can use it.
 //
 // Where an icon comes from, in this order:
 // 1. The icon installed on this iPhone, through UIKit's private
-//    `+[UIImage _applicationIconImageForBundleIdentifier:format:scale:]`. Poki is not distributed through
+//    `+[UIImage _applicationIconImageForBundleIdentifier:format:scale:]`. kaka is not distributed through
 //    the App Store, so it may call it. It is looked up at run time and called only when it exists, so an
 //    iOS that drops it only loses this source. For an app that is not installed (or that the sandbox
 //    hides) iOS draws its generic icon; that picture is recognised and skipped, and so is an empty
 //    picture. An app with several editions is looked up by each edition's bundle ID (KnownApps).
-//    `-pokiSystemIcons off` turns this source off, to compare. When it has nothing for an app Poki
+//    `-pokiSystemIcons off` turns this source off, to compare. When it has nothing for an app kaka
 //    carries an icon for, the log says so (category "icons"), and the carried icon shows: on 0.3.1
 //    (863) Taobao was installed and still showed the placeholder.
-// 2. The App Store artwork Poki carries for common apps (Poki/AppIcons, see AppIcons.md).
+// 2. The App Store artwork kaka carries for common apps (kaka/AppIcons, see AppIcons.md).
 // 3. An icon fetched earlier from the App Store and kept in Caches/AppIcons.
 // 4. The App Store's public lookup by bundle ID (itunes.apple.com/lookup), on a view's `.task`. The
 //    request carries the bundle ID and the store's country only. A miss is remembered for a day.
-// Without any of these the view draws Poki's carried bear icon.
+// Without any of these the view draws kaka's carried bear icon.
 
 /// Icons of apps, found once and kept for the app's run.
 @MainActor @Observable
@@ -150,14 +150,14 @@ final class AppIconStore {
         id.flatMap { KnownApps.byID[$0.lowercased()]?.icon }.flatMap(carried)
     }
 
-    /// One of the PNGs in Poki/AppIcons by its file name, at the Home Screen's 3x.
+    /// One of the PNGs in kaka/AppIcons by its file name, at the Home Screen's 3x.
     static func carried(_ file: String) -> UIImage? {
         guard let path = Bundle.main.path(forResource: file, ofType: "png"), let image = UIImage(contentsOfFile: path)?.cgImage else { return nil }
         return UIImage(cgImage: image, scale: 3, orientation: .up)
     }
 }
 
-/// An app's icon in the Home Screen's shape at `size` points, or Poki's default icon.
+/// An app's icon in the Home Screen's shape at `size` points, or kaka's default icon.
 struct AppIconView: View {
     var app: String
     var size: CGFloat

@@ -4,12 +4,12 @@ import Speech
 
 /// Voice without the Mac's voice bridge.
 ///
-/// - With the owner's OpenAI API key on this iPhone, Poki asks OpenAI for a one-minute Realtime key
+/// - With the owner's OpenAI API key on this iPhone, kaka asks OpenAI for a one-minute Realtime key
 ///   itself (what `bin/voice-bridge.mjs` does on the Mac: the same model, instructions and tools), and
 ///   look and do run here, through PokiCore, as with the bridge's phone tools.
 /// - With any other model (a ChatGPT plan, Anthropic, OpenRouter…), whose sign-in has no Realtime
 ///   audio, holding the button dictates on this iPhone (Apple's speech recognition, on the device when
-///   it can) and lets go to send it to Poki's chat; Poki reads the answer out loud.
+///   it can) and lets go to send it to kaka's chat; kaka reads the answer out loud.
 enum VoiceDirect {
     /// The live voice model the owner picked (Accounts › OpenAI › Live Voice), GPT Realtime 2.1 by default.
     static var model: String { ModelCatalog.voiceModel }
@@ -87,7 +87,7 @@ enum VoiceDirect {
     }
 }
 
-/// Hold to dictate, let go to send to Poki's chat, hear the answer: voice for models without Realtime.
+/// Hold to dictate, let go to send to kaka's chat, hear the answer: voice for models without Realtime.
 @MainActor
 final class Dictation: NSObject, AVSpeechSynthesizerDelegate {
     private let engine = AVAudioEngine()

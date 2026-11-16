@@ -11,7 +11,7 @@ import UIKit
 import UniformTypeIdentifiers
 
 /// Runs the one Live Activity: started when a session starts, updated from PokiCore's events, ended
-/// when the session stops or Poki closes.
+/// when the session stops or kaka closes.
 ///
 /// AppModel only describes the state (`update`, `record`); this class decides what deserves a pop-up.
 /// It compares each new state with the last one and, for the moments that matter, sends the update with
@@ -22,7 +22,7 @@ import UniformTypeIdentifiers
 ///
 /// Never while the runner may be sending input: an alert expands the Dynamic Island over the top
 /// of the screen, and on the owner's phone the agent's next tap (Back, a list's first row) landed
-/// on the expanded island and opened Poki. So steps, the start of a run and app switches only
+/// on the expanded island and opened kaka. So steps, the start of a run and app switches only
 /// change the compact island and the Lock Screen (the event tag); they never expand it.
 ///
 /// Sending: a state that needs the person (an approval, its answer, a problem, a pairing code, the
@@ -53,6 +53,7 @@ final class ActivityController {
     private var worker: Task<Void, Never>?
     private var tail: Task<Void, Never>?
     private var finishTimer: Task<Void, Never>?
+    private var chatOwnsCompletion = false
     private var foldTimer: Task<Void, Never>?
     /// Halfway to an approval's deadline the island is popped open once more (ESP-467).
     private var approvalReminder: Task<Void, Never>?
@@ -72,11 +73,11 @@ final class ActivityController {
 
     var enabled: Bool { ActivityAuthorizationInfo().areActivitiesEnabled }
 
-    /// True where something else already says Poki is on while nothing happens (iOS 26's continued
+    /// True where something else already says kaka is on while nothing happens (iOS 26's continued
     /// processing task has its own Lock Screen and island UI): then there is no idle Live Activity.
-    /// It starts when work begins or Poki needs the person, and goes when the run has folded.
+    /// It starts when work begins or kaka needs the person, and goes when the run has folded.
     var hidesWhenIdle: () -> Bool = { false }
-    /// Poki is in front: iOS starts a Live Activity only then.
+    /// kaka is in front: iOS starts a Live Activity only then.
     var canStart: () -> Bool = { true }
     /// The device name `start` was last asked with: the activity is wanted, shown or not.
     private var wanted: String?
@@ -85,9 +86,9 @@ final class ActivityController {
 
     var isRunning: Bool { activity != nil }
 
-    /// Ends every Live Activity of Poki's: at launch, the ones a crashed or closed earlier run left
+    /// Ends every Live Activity of kaka's: at launch, the ones a crashed or closed earlier run left
     /// behind (only this process updates its activity, so one it did not start is out of date); when
-    /// Poki closes, its own, since nothing would update it after that. Detached, because Poki holds
+    /// kaka closes, its own, since nothing would update it after that. Detached, because kaka holds
     /// the main thread while it closes.
     nonisolated static func endAll() {
         let activities = Activity<PokiActivityAttributes>.activities
@@ -95,12 +96,15 @@ final class ActivityController {
         Task.detached { for old in activities { await old.end(nil, dismissalPolicy: .immediate) } }
     }
 
-    /// Starts the Live Activity if it is not running. iOS only allows this while Poki is in front, so
+    /// Starts the Live Activity if it is not running. iOS only allows this while kaka is in front, so
     /// it is called when the person taps something (Start, Start pairing, a setup step), never later
     /// from the background.
     func start(deviceName: String) {
         wanted = deviceName
         guard activity == nil else { return }
+        // Keep it wanted for the next foreground update, without asking ActivityKit to start from
+        // the background. Direct callers and update-driven restarts share the same restriction.
+        guard canStart() else { return }
         if state.isQuiet, hidesWhenIdle() { lastError = nil; return }
         guard enabled else { lastError = "Live Activities are off for kaka (Settings > kaka > Live Activities)."; return }
         // A Live Activity left from an earlier run of the app is replaced.
@@ -144,6 +148,7 @@ final class ActivityController {
     @discardableResult
     func end(dismissalPolicy: ActivityUIDismissalPolicy? = nil) -> Task<Void, Never>? {
         wanted = nil
+        chatOwnsCompletion = false
         finishTimer?.cancel(); foldTimer?.cancel(); eventTimer?.cancel()
         if Self.runPhases.contains(state.phase) { logRun("cut off by ending the Live Activity") }
         worker?.cancel(); worker = nil; plainWaiting = false
@@ -300,7 +305,7 @@ final class ActivityController {
         }
         if state.stepCount != old.stepCount { inStep = false }
         // The finish timer: re-armed by every change during a run; never fires in the middle of a step.
-        if state.phase == .working, state.approval == nil, state.handoff == nil, state.stepCount > 0 { armFinish() } else { finishTimer?.cancel() }
+        if !chatOwnsCompletion, state.phase == .working, state.approval == nil, state.handoff == nil, state.stepCount > 0 { armFinish() } else { finishTimer?.cancel() }
         return alert
     }
 
@@ -334,6 +339,22 @@ final class ActivityController {
         }
     }
 
+    /// The local chat can be waiting for its model after a phone step has finished.
+    func setChatOwnsCompletion(_ ownsCompletion: Bool) {
+        chatOwnsCompletion = ownsCompletion
+        if ownsCompletion { finishTimer?.cancel() }
+    }
+
+    func endStoppedRun() {
+        update { state in
+            state.phase = .idle
+            state.headline = "Waiting for agent"
+            state.plan = nil
+            state.since = nil
+        }
+        end(dismissalPolicy: .immediate)
+    }
+
     /// The chat's task ended: the run is finished now, not after the quiet wait. `alert` false when
     /// the chat tells the owner itself (its reply notification).
     func finishNow(alert: Bool) {
@@ -347,7 +368,7 @@ final class ActivityController {
     }
 
     private func finishRun(ifCount count: Int) {
-        guard state.phase == .working, state.approval == nil, !inStep, state.stepCount == count, count > 0 else { return }
+        guard !chatOwnsCompletion, state.phase == .working, state.approval == nil, !inStep, state.stepCount == count, count > 0 else { return }
         finish(alert: true)
     }
 
@@ -459,7 +480,7 @@ final class ActivityController {
             self.tally.answered += 1
             let seconds = Date().timeIntervalSince(began)
             if alert != nil {
-                // For the Activity Log: iOS opens the island for an alert, but not while Poki itself is in
+                // For the Activity Log: iOS opens the island for an alert, but not while kaka itself is in
                 // front, and late if the update waited behind others.
                 let state = switch UIApplication.shared.applicationState { case .active: "active"; case .inactive: "inactive"; default: "background" }
                 AppLog.shared.add("activity", "alert sent with \(content.state.phase.rawValue) \(String(format: "%.1f", Date().timeIntervalSince(queued))) s after it was queued; \(activity.activityState); kaka \(state)")
@@ -489,7 +510,7 @@ final class ActivityController {
         trimToFit()
         // Approvals are urgent; everything else is not. An approval goes stale when it expires.
         // An approval goes stale when it expires. A run goes stale when no update has come for ten
-        // minutes (Poki was closed or suspended), and then says it is not updating.
+        // minutes (kaka was closed or suspended), and then says it is not updating.
         let stale = state.approval?.expires ?? (state.phase == .working ? Date.now.addingTimeInterval(600) : nil)
         return ActivityContent(state: state, staleDate: stale, relevanceScore: state.approval == nil && state.handoff == nil ? 50 : 100)
     }

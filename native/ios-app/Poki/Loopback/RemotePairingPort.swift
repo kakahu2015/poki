@@ -4,7 +4,7 @@ import Foundation
 /// service the next free port whenever it starts it, and names that port only in the service's
 /// Bonjour record (`_remotepairing._tcp`). After a restart of the phone it is 49152 as a rule; once
 /// iOS has started the service again it is another one, and 49152 refuses although the loopback
-/// works. Poki starts at 49152 and looks the port up when it does not answer.
+/// works. kaka starts at 49152 and looks the port up when it does not answer.
 enum RemotePairingPort {
     static let standard: UInt16 = 49152
     /// The port in use, for the probes here. The launcher keeps its own copy (`use` sets both).
@@ -16,9 +16,9 @@ enum RemotePairingPort {
         poki_set_remote_pairing_port(port)
     }
 
-    /// Whether Poki looks for a moved port now. Only then does the launcher read a refused connection
+    /// Whether kaka looks for a moved port now. Only then does the launcher read a refused connection
     /// as a moved port (`pairing_port`); otherwise a refusal keeps its earlier meaning, and on a
-    /// mounted disk image it goes to Poki's own session.
+    /// mounted disk image it goes to kaka's own session.
     @MainActor private(set) static var searching = false
 
     @MainActor static func setSearching(_ on: Bool) {
@@ -32,7 +32,7 @@ enum RemotePairingPort {
     static let lookDelays: [TimeInterval] = [0, 10, 30]
 
     /// Whether a look in Bonjour is due. Never on cellular alone: there iOS refuses the developer
-    /// services' loopback itself (GitHub issue 35), and a mounted disk image goes to Poki's own
+    /// services' loopback itself (GitHub issue 35), and a mounted disk image goes to kaka's own
     /// session at once instead of waiting for a port.
     static func lookDue(cellularOnly: Bool, looks: Int, lastAt: Date, now: Date) -> Bool {
         guard !cellularOnly, looks < lookDelays.count else { return false }

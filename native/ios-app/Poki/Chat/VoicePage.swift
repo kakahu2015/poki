@@ -1,9 +1,9 @@
 import SwiftUI
 
 /// The voice page (ESP-171 boards "V Voice ready", "V Voice listening", "V Voice working with Island"):
-/// one big line in the middle and the hold button at the bottom, on Poki's blue. It runs on VoiceModel
+/// one big line in the middle and the hold button at the bottom, on kaka's blue. It runs on VoiceModel
 /// and VoiceDirect (the Realtime voice conversation or on-device dictation): holding the button starts the
-/// conversation and Poki hears you; letting go leaves the turn to the model, which knows when you stopped;
+/// conversation and kaka hears you; letting go leaves the turn to the model, which knows when you stopped;
 /// sliding up ends it.
 struct VoicePage: View {
     @Environment(AppModel.self) private var model
@@ -82,7 +82,7 @@ struct VoicePage: View {
         return AppLocalization.text(LocalizedStringResource("“Text Mom I’m on my way.”"))
     }
 
-    /// What Poki heard so far, the last word faded while you speak.
+    /// What kaka heard so far, the last word faded while you speak.
     private var heard: Text {
         let said = Self.sample == .listening ? AppLocalization.text(LocalizedStringResource("Text Mom\nI’m on my way…")) : (voice.lines.last { $0.role == .you }?.text ?? AppLocalization.text(LocalizedStringResource("Listening…")))
         guard let space = said.lastIndex(where: { $0 == " " || $0 == "\n" }) else { return Text(verbatim: said) }
@@ -180,7 +180,7 @@ private struct HoldButton: View {
 // RecordWaveform is from exyte/Chat (commit f382a14, Sources/ExyteChat/Views/Recording/RecordWaveform.swift,
 // by Alisa Mylnikova), Copyright (c) 2019 exyte, MIT License; see THIRD_PARTY_NOTICES.md. Changed: the
 // board's 14 bars (4 pt wide, 4 pt apart, up to 48 pt, fading at the ends), centred instead of on the
-// bottom, and moving while Poki listens. The voice conversation gives no microphone levels, so the bars
+// bottom, and moving while kaka listens. The voice conversation gives no microphone levels, so the bars
 // follow the board's shape instead of the sound.
 struct VoiceWaveform: View {
     /// The board's heights and opacities.

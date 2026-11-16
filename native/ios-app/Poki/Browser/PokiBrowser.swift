@@ -2,7 +2,7 @@ import Foundation
 import Observation
 import WebKit
 
-/// One step Poki took in its browser, as the panel lists it.
+/// One step kaka took in its browser, as the panel lists it.
 struct BrowserStep: Identifiable, Equatable {
     enum State: Equatable { case working, done, failed, waiting }
     let id = UUID()
@@ -11,11 +11,11 @@ struct BrowserStep: Identifiable, Equatable {
     var ms: Int = 0
 }
 
-/// Poki's own browser (ESP-145): a WKWebView of its own, apart from Safari and the phone's screen, so the
+/// kaka's own browser (ESP-145): a WKWebView of its own, apart from Safari and the phone's screen, so the
 /// agent can work a website while the owner keeps the phone. Its website data store is the app's
 /// persistent one, so a sign-in done here stays for the next task. It shows as a panel in the chat;
 /// the owner can take it over at any time, and the agent hands it over for sign-ins, human checks and
-/// payment. Works while Poki is in front.
+/// payment. Works while kaka is in front.
 @MainActor
 @Observable
 final class PokiBrowser: NSObject {
@@ -137,7 +137,7 @@ final class PokiBrowser: NSObject {
         isLoading = true
     }
 
-    /// Calls one of the page reader's functions in Poki's content world, loading the reader first.
+    /// Calls one of the page reader's functions in kaka's content world, loading the reader first.
     func call(_ body: String, _ arguments: [String: Any] = [:]) async throws -> Any? {
         try await webView.callAsyncJavaScript(PageReader.source + "\n" + body, arguments: arguments, in: nil, contentWorld: world)
     }
@@ -152,13 +152,13 @@ final class PokiBrowser: NSObject {
     func takeOver(reason: String? = nil) {
         owner = .person(reason: reason)
         // The owner starts from a page with nothing focused, and its fields get their keyboard back
-        // (the reader keeps it down while Poki types).
+        // (the reader keeps it down while kaka types).
         webView.endEditing(true)
         sheetShown = true
         if isOpen { Task { _ = try? await call("window.__pokiReader.drive(false)") } }
     }
 
-    /// The owner gives the page back to Poki (Done in the sheet, or the sheet swiped away).
+    /// The owner gives the page back to kaka (Done in the sheet, or the sheet swiped away).
     func handBack() {
         guard ownerHasIt else { return }
         owner = .poki

@@ -2,7 +2,7 @@ import AVFoundation
 import Speech
 import SwiftUI
 
-/// What an earlier version of Poki left on this phone. None of it is written by this version before
+/// What an earlier version of kaka left on this phone. None of it is written by this version before
 /// launch has read it, so it tells an update (or a reinstall the Keychain restored) from a fresh install:
 /// a saved conversation, or a setting an earlier version stored (setup progress, the relay, the model,
 /// approvals, voice).
@@ -15,7 +15,7 @@ enum EarlierVersion {
     }
 }
 
-/// The first run: Poki says hello, then goes through what it needs (this iPhone, a model, the microphone),
+/// The first run: kaka says hello, then goes through what it needs (this iPhone, a model, the microphone),
 /// each of which can wait, and says what to try. Someone who used an earlier version never sees it on
 /// updating; it can be gone through again from Settings › Automation › Setup.
 enum FirstRun {
@@ -49,7 +49,7 @@ struct FirstRunGuide: View {
     @Environment(AppModel.self) private var model
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
-    /// A setup step a link opened (a pairing file from Poki Setup) while the first run is up.
+    /// A setup step a link opened (a pairing file from kaka Setup) while the first run is up.
     @Binding var link: SetupStep?
     var done: () -> Void
 
@@ -167,9 +167,9 @@ struct FirstRunGuide: View {
             .sheet(item: $keyFor, onDismiss: refresh) { KeyEntry(provider: $0) }
             .sheet(isPresented: $signingIn, onDismiss: refresh) { ChatGPTSignIn() }
         }
-        // Past this size a row's name breaks into single letters and the button's words are cut.
-        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
         .interactiveDismissDisabled()
+        // Keep the existing limit until the guide's rows and buttons are verified at AX3–AX5.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
     }
 
     private var dots: some View {
@@ -368,7 +368,7 @@ struct FirstRunAgain: View {
     }
 }
 
-/// Poki's round picture at the top of each page, in the white ring the home page gives it.
+/// kaka's round picture at the top of each page, in the white ring the home page gives it.
 private struct FirstRunPortrait: View {
     var mood: PokiMood
     @Environment(\.colorScheme) private var scheme

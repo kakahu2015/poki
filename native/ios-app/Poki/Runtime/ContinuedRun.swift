@@ -1,8 +1,8 @@
 import BackgroundTasks
 import Foundation
 
-/// iOS 27's continued processing task: work the person started keeps running after Poki leaves the
-/// screen, shown by iOS with its own progress UI, with no silent audio and no location. Poki holds one
+/// iOS 27's continued processing task: work the person started keeps running after kaka leaves the
+/// screen, shown by iOS with its own progress UI, with no silent audio and no location. kaka holds one
 /// while it is on and ends it when it turns off. iOS may end it early (under load, or when the person
 /// stops it from that UI); then BackgroundKeeper falls back to silent audio.
 @MainActor
@@ -34,11 +34,11 @@ final class ContinuedRun {
     private var ticker: Task<Void, Never>?
     private var registered: Set<String> = []
     private var attempted = false
-    /// iOS ended the task before Poki turned off.
+    /// iOS ended the task before kaka turned off.
     var onExpired: (() -> Void)?
     private(set) var isRunning = false
 
-    /// Asks iOS for the task; must be called while Poki is in front. False when iOS refuses.
+    /// Asks iOS for the task; must be called while kaka is in front. False when iOS refuses.
     func begin(subtitle: String) async -> Bool {
         guard !isRunning else { return true }
         guard let wildcard = Self.permitted else {

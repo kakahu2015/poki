@@ -146,7 +146,7 @@ impl Device {
                 Ok(Self { adapter, rsd, _control: Some(control) })
             }
             Pairing::Lockdown(file) => {
-                let provider = TcpProvider { addr: address, scope_id: None, pairing_file: file.clone(), label: "Poki".into() };
+                let provider = TcpProvider { addr: address, scope_id: None, pairing_file: file.clone(), label: "kaka".into() };
                 let proxy = CoreDeviceProxy::connect(&provider).await.map_err(|e| {
                     let text = e.to_string();
                     // A socket or TLS failure is the path to the phone, not the phone refusing the pairing.

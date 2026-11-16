@@ -32,7 +32,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Poki"
+            "value" : "kaka"
           }
         }
       }
@@ -60,6 +60,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "kaka 使用相機拍攝你在訊息裡傳送的照片，以及掃描電腦上 kaka Setup 顯示的配對碼。"
+          }
+        }
+      }
+    },
+    "NSFaceIDUsageDescription" : {
+      "comment" : "Info.plist",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kaka uses Face ID to unlock Screen History, so only you can open it."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kaka 使用面容 ID 解锁屏幕历史，确保只有你能打开。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kaka 使用 Face ID 解鎖螢幕歷史，確保只有你能打開。"
           }
         }
       }

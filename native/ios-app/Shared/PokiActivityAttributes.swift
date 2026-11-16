@@ -19,7 +19,7 @@ struct PokiActivityAttributes: ActivityAttributes {
             /// The phases a person has to answer: a step from the agent never replaces them.
             var holdsApproval: Bool { self == .approval || self == .deciding }
         }
-        /// Live voice session state when Poki's voice mode is active.
+        /// Live voice session state when kaka's voice mode is active.
         enum Voice: String, Codable, Hashable {
             case listening, thinking, speaking
         }
@@ -33,7 +33,7 @@ struct PokiActivityAttributes: ActivityAttributes {
         var label: String?
         /// The app in front.
         var app: String?
-        /// The outside agent driving the phone ("Claude Code"), nil for Poki's own chat.
+        /// The outside agent driving the phone ("Claude Code"), nil for kaka's own chat.
         var caller: String?
         /// Bumped whenever a new thumbnail is written to the App Group container.
         var thumbnailVersion: Int
@@ -118,6 +118,15 @@ struct PendingApproval: Codable, Hashable {
     /// Why it needs the owner, from PokiCore's rules: `sending a message ("send")`, `a payment ("pay")`.
     var reason: String
     var expires: Date
+
+    /// PokiCore's word on whether turning asking off (Never Ask) would stop every step this approval
+    /// covers from asking; nil from a state saved before it existed. Not the reason's wording: a tap in a
+    /// chat app on a screen not read yet reads as sending, and stops, while a payment, a deletion, Wallet
+    /// and a tap after a launch do not.
+    var stopsWhenOff: Bool? = nil
+
+    /// The card offers Don’t Ask Again.
+    var offersStopAsking: Bool { stopsWhenOff == true }
 
     /// The approval as one short question, the same on every card, the island, the Lock Screen and
     /// the notification. It comes from the kind the rules saw in PokiCore's reason, never from the

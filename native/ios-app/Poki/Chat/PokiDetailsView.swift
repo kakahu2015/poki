@@ -1,15 +1,16 @@
 import PokiCore
 import SwiftUI
 
-// Settings (ESP-469; before it Poki's profile, ESP-326 board "09 Poki") opens from the bottom of the
-// conversations. It replaced the earlier details screen and its "More Settings" layer. Every part of Poki a
+// Settings (ESP-469; before it kaka's profile, ESP-326 board "09 kaka") opens from the bottom of the
+// conversations. It replaced the earlier details screen and its "More Settings" layer. Every part of kaka a
 // person looks for by name is a row of its own on this page (Connection, Models, Dictation & Mute,
 // Approvals, Agents, Memory, Archived Conversations, Notifications, Appearance, Language), and
 // what only a few need is on one page, Advanced, by where it came from. Nothing has two ways in: the
-// approval method is changed on Poki's card in the chat only. The rows are PokiSettingsKit's.
+// approval method is changed on kaka's card in the chat only. The rows are PokiSettingsKit's.
 
-/// Settings: the current status and Activity Log, then any problem that keeps the app from working
-/// and its settings in three groups of rows.
+/// Settings: kaka on top, as a group of rows like the groups under it (the owner, 2026-11-13: not a
+/// card of its own): the bear and its name, where kaka stands, and the Activity Log. Then any problem
+/// that keeps kaka from working, and the parts of kaka in three groups of rows.
 struct PokiDetailsView: View {
     @Environment(AppModel.self) private var model
     @Environment(ChatModel.self) private var chat
@@ -31,6 +32,8 @@ struct PokiDetailsView: View {
             ScrollViewReader { scroll in
             List {
                 Section {
+                    // The first two rows only show: Connection's Automation switch turns kaka on and pauses it.
+                    PokiNameRow(mood: status.mood)
                     SettingsRow(title: "Status", symbol: "dot.radiowaves.left.and.right", value: PokiStatusCopy.word(status), dot: status.mood.dot)
                         .accessibilityElement(children: .combine)
                         .accessibilityIdentifier("details.status")
@@ -52,24 +55,25 @@ struct PokiDetailsView: View {
                     }
                 }
 
-                // What Poki works with.
+                // What kaka works with.
                 Section {
                     NavigationLink(value: DetailsRoute.connection) {
-                        SettingsRow(title: "Connection", symbol: "iphone.gen3", value: connectionValue, warns: !setupDone)
+                        SettingsRow(title: "Connection", symbol: "iphone.gen3", value: connectionValue,
+                                    valueIsAction: !isSample && !model.setupReadyForUse)
                     }
                     .accessibilityIdentifier("details.hands")
                     NavigationLink(value: DetailsRoute.model) {
-                        SettingsRow(title: "Models", symbol: "sparkles", value: brainValue, warns: !hasModel)
+                        SettingsRow(title: "Models", symbol: "sparkles", value: brainValue, valueIsAction: !hasModel)
                             .id(modelVersion)
                     }
                     .accessibilityIdentifier("details.accountsAndModels")
-                    // Named for what is on it: the dictation button and Poki's voice. Live voice starts in the chat.
+                    // Named for what is on it: the dictation button and kaka's voice. Live voice starts in the chat.
                     NavigationLink(value: DetailsRoute.voice) {
                         SettingsRow(title: "Dictation & Mute", symbol: "mic")
                     }
                     .accessibilityIdentifier("details.voice")
                     // What always asks, what each method does and the sensitivity. The method in use shows
-                    // here; it is changed on Poki's card in the chat.
+                    // here; it is changed on kaka's card in the chat.
                     NavigationLink(value: DetailsRoute.approvals) {
                         SettingsRow(title: "Approvals", symbol: "checkmark.shield", value: model.approvalMode.title)
                     }
@@ -106,6 +110,10 @@ struct PokiDetailsView: View {
                         SettingsRow(title: "Appearance", symbol: "circle.lefthalf.filled", value: AppLocalization.text(appearance.title))
                     }
                     .accessibilityIdentifier("details.appearance")
+                    NavigationLink(value: DetailsRoute.interfaceSize) {
+                        SettingsRow(title: "Interface Size", symbol: "textformat.size")
+                    }
+                    .accessibilityIdentifier("general.interfaceSize")
                     NavigationLink(value: DetailsRoute.language) {
                         SettingsRow(title: "Language", symbol: "globe", value: LanguageSettingsView.selectionTitle)
                     }
@@ -165,12 +173,14 @@ struct PokiDetailsView: View {
                     ApprovalsSettingsView()
                 case .appearance:
                     AppearanceView()
+                case .interfaceSize:
+                    InterfaceSizeSettingsView()
                 case .language:
                     LanguageSettingsView()
                 } }
                 .settingsPage()
             }
-            .navigationDestination(for: SetupStep.self) { SetupStepPage(step: $0) }
+            .navigationDestination(for: SetupStep.self) { SetupStepPage(step: $0).settingsPage() }
             .navigationDestination(for: SettingsRoute.self) { route in
                 SettingsDestination(route: route, push: { path.append($0) }, pop: { if !path.isEmpty { path.removeLast() } })
                     .settingsPage()
@@ -182,16 +192,14 @@ struct PokiDetailsView: View {
     private var hasModel: Bool { isSample || ModelKeys.hasUsableKey }
     private var brainValue: String {
         if isSample { return "GPT-6.1 Terra" }
-        return hasModel ? ModelKeys.selectedModelName : AppLocalization.text(LocalizedStringResource("Add"))
+        return hasModel ? ModelKeys.selectedModelName : AppLocalization.text(LocalizedStringResource("Add Model"))
     }
 
-    private var setupDone: Bool { isSample || model.setupComplete }
-    /// Setup first, then whether Poki is on.
+    /// Setup first, then whether kaka is on.
     private var connectionValue: String {
         if isSample { return AppLocalization.text(LocalizedStringResource("On")) }
-        if !model.setupComplete {
-            let steps = SetupStep.shown
-            return AppLocalization.text(LocalizedStringResource("\(steps.filter(model.isDone).count) of \(steps.count)"))
+        if !model.setupReadyForUse {
+            return AppLocalization.text(LocalizedStringResource("Finish Setup"))
         }
         if !model.sessionOn { return AppLocalization.text(LocalizedStringResource("Off")) }
         return model.ownerPaused ? AppLocalization.text(LocalizedStringResource("Paused")) : AppLocalization.text(LocalizedStringResource("On"))
@@ -215,9 +223,9 @@ struct PokiDetailsView: View {
 }
 
 enum DetailsRoute: Hashable {
-    case model, history, conversations, voice, connection, advanced, agents, approvals, appearance, language
+    case model, history, conversations, voice, connection, advanced, agents, approvals, appearance, language, interfaceSize
     /// Models, with the OpenAI key's form open (or Live Voice, when the key is there but turned off):
-    /// where Talk with Poki without a key leads.
+    /// where Talk with kaka without a key leads.
     case voiceKey
 }
 
@@ -292,6 +300,33 @@ private struct ConversationsSettingsView: View {
     }
 }
 
+/// The first row of Settings: the bear's face where the rows under it have their icon, and kaka's name.
+private struct PokiNameRow: View {
+    var mood: PokiMood
+    @ScaledMetric(relativeTo: .body) private var face = SettingsRowMetrics.iconSize
+    @ScaledMetric(relativeTo: .body) private var iconSpacing = SettingsRowMetrics.iconSpacing
+
+    var body: some View {
+        HStack(spacing: min(18, iconSpacing)) {
+            Group {
+                if let image = PokiMood.cutout(mood, small: true) {
+                    Image(uiImage: image).resizable().interpolation(.high).scaledToFit()
+                }
+            }
+            .frame(width: min(SettingsRowMetrics.maximumIconSize, face), height: min(SettingsRowMetrics.maximumIconSize, face))
+            .background(mood == .paused ? Tint.night : Tint.portrait, in: .circle)
+            .clipShape(.circle)
+            .overlay(Circle().strokeBorder(Tint.ring, lineWidth: 1))
+            .padding(.vertical, SettingsRowMetrics.iconLineInset)
+            .accessibilityHidden(true)
+            Text(verbatim: "kaka").font(.body.weight(.semibold)).foregroundStyle(Color(.label))
+                .accessibilityAddTraits(.isHeader)
+            Spacer(minLength: 8)
+        }
+        .animation(.easeInOut(duration: 0.3), value: mood)
+    }
+}
+
 /// A plain button that dims while pressed, for tiles that draw their own surface.
 struct PressedDimStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
@@ -303,7 +338,7 @@ struct PressedDimStyle: ButtonStyle {
 
 // MARK: Connection
 
-/// Connection: whether Poki may act on this iPhone and each thing the phone needs for it (the setup
+/// Connection: whether kaka may act on this iPhone and each thing the phone needs for it (the setup
 /// items, each opening its own page), with the guide that walks through them and the first run.
 struct ConnectionView: View {
     @Environment(AppModel.self) private var model
@@ -319,32 +354,48 @@ struct ConnectionView: View {
                     SettingsRow(title: "Automation", symbol: "hand.tap")
                 }
                 .accessibilityIdentifier("hands.on")
+                if model.passcodeConfirmationPending {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Enter Your Passcode Next").font(.headline)
+                        Text(AppModel.passcodeHeadsUpMessage).font(.subheadline)
+                    }
+                    Button("Continue") { model.continueAfterPasscodeHeadsUp() }
+                    Button("Cancel", role: .cancel) { model.cancelPasscodeHeadsUp() }
+                }
             } footer: {
                 VStack(alignment: .leading, spacing: 6) {
-                    // Paused is not a lock: an agent's request, or a task you send, starts Poki again.
-                    Text(model.sessionStarting ? "kaka is turning on."
-                         : on ? "kaka can tap, type, and scroll on this iPhone."
-                         : model.sessionOn ? "kaka is paused. It resumes automatically upon a new task or agent request."
-                         : "kaka is off. Agents can’t reach this iPhone.")
-                    // Why turning on failed, under the switch that was turned on (not only on Poki's
-                    // page). Poki's own sentences are localized; PokiCore's stay as they came.
-                    if !on, !model.sessionStarting, let problem = model.problem {
+                    // Paused is not a lock: an agent's request, or a task you send, starts kaka again.
+                    if model.passcodeConfirmationPending {
+                        Text(AppModel.passcodeConfirmationMessage)
+                    } else {
+                        Text(model.sessionStarting ? "kaka is turning on."
+                             : on ? "kaka can tap, type, and scroll on this iPhone."
+                             : model.sessionOn ? "kaka is paused. It resumes automatically upon a new task or agent request."
+                             : "kaka is off. Agents can’t reach this iPhone.")
+                    }
+                    // Why turning on failed, under the switch that was turned on (not only on kaka's
+                    // page). kaka's own sentences are localized; PokiCore's stay as they came.
+                    if let failure = model.developerToolsFailure {
+                        Text(failure).foregroundStyle(.red)
+                    } else if !on, !model.sessionStarting, let problem = model.problem {
                         Text(verbatim: AppLocalization.bundle.localizedString(forKey: problem, value: problem, table: nil))
                             .foregroundStyle(.red)
+                    } else if !on, !model.sessionStarting, case .downloaded = model.diskImage.state {
+                        Text(DiskImageStore.unavailableMessage).foregroundStyle(.orange)
                     }
                 }
             }
 
             Section {
                 ForEach(SetupStep.shown) { step in
-                    let done = model.isDone(step)
+                    let done = model.stepReadyForUse(step)
                     NavigationLink(value: step) {
                         SettingsRow(title: step.rowTitle, symbol: step.symbol, value: done ? nil : AppLocalization.text(LocalizedStringResource("Turn On")),
                                     warns: !done, accessory: done ? .done : nil)
                     }
                 }
                 Button { guiding = true } label: {
-                    SettingsRow(title: model.setupComplete ? "Set Up Again" : "Continue Setup", symbol: "checklist")
+                    SettingsRow(title: model.setupReadyForUse ? "Set Up Again" : "Continue Setup", symbol: "checklist")
                 }
                 .accessibilityIdentifier("moreSettings.setup")
                 FirstRunAgain(row: true)
@@ -356,9 +407,9 @@ struct ConnectionView: View {
         }
         .navigationTitle(AppLocalization.text("Connection"))
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear { model.loopback.resume() }
+        .onAppear { model.loopback.resume(); model.diskImage.notice() }
         .sheet(isPresented: $guiding) {
-            SetupGuide(start: SetupStep.shown.first { !model.isDone($0) })
+            SetupGuide(start: SetupStep.shown.first { !model.stepReadyForUse($0) })
         }
     }
 
@@ -387,7 +438,7 @@ struct AdvancedSettingsView: View {
         @Bindable var model = model
         let voice = model.voice
         List {
-            // Main's Runner section. The in-process path has no Poki Runner to start or stop (ESP-152).
+            // Main's Runner section. The in-process path has no kaka Runner to start or stop (ESP-152).
             if model.automationPath == .runner {
                 Section {
                     LabeledContent("Runner", value: Health.runner(model).word)
@@ -476,26 +527,96 @@ enum Appearance: String, CaseIterable, Identifiable {
         case .dark: .dark
         }
     }
+
+    @MainActor
+    func select(reduceMotion: Bool, updatePreference: () -> Void) {
+        let windows = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .filter { $0.activationState == .foregroundActive }
+            .flatMap(\.windows)
+            .filter { $0.isKeyWindow && !$0.isHidden }
+        let transitions = reduceMotion ? [] : windows.compactMap { AppearanceFade(window: $0) }
+        var transaction = Transaction(animation: nil)
+        transaction.disablesAnimations = true
+        withTransaction(transaction, updatePreference)
+        UIView.performWithoutAnimation {
+            for window in windows {
+                window.overrideUserInterfaceStyle = style
+                window.layoutIfNeeded()
+            }
+        }
+        transitions.forEach { $0.start() }
+    }
+}
+
+@MainActor
+private final class AppearanceFade: UIView {
+    // Keep the outgoing frame opaque until SwiftUI has rendered the new list selection and UIKit
+    // has presented the new traits. Layout alone does not commit a frame to the display.
+    private var framesUntilReveal = 3
+
+    init?(window: UIWindow) {
+        guard let snapshot = window.snapshotView(afterScreenUpdates: false) else { return nil }
+        super.init(frame: window.bounds)
+        for case let previous as AppearanceFade in window.subviews { previous.removeFromSuperview() }
+        autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        isUserInteractionEnabled = false
+        accessibilityElementsHidden = true
+        snapshot.frame = bounds
+        snapshot.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(snapshot)
+        window.addSubview(self)
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    func start() {
+        CADisplayLink(target: self, selector: #selector(reveal(_:))).add(to: .main, forMode: .common)
+    }
+
+    @objc private func reveal(_ link: CADisplayLink) {
+        guard superview != nil else { link.invalidate(); return }
+        framesUntilReveal -= 1
+        guard framesUntilReveal == 0 else { return }
+        link.invalidate()
+        UIView.animate(withDuration: 0.24, delay: 0, options: [.curveEaseInOut, .allowUserInteraction]) {
+            self.alpha = 0
+        } completion: { _ in
+            self.removeFromSuperview()
+        }
+    }
 }
 
 /// Settings › Appearance: Automatic, Light or Dark.
 struct AppearanceView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage(Appearance.key) private var choice = Appearance.automatic.rawValue
 
     var body: some View {
         List {
             Section {
                 ForEach(Appearance.allCases) { option in
-                    Button { choice = option.rawValue } label: {
+                    Button {
+                        guard choice != option.rawValue else { return }
+                        option.select(reduceMotion: reduceMotion) { choice = option.rawValue }
+                    } label: {
                         HStack {
                             Text(verbatim: AppLocalization.text(option.title)).foregroundStyle(Color(.label))
                             Spacer()
-                            if option.rawValue == choice {
-                                Image(systemName: "checkmark").font(.body.weight(.semibold)).foregroundStyle(Tint.blueText)
-                            }
+                            // Keep the same view and layout when the selection moves. A list row
+                            // can animate an inserted symbol independently of the window's fade.
+                            Image(systemName: "checkmark")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(option.rawValue == choice ? Tint.blueText : Color.clear)
+                                .transaction {
+                                    $0.animation = nil
+                                    $0.disablesAnimations = true
+                                }
+                                .accessibilityHidden(true)
                         }
                         .contentShape(.rect)
                     }
+                    .buttonStyle(.plain)
                     .accessibilityAddTraits(option.rawValue == choice ? .isSelected : [])
                     .accessibilityIdentifier("appearance.\(option == .automatic ? "automatic" : option.rawValue)")
                 }
@@ -508,7 +629,7 @@ struct AppearanceView: View {
     }
 }
 
-/// Settings › Language: the effective iOS app language or one of Poki’s bundled translations.
+/// Settings › Language: the effective iOS app language or one of kaka’s bundled translations.
 private struct LanguageSettingsView: View {
     @Bindable private var localization = AppLocalization.shared
 
@@ -544,9 +665,9 @@ private struct LanguageSettingsView: View {
     }
 }
 
-/// Approvals (ESP-469 board "03 审批"): what always needs you, how Poki asks before a sensitive step, and
-/// how much your chat model may approve by itself. The way of asking is chosen on Poki's card only (the
-/// owner: one setting in one place); this page says which is in use and what it does. The sensitivity's
+/// Approvals (ESP-469 board "03 审批"): what always needs you, how kaka asks before a sensitive step, and
+/// how much your chat model may approve by itself. The way of asking is chosen here and on kaka's card (the
+/// same setting); the chat's Approvals are off line links here to turn them back on. The sensitivity's
 /// four levels are segments in their own order, least asking first.
 struct ApprovalsSettingsView: View {
     @Environment(AppModel.self) private var model
@@ -567,11 +688,12 @@ struct ApprovalsSettingsView: View {
             }
 
             Section {
-                LabeledContent("Approval Method", value: model.approvalMode.title)
-                    .accessibilityIdentifier("approvals.mode.current")
+                Picker("Approval Method", selection: $model.approvalMode) {
+                    ForEach(ApprovalClassifier.Mode.allCases) { Text($0.title).tag($0) }
+                }
+                .accessibilityIdentifier("approvals.mode.picker")
             } footer: {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Change it on kaka’s card: tap kaka’s picture at the top of the chat.")
                     switch model.approvalMode {
                     case .reply: Text("kaka asks in the chat and proceeds after you reply.")
                     case .confirm: Text("Tap Allow or Don’t Allow in the Live Activity, a notification, or kaka.")
@@ -624,7 +746,7 @@ struct ApprovalsSettingsView: View {
 }
 
 /// Agents: the MCP relay outside agents come through (its switch and address), then the agents that control
-/// this iPhone through Poki (list, add, revoke, each one's QR code and address).
+/// this iPhone through kaka (list, add, revoke, each one's QR code and address).
 struct AgentsAndRelayView: View {
     @Environment(AppModel.self) private var model
     @Binding var path: NavigationPath
@@ -751,10 +873,10 @@ struct GroupedSection<Content: View>: View {
     @ViewBuilder var content: Content
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title).font(.system(size: 13)).foregroundStyle(Color(.secondaryLabel)).padding(.horizontal, 16)
+            Text(title).font(.footnote).foregroundStyle(Color(.secondaryLabel)).padding(.horizontal, 16)
             VStack(spacing: 0) { content }.groupCard()
             if let footer {
-                Text(footer).font(.system(size: 13)).foregroundStyle(Color(.secondaryLabel)).padding(.horizontal, 16)
+                Text(footer).font(.footnote).foregroundStyle(Color(.secondaryLabel)).padding(.horizontal, 16)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -762,7 +884,7 @@ struct GroupedSection<Content: View>: View {
 }
 
 struct Chevron: View {
-    var body: some View { Text(verbatim: "›").font(.system(size: 17, weight: .semibold)).foregroundStyle(Color(.tertiaryLabel)) }
+    var body: some View { Text(verbatim: "›").font(.body.weight(.semibold)).foregroundStyle(Color(.tertiaryLabel)) }
 }
 
 private struct DetailsIssueRow: View {
@@ -788,7 +910,7 @@ private struct DetailsIssueRow: View {
     }
 }
 
-/// The first tile on Poki's details: main's Pause and Resume pair, and Turn On while Poki is off.
+/// The first tile on kaka's details: main's Pause and Resume pair, and Turn On while kaka is off.
 /// Standing by (right after Turn On, or after the idle minute) is Resume, as on main.
 enum PowerTile: Equatable {
     case pause, resume, turnOn
@@ -803,7 +925,17 @@ enum PowerTile: Equatable {
 /// The provider's letter on its coloured tile.
 struct ProviderTile: View {
     var provider: ModelProvider
-    var size: CGFloat = 29
+    @ScaledMetric(relativeTo: .body) private var scaledSize: CGFloat = 29
+    private let baseSize: CGFloat
+
+    init(provider: ModelProvider, size: CGFloat = 29) {
+        self.provider = provider
+        baseSize = size
+        _scaledSize = ScaledMetric(wrappedValue: size, relativeTo: .body)
+    }
+
+    private var size: CGFloat { min(baseSize * 1.5, max(baseSize * 0.9, scaledSize)) }
+
     var body: some View {
         Group {
             if let logo = provider.logo {
@@ -820,7 +952,7 @@ struct ProviderTile: View {
 }
 
 extension ModelProvider {
-    /// The provider's own logo in the asset catalog (Poki/ProviderIcons).
+    /// The provider's own logo in the asset catalog (kaka/ProviderIcons).
     var logo: String? {
         switch self {
         case .anthropic: "Provider-anthropic"

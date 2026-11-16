@@ -16,7 +16,7 @@
 
 // Carried over from LiveKit's components-swift, BarAudioVisualizer.swift
 // (https://github.com/livekit/components-swift/blob/9f28db3ae5d2b51f3033ea725c952ddacb5657d0/Sources/LiveKitComponents/UI/Visualizer/BarAudioVisualizer.swift).
-// Changed for Poki, which does not link the LiveKit SDK and has no audio levels to read:
+// Changed for kaka, which does not link the LiveKit SDK and has no audio levels to read:
 // - `AgentState` is `TalkBars.Mode`, with `quiet` added (no bar lit) for a talk that was interrupted;
 // - the bars' heights come from `TalkBars.levels` instead of LiveKit's `AudioProcessor`: made-up
 //   levels, highest in the middle, while somebody speaks, and none otherwise;
@@ -25,7 +25,7 @@
 import SwiftUI
 
 /// A talk's state as a row of vertical bars: a sweep while it connects, the middle bar pulsing while
-/// Poki listens, a quick sweep while it thinks, and all bars moving while somebody speaks.
+/// kaka listens, a quick sweep while it thinks, and all bars moving while somebody speaks.
 struct TalkBars: View {
     enum Mode: Equatable { case initializing, listening, thinking, speaking, quiet }
 

@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-/// One language for Poki-owned UI. System UI keeps iOS's per-app language, and stored conversation
+/// One language for kaka-owned UI. System UI keeps iOS's per-app language, and stored conversation
 /// content stays as written. Resources still live in the existing String Catalogs.
 @Observable final class AppLocalization {
     static let shared = AppLocalization()

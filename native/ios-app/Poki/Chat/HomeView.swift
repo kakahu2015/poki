@@ -1,19 +1,25 @@
 import PokiCore
 import SwiftUI
 
-// The home page and the way from it into the conversation. The home page carries the Kaka mark;
-// the conversation keeps only its navigation buttons in the top bar.
+// The home page and the way from it into the conversation (ESP-376, and the owner's home of
+// 2026-11-12: no large bear, kaka's picture at the top as in the conversation). The chat page
+// (`ChatView`) owns the state and puts these pieces together: `HomePage` under the top bar and
+// `ChatTopBar` in it, the same on both pages.
 
 // MARK: Timing
 
-/// The change from the home page to the conversation: the mark and greeting fade out together
-/// (`flight`, 0.35 s); the pills fade and sink 14 points in 180 ms, the light takes from 60 to 510 ms to sink to the bottom
+/// The change from the home page to the conversation, counted from Send: kaka's picture rises into
+/// the top bar and the greeting rises under it, fading, both on one animation (`flight`, 0.35 s); the
+/// pills fade and sink 14 points in 180 ms, the light takes from 60 to 510 ms to sink to the bottom
 /// edge, the new-conversation button turns up on 300 to 480 ms, and your words rise out of the message
 /// field on their own spring (response 0.45, damping 0.85). Every piece is driven by the
 /// one fact "the conversation has begun", so the change can be turned round at any moment. With
 /// Reduce Motion the page cross-fades in 200 ms.
 enum HomeMotion {
-    /// The side of the Kaka mark over the greeting on the home page.
+    /// The side of kaka's picture in the top bar, and of the round buttons beside it.
+    static let avatar: CGFloat = 56
+    /// The side of kaka's picture over the greeting on the home page (board 头像位置 丙), 16 points
+    /// above the greeting.
     static let homeAvatar: CGFloat = 80
     static let button: CGFloat = 48
     private static let fade = Animation.easeInOut(duration: 0.2)
@@ -25,29 +31,76 @@ enum HomeMotion {
     /// Every animation of the change goes through here, delays included.
     static func paced(_ animation: Animation) -> Animation { slow > 1 ? animation.speed(1 / slow) : animation }
 
-    /// The home mark and greeting fade as the conversation begins, and return for a new one.
+    /// kaka's picture and the greeting under it go together, on one animation: up into the top bar
+    /// as the conversation begins, the greeting fading as it rises, and back down for a new one.
     static func flight(_ reduce: Bool) -> Animation { paced(reduce ? fade : .smooth(duration: 0.35)) }
-    /// The message field taking the home page up, or letting it down.
-    static let lift = Animation.snappy(duration: 0.3)
+    /// The message field taking the home page up, or letting it down: the greeting and kaka's picture
+    /// over it move on this one animation.
+    static let lift = Animation.smooth(duration: 0.3)
 
     static func ground(_ reduce: Bool) -> Animation { paced(reduce ? fade : .easeInOut(duration: 0.45).delay(0.06)) }
     static func pills(_ home: Bool, _ reduce: Bool) -> Animation {
         paced(reduce ? fade : home ? .easeOut(duration: 0.25).delay(0.3) : .easeIn(duration: 0.18))
     }
+    /// The new-conversation button, once the conversation has begun.
+    static func landing(_ home: Bool, _ reduce: Bool) -> Animation {
+        paced(reduce ? fade : home ? .easeOut(duration: 0.12) : .easeOut(duration: 0.18).delay(0.3))
+    }
 }
 
-// MARK: Kaka mark
+/// The portrait and both of its anchors must use the same scale during the home-to-chat flight.
+struct HomeSizes: DynamicProperty {
+    @ScaledMetric(relativeTo: .body) private var factor = 1.0
+    private var scale: CGFloat { min(1.2, max(0.9, factor)) }
+    var avatar: CGFloat { HomeMotion.avatar * scale }
+    var homeAvatar: CGFloat { HomeMotion.homeAvatar * scale }
+    var button: CGFloat { max(44, HomeMotion.button * scale) }
+}
 
-/// The site's mark on the same round ground used by the welcome pages.
+// MARK: kaka's picture
+
+/// kaka's round picture: the bear for its state, on a pale blue ground. Every state is played by the
+/// three-dimensional bear (`PokiMood.act`), which takes up each state's stance from where it is, reacts
+/// when a task is done or goes wrong, and says hi to a tap (`ModelBear`). The flat faces, which blink and
+/// hop when the state changes (`BlinkingFace`), stand in only until the model is drawn, or where it
+/// cannot be.
 struct PokiPortrait: View {
     var mood: PokiMood
-    var side: CGFloat = HomeMotion.homeAvatar
+    var side: CGFloat = HomeMotion.avatar
+    /// Counts the taps on the picture.
+    var pokes = 0
 
     var body: some View {
+        #if DEBUG
+        // `-pokiMoodCycle ready,done,ready,tripped` shows those states in turn, four seconds each, to
+        // watch the bear change between them.
+        if let cycle = Self.cycle {
+            TimelineView(.periodic(from: .now, by: 4)) { context in
+                portrait(cycle[Int(context.date.timeIntervalSinceReferenceDate / 4) % cycle.count])
+            }
+        } else {
+            portrait(mood)
+        }
+        #else
+        portrait(mood)
+        #endif
+    }
+
+    #if DEBUG
+    private static let cycle: [PokiMood]? = UserDefaults.standard.string(forKey: "pokiMoodCycle")
+        .map { $0.split(separator: ",").compactMap { PokiMood(rawValue: String($0)) } }.flatMap { $0.isEmpty ? nil : $0 }
+    #endif
+
+    private func portrait(_ mood: PokiMood) -> some View {
         ZStack {
             Circle().fill(Tint.portrait)
-            Image("KakaMark").resizable().scaledToFit()
-                .frame(width: side, height: side)
+            // The board's bear is 50 points in the 56-point circle, 6 points down, so the circle
+            // cuts it at the chest.
+            ModelBear(act: mood.act, side: side * 50 / 56, pokes: pokes) {
+                BlinkingFace(mood: mood, side: side * 50 / 56)
+            }
+            .frame(width: side * 50 / 56, height: side * 50 / 56)
+            .offset(y: side * 3 / 56)
         }
         .frame(width: side, height: side)
         .clipShape(.circle)
@@ -55,22 +108,28 @@ struct PokiPortrait: View {
     }
 }
 
-/// The Kaka mark over the home greeting, on a pale blue ground with a soft blue shadow.
+/// kaka's picture as it shows on a page: its round pale blue ground with a soft blue shadow, and no
+/// white ring around it (boards 定稿 07 and 头像位置 丙 drew one; the owner had it taken off). It is
+/// drawn at the home page's 80 points and scaled, so one picture, and one three-dimensional bear, goes
+/// from the home page to the top of the chat without being made again.
 struct PokiPicture: View {
+    var mood: PokiMood
     var side: CGFloat
+    /// Counts the taps on kaka, for the bear to answer.
+    var pokes = 0
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         let dark = scheme == .dark
-        PokiPortrait(mood: .ready, side: HomeMotion.homeAvatar)
+        PokiPortrait(mood: mood, side: HomeMotion.homeAvatar, pokes: pokes)
             .scaleEffect(side / HomeMotion.homeAvatar)
             .frame(width: side, height: side)
             .shadow(color: dark ? Color(hex: 0x3C8DFF).opacity(0.35) : Color(hex: 0x0177FD).opacity(0.18), radius: dark ? 8 : 7, y: 4)
     }
 }
 
-/// The Kaka mark's place over the home greeting.
-enum PicturePlace: Hashable { case home }
+/// The two places kaka's picture sits: over the greeting on the home page, and at the top of the chat.
+enum PicturePlace: Hashable { case home, top }
 
 struct PicturePlaceKey: PreferenceKey {
     static let defaultValue: [PicturePlace: Anchor<CGRect>] = [:]
@@ -80,82 +139,163 @@ struct PicturePlaceKey: PreferenceKey {
 }
 
 extension View {
-    /// Marks where the home mark sits; the page draws it there (`PokiFlight`).
+    /// Marks where kaka's picture sits on this page; the chat draws the one picture there (`PokiFlight`).
     func picturePlace(_ place: PicturePlace) -> some View {
         anchorPreference(key: PicturePlaceKey.self, value: .bounds) { [place: $0] }
     }
 }
 
-/// The home mark over the greeting. It leaves the screen when the conversation begins; tapping it
-/// opens the status card.
+/// The one picture of kaka, over the greeting on the home page at 80 points and at the top of the
+/// chat at 56. Sending the first message moves it up and makes it smaller, with the greeting rising
+/// under it on the same animation (`HomeMotion.flight`), and a new conversation brings both back;
+/// with Reduce Motion it is just there. While the message field takes the home page up, the picture
+/// moves with the greeting on the page's own animation. It is one view all the way, and the bear in it
+/// is drawn at one size, so nothing is made again on the way. A tap says hi and opens kaka's
+/// card. In the chat VoiceOver reads the top bar's kaka instead, which is the same button.
 struct PokiFlight: View {
+    var sizes = HomeSizes()
+    var status: PokiStatus
     var home: Bool
     var writing = false
     var places: [PicturePlace: CGRect]
+    var pokes: Int
     var tap: () -> Void
-    /// The bottom of the mark over the greeting, in global points, for the status card to open under it.
+    /// The bottom of the picture over the greeting, in global points, for kaka's card to open under it.
     var landed: (CGFloat) -> Void = { _ in }
+    /// How far the picture rises from over the greeting to the top bar, for the greeting to rise with it.
+    var travel: (CGFloat) -> Void = { _ in }
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        Group {
-            if home, let place = places[.home] {
-                Button(action: tap) {
-                    PokiPicture(side: HomeMotion.homeAvatar).contentShape(.circle)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(Text(verbatim: "kaka"))
-                .accessibilityIdentifier("home.poki")
-                .onGeometryChange(for: CGFloat?.self) { $0.frame(in: .global).maxY } action: {
-                    if let bottom = $0 { landed(bottom) }
-                }
-                .position(x: place.midX, y: place.midY)
-                .animation(reduceMotion ? nil : HomeMotion.lift, value: writing)
-                .transition(.opacity)
+        let side = home ? sizes.homeAvatar : sizes.avatar
+        if let place = places[home ? .home : .top] {
+            Button(action: tap) {
+                PokiPicture(mood: status.mood, side: side, pokes: pokes).contentShape(.circle)
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text(verbatim: "kaka, " + PokiStatusCopy.word(status)))
+            .accessibilityIdentifier("home.poki")
+            .accessibilityHidden(!home)
+            .onGeometryChange(for: CGFloat?.self) { home ? $0.frame(in: .global).maxY : nil } action: {
+                if let bottom = $0 { landed(bottom) }
+            }
+            .position(x: place.midX, y: place.midY)
+            // The greeting's own animations, so the two move as one. A place that moves for any other
+            // reason (the keyboard) moves in that change's animation, as the greeting does.
+            .animation(reduceMotion ? nil : HomeMotion.lift, value: writing)
+            .animation(reduceMotion ? nil : HomeMotion.flight(false), value: home)
+            .onChange(of: rise, initial: true) { if home, let rise { travel(rise) } }
         }
-        .animation(HomeMotion.flight(reduceMotion), value: home)
+    }
+
+    private var rise: CGFloat? {
+        guard let from = places[.home], let to = places[.top] else { return nil }
+        return from.midY - to.midY
+    }
+}
+
+/// The middle of the chat's top bar (board 定稿 07): the place for kaka's picture, which the chat
+/// draws there (`PokiFlight`), and under it kaka's name on a capsule of glass. Where kaka stands shows
+/// in the picture's face; the word for it is at the top of kaka's card and in what VoiceOver reads.
+/// On the home page the picture is over the greeting and the bar's middle is empty.
+struct PokiHead: View {
+    var sizes = HomeSizes()
+    var home: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Color.clear.frame(width: sizes.avatar, height: sizes.avatar).picturePlace(.top)
+            // Glass in a group is drawn by the group, so the capsule comes and goes rather than fading;
+            // its place stays, and the bar keeps its height on both pages.
+            ZStack {
+                if !home {
+                    Text(verbatim: "kaka")
+                        .font(.caption.weight(.semibold)).foregroundStyle(Color(.label))
+                        .padding(.horizontal, 12).frame(minHeight: 24)
+                        .glassSurface(in: Capsule())
+                        .glassAppearing()
+                }
+            }
+            .frame(minHeight: 24)
+            .animation(HomeMotion.landing(home, reduceMotion), value: home)
+        }
     }
 }
 
 // MARK: Top bar
 
-/// The chat's top: conversations on the left and a new conversation on the right. The message list
-/// passes behind the floating buttons through the system's scroll edge effect.
+// The middle of the bar, kaka's picture over its state, is IMessageChannelHeaderModifier from
+// GetStream/stream-tutorial-projects (commit 04c8dbb, AI/AgentSkills/iMessageCloneWithSkills/
+// IMessageScreens.swift; the repository has no licence file). Changed: a bar of its own instead of a
+// toolbar item; the picture at the board's 56 points, with no white ring; a dot and kaka's state under it
+// (board 定稿 07).
+
+/// The chat's top as Messages draws a conversation's (ESP-468): the two round glass buttons float at
+/// the sides, the conversations on the left and a new conversation on the right, and between them
+/// in the conversation kaka's picture and name (on the home page the picture is over the greeting,
+/// and the middle is empty). A tap on kaka opens its card. There is no bar behind them: the conversation passes under them through the system's scroll
+/// edge effect. The new-conversation button looks the same on the home page: there, the page already
+/// being a new conversation, a tap starts the message instead (`newConversation` decides what).
 struct ChatTopBar: View {
+    var sizes = HomeSizes()
+    var status: PokiStatus
     var home: Bool
     /// A task is under way: no new conversation until it ends or is stopped.
     var busy: Bool
     /// Opens the conversations (the drawer on iPhone); nil where the list is always beside the chat.
     var openThreads: (() -> Void)?
     var newConversation: () -> Void
+    /// A tap on kaka: the bear says hi while its card opens.
+    var openDetails: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Taps on New Conversation on the home page, for a light tap in the hand.
     @State private var homeTaps = 0
 
     var body: some View {
-        HStack {
-            if let openThreads {
-                Button(action: openThreads) { glyph("line.3.horizontal") }
-                    .buttonStyle(.plain)
-                    .glassSurface(in: Circle(), interactive: true)
-                    .accessibilityLabel(Text("Conversations"))
-                    .accessibilityIdentifier("chat.threads")
+        ZStack(alignment: .top) {
+            HStack {
+                if let openThreads {
+                    Button(action: openThreads) { glyph("line.3.horizontal") }
+                        .buttonStyle(.plain)
+                        .glassSurface(in: Circle(), interactive: true)
+                        .accessibilityLabel(Text("Conversations"))
+                        .accessibilityIdentifier("chat.threads")
+                        .accessibilityShowsLargeContentViewer {
+                            Label("Conversations", systemImage: "line.3.horizontal")
+                        }
+                }
+                Spacer(minLength: 8)
+                Button {
+                    if home { homeTaps += 1 }
+                    newConversation()
+                } label: {
+                    glyph("square.and.pencil", dim: busy)
+                }
+                .buttonStyle(.plain)
+                .glassSurface(in: Circle(), interactive: !busy)
+                .allowsHitTesting(!busy)
+                .sensoryFeedback(.impact(weight: .light), trigger: homeTaps)
+                .accessibilityLabel(Text("New Conversation"))
+                .accessibilityIdentifier("home.newChat")
+                .accessibilityShowsLargeContentViewer {
+                    Label("New Conversation", systemImage: "square.and.pencil")
+                }
             }
-            Spacer(minLength: 8)
-            Button {
-                if home { homeTaps += 1 }
-                newConversation()
-            } label: {
-                glyph("square.and.pencil", dim: busy)
+            .padding(.top, (sizes.avatar - sizes.button) / 2)
+            Button(action: openDetails) {
+                PokiHead(home: home).contentShape(.rect)
             }
             .buttonStyle(.plain)
-            .glassSurface(in: Circle(), interactive: !busy)
-            .allowsHitTesting(!busy)
-            .sensoryFeedback(.impact(weight: .light), trigger: homeTaps)
-            .accessibilityLabel(Text("New Conversation"))
-            .accessibilityIdentifier("home.newChat")
+            .allowsHitTesting(!home)
+            .accessibilityHidden(home)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: "kaka, " + PokiStatusCopy.word(status)))
+            .accessibilityAddTraits(.isButton)
+            .accessibilityIdentifier("chat.header.details")
+            .accessibilityShowsLargeContentViewer()
+            .padding(.horizontal, sizes.button + 12)
         }
-        .padding(.top, 4)
         .glassGroup()
         .padding(.horizontal, 16).padding(.top, 2).padding(.bottom, 4)
         .frame(maxWidth: 720)
@@ -167,7 +307,7 @@ struct ChatTopBar: View {
         Image(systemName: symbol)
             .font(.body.weight(.semibold))
             .foregroundStyle(Color(.label).opacity(dim ? 0.35 : 1))
-            .frame(width: HomeMotion.button, height: HomeMotion.button)
+            .frame(width: sizes.button, height: sizes.button)
             .contentShape(.circle)
     }
 }
@@ -194,7 +334,7 @@ enum HomeIdea {
     /// The fixed key keeps Forget stable across language changes. The carried mark also appears
     /// when GitHub is not installed, so the task can explain how to install it.
     static var star: HomeShortcut {
-        HomeShortcut(key: "starpokiongithub", app: "", appName: "GitHub", text: AppLocalization.text(LocalizedStringResource("Star this repo")),
+        HomeShortcut(key: "starpokiongithub", app: "", appName: "GitHub", text: AppLocalization.text(LocalizedStringResource("Star kaka")),
                      prompt: AppLocalization.text(LocalizedStringResource("Open the GitHub app on this iPhone, go to the JosssphZhou/poki repository, and star it. If the app is not installed, stop and ask me to install it from the App Store. Do not use a browser. If I am not signed in, stop on the login screen and let me sign in myself. If I have already starred the repository, tell me and leave it starred.")), icon: "github")
     }
 
@@ -229,7 +369,7 @@ enum HomeIdea {
 }
 
 /// The home page's greeting (ESP-474): a hello for the time of day, as a chat app greets you (morning
-/// from 5, afternoon from 11, evening from 18, late from 23), and what you would like done.
+/// from 5, afternoon from 11, evening from 18, late from 23), and what kaka should do under it.
 enum HomeGreeting {
     /// The two lines as VoiceOver reads them: the hello and the question, as one sentence.
     static func spoken(at date: Date = .now) -> String {
@@ -247,11 +387,11 @@ enum HomeGreeting {
     }
 
     /// The line under the hello, the same at any hour.
-    static var ask: String { AppLocalization.text(LocalizedStringResource("What can I do for you?")) }
+    static var ask: String { AppLocalization.text(LocalizedStringResource("What should kaka do?")) }
 }
 
 /// The greeting as the home page draws it, for the time `date` falls in: the hello in ink and the
-/// question in grey under it, centred under the Kaka mark. System Semibold 28 tracked in by 0.6,
+/// question in grey under it, centred under kaka's picture. System Semibold 28 tracked in by 0.6,
 /// with no space between the lines.
 struct HomeGreetingView: View {
     var date: Date
@@ -263,10 +403,9 @@ struct HomeGreetingView: View {
         VStack(spacing: 0) {
             Text(verbatim: HomeGreeting.hello(at: date))
                 .foregroundStyle(dark ? Color(hex: 0xF4F4F1) : Color(hex: 0x111110))
-            // One line at any type size: at the largest sizes two lines of it reach down to the pills.
             Text(verbatim: HomeGreeting.ask)
                 .foregroundStyle(dark ? Color(hex: 0x8D8D87) : Color(hex: 0x6F6F69))
-                .lineLimit(1).minimumScaleFactor(0.5)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .font(.system(size: size, weight: .semibold))
         .tracking(-0.6 * size / 28)
@@ -278,20 +417,25 @@ struct HomeGreetingView: View {
     }
 }
 
-/// The home page, before your first message: under the Kaka mark at the top, two
+/// The home page, before your first message (board 定稿 01): under kaka's picture at the top, two
 /// lines of greeting a little above the middle, and things you could ask as two
 /// rows of glass pills over the message field. A pill fills the message field; nothing is sent until
 /// you send it.
 struct HomePage<Footer: View>: View {
+    var sizes = HomeSizes()
     var home: Bool
     /// Suggestions yield their space while the message field has focus.
     var writing = false
+    /// How far kaka's picture rises into the top bar as the conversation begins: the greeting rises with it.
+    var rise: CGFloat = 0
     var pick: (String) -> Void
     @ViewBuilder var footer: () -> Footer
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.coveredByDrawer) private var covered
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     private let shortcutStore = HomeShortcutStore.shared
     /// Picked as the page comes in, so it does not change while you look at it.
     @State private var greetedAt = Date.now
@@ -311,49 +455,19 @@ struct HomePage<Footer: View>: View {
 
     var body: some View {
         GeometryReader { geometry in
-            ScrollView {
-                VStack(spacing: 0) {
-                    VStack(spacing: 12) {
-                        // The mark sits 16 points over the greeting.
-                        Color.clear.frame(width: HomeMotion.homeAvatar, height: HomeMotion.homeAvatar)
-                            .picturePlace(.home)
-                            .padding(.bottom, 4)
-                        HomeGreetingView(date: greetedAt)
-                        footer()
-                    }
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
-                    // Keep the greeting in the same vertical position under the navigation buttons.
-                    .padding(.top, writing ? 24 : max(24, min(112, geometry.size.height * 0.29 - 72)))
-                    .opacity(home ? 1 : 0)
-                    .animation(HomeMotion.flight(reduceMotion), value: home)
-                    .onChange(of: home) { _, shown in if shown { greetedAt = .now } }
-
-                    Spacer(minLength: 24)
-                    if !writing, !editorTyping {
-                        VStack(spacing: 8) {
-                            let shortcuts = shortcutStore.shortcuts
-                            // Three on top, or the larger half of more than six.
-                            let top = max(3, (shortcuts.count + 1) / 2)
-                            row(Array(shortcuts.prefix(top)), at: 0, speed: HomeMotion.pillSpeeds.top, start: 64)
-                            if shortcuts.count > top { row(Array(shortcuts.dropFirst(top)), at: 1, speed: HomeMotion.pillSpeeds.bottom, start: 0) }
-                        }
-                        .padding(.top, 2)
-                        // A sideways drag on the rows scrolls them; it does not pull the drawer out.
-                        .scrollsSideways(home)
-                        .opacity(home ? 1 : 0)
-                        .offset(y: home || reduceMotion ? 0 : 14)
-                        .animation(HomeMotion.pills(home, reduceMotion), value: home)
-                    }
-                    Spacer().frame(height: 34)
+            let inset = max(24, min(112, geometry.size.height * 0.29 - 72))
+            // A regular-height greeting fits without a vertical scroll view. Keeping the same
+            // layout as the keyboard opens avoids scroll corrections while the composer expands.
+            if typeSize.isAccessibilitySize || verticalSizeClass == .compact {
+                ScrollView {
+                    content(inset: inset, height: geometry.size.height, scrolls: true)
                 }
-                .frame(maxWidth: .infinity, minHeight: geometry.size.height)
+                    .scrollBounceBehavior(.basedOnSize)
+                    .scrollDismissesKeyboard(.interactively)
+            } else {
+                content(inset: inset, height: geometry.size.height, scrolls: false)
             }
-            .scrollBounceBehavior(.basedOnSize)
-            .scrollDismissesKeyboard(.interactively)
         }
-        .animation(HomeMotion.lift, value: writing)
-        .animation(HomeMotion.lift, value: editorTyping)
         .task(id: SessionStore.shared.sessions.count) {
             shortcutStore.refresh(sessions: SessionStore.shared.sessions, routines: RoutineStore.shared.routines)
         }
@@ -380,6 +494,57 @@ struct HomePage<Footer: View>: View {
         .sensoryFeedback(.impact(weight: .medium), trigger: holds)
     }
 
+    private func content(inset: CGFloat, height: CGFloat, scrolls: Bool) -> some View {
+        VStack(spacing: 0) {
+            VStack(spacing: 12) {
+                // kaka's picture, 16 points over the greeting (board 头像位置 丙); the chat draws it here.
+                Color.clear.frame(width: sizes.homeAvatar, height: sizes.homeAvatar)
+                    .picturePlace(.home)
+                    .padding(.bottom, 4)
+                HomeGreetingView(date: greetedAt)
+                footer()
+            }
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 24)
+            // The board's picture 258 points from the screen's top, the greeting 354: under the top
+            // bar, whose middle keeps the chat's picture and name in height, that is 112 points.
+            // A fixed top layout keeps the regular greeting out of the keyboard's layout pass.
+            // In a scrollable layout, reserve the actual space so large text stays reachable.
+            .padding(.top, scrolls && !writing ? inset : 24)
+            .offset(y: scrolls || writing ? 0 : inset - 24)
+            .animation(reduceMotion ? nil : HomeMotion.lift, value: writing)
+            .opacity(home ? 1 : 0)
+            .offset(y: home || reduceMotion ? 0 : -rise)
+            .animation(HomeMotion.flight(reduceMotion), value: home)
+            .onChange(of: home) { _, shown in if shown { greetedAt = .now } }
+
+            Spacer(minLength: 24)
+            if !writing, !editorTyping {
+                VStack(spacing: 8) {
+                    let shortcuts = shortcutStore.shortcuts
+                    if typeSize.isAccessibilitySize {
+                        ForEach(shortcuts) { idea in shortcut(idea, row: 0) }
+                    } else {
+                        // Three on top, or the larger half of more than six.
+                        let top = max(3, (shortcuts.count + 1) / 2)
+                        row(Array(shortcuts.prefix(top)), at: 0, speed: HomeMotion.pillSpeeds.top, start: 64)
+                        if shortcuts.count > top { row(Array(shortcuts.dropFirst(top)), at: 1, speed: HomeMotion.pillSpeeds.bottom, start: 0) }
+                    }
+                }
+                .padding(.top, 2)
+                .padding(.horizontal, typeSize.isAccessibilitySize ? 18 : 0)
+                // A sideways drag on the rows scrolls them; it does not pull the drawer out.
+                .scrollsSideways(home && !typeSize.isAccessibilitySize)
+                .opacity(home ? 1 : 0)
+                .offset(y: home || reduceMotion ? 0 : 14)
+                .animation(HomeMotion.pills(home, reduceMotion), value: home)
+                .transition(.opacity)
+            }
+            Spacer().frame(height: 34)
+        }
+        .frame(maxWidth: .infinity, minHeight: height)
+    }
+
     /// The part of the pressed pill that shows, in the page's own points: a pill at an end of a row is
     /// partly off the screen, and the menu's arrow points at what can be seen of it.
     private var menuAnchor: CGRect {
@@ -403,16 +568,18 @@ struct HomePage<Footer: View>: View {
     private func row(_ ideas: [HomeShortcut], at index: Int, speed: Double, start: CGFloat) -> some View {
         Marquee(speed: speed, spacing: 8, start: start, edgeFade: 32, running: !reduceMotion && !DeviceStrain.shared.resting && !writing && !PerfSwitch.on(.pillsStill),
                 active: home && scenePhase == .active && !covered, loops: !voiceOver, stopped: busy) {
-            ForEach(ideas) { idea in
-                ShortcutPill(idea: idea, row: index, locked: busy, pick: { pick(idea.prompt) },
-                             hold: { frame in
-                                 guard home, !busy else { return }
-                                 holds += 1
-                                 held = HeldShortcut(shortcut: idea, frame: frame)
-                             },
-                             edit: { edit(idea) }, forget: { shortcutStore.forget(idea) })
-            }
+            ForEach(ideas) { idea in shortcut(idea, row: index) }
         }
+    }
+
+    private func shortcut(_ idea: HomeShortcut, row: Int) -> some View {
+        ShortcutPill(idea: idea, row: row, locked: busy, pick: { pick(idea.prompt) },
+                     hold: { frame in
+                         guard home, !busy else { return }
+                         holds += 1
+                         held = HeldShortcut(shortcut: idea, frame: frame)
+                     },
+                     edit: { edit(idea) }, forget: { shortcutStore.forget(idea) })
     }
 
     /// A pill's menu or its Edit popup is open, or about to: the rows stand still, and no pill is tapped.
@@ -428,7 +595,7 @@ private struct HeldShortcut: Identifiable {
 
 /// One pill of a row: the app's icon, its name and the action, the name and the action in one size and
 /// told apart by weight and shade (the owner: the name and the words after it did not match). An edited
-/// one with no app this iPhone knows is Poki's icon and the words. A tap picks it and a long press
+/// one with no app this iPhone knows is kaka's icon and the words. A tap picks it and a long press
 /// opens its menu. `Marquee` lays every pill out several times over, so where the one under the
 /// finger is on the screen is kept here, by each copy.
 private struct ShortcutPill: View {
@@ -443,21 +610,33 @@ private struct ShortcutPill: View {
     var edit: () -> Void
     var forget: () -> Void
     @State private var place = ScreenPlace.Probe()
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @ScaledMetric(relativeTo: .subheadline) private var iconSide = 24.0
+    @ScaledMetric(relativeTo: .subheadline) private var pillHeight = 48.0
+    @ScaledMetric(relativeTo: .subheadline) private var sideInset = 12.0
 
     var body: some View {
         Button { if !locked { pick() } } label: {
             HStack(spacing: 8) {
-                AppIconView(app: idea.app, size: 24, alwaysLight: true, carried: idea.icon)
-                HStack(spacing: 5) {
+                AppIconView(app: idea.app, size: min(40, iconSide), alwaysLight: true, carried: idea.icon)
+                let layout = typeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2))
+                    : AnyLayout(HStackLayout(spacing: 5))
+                layout {
                     if !idea.appName.isEmpty {
                         Text(verbatim: idea.appName).font(.subheadline.weight(.semibold)).foregroundStyle(Color(.label))
                     }
                     Text(verbatim: idea.text).font(.subheadline).foregroundStyle(Color(.label).opacity(0.7))
                 }
-                .lineLimit(1)
+                .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
+                .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(.leading, 12).padding(.trailing, 18).frame(minHeight: 48)
-            .contentShape(.capsule)
+            .padding(.vertical, typeSize.isAccessibilitySize ? 10 : 0)
+            .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, alignment: .leading)
+            .padding(.leading, min(18, sideInset))
+            .padding(.trailing, min(24, sideInset * 1.5))
+            .frame(minHeight: min(64, max(44, pillHeight)))
+            .contentShape(.rect)
         }
         .pillButtonStyle(row: row)
         .background(ScreenPlace(probe: place))
@@ -470,8 +649,6 @@ private struct ShortcutPill: View {
         .accessibilityAction(named: Text("Edit"), edit)
         .accessibilityAction(named: Text("Forget"), forget)
         .accessibilityIdentifier("home.idea." + (idea.app.isEmpty ? idea.icon ?? "poki" : idea.app))
-        // Said here and not on the row: the pills live in the scroll view's own hosting view.
-        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
     }
 }
 

@@ -1,8 +1,8 @@
 import Foundation
 
-/// What a talk with Poki is doing, as its screens say it: one value at a time, worked out from the
+/// What a talk with kaka is doing, as its screens say it: one value at a time, worked out from the
 /// voice session (`VoiceModel.talkState`). The message field's talk bar, the light along the bottom
-/// edge and Poki's picture all read this, so they change together.
+/// edge and kaka's picture all read this, so they change together.
 enum TalkState: Equatable {
     case connecting
     /// The microphone is open and nobody speaks.
@@ -13,7 +13,7 @@ enum TalkState: Equatable {
     /// A step of the talk is running on the phone.
     case acting
     case speaking
-    /// The person spoke over Poki's answer, or stopped it: said for a moment, then Poki listens again.
+    /// The person spoke over kaka's answer, or stopped it: said for a moment, then kaka listens again.
     case interrupted
     /// The talk ended without being asked to. Why, in the session's own words.
     case failed(String)

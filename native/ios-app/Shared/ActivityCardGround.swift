@@ -49,13 +49,13 @@ struct CardSkin {
     var across: [Gradient.Stop] { zip(Self.across, rows[1].colours).map { Gradient.Stop(color: Color(hex: $1), location: Double($0)) } }
 }
 
-/// Poki's brand band: the card's lowest row of blues, left to right, where its light is brightest. The
-/// island's glow while you talk with Poki and the talk's marks in the app draw it.
+/// kaka's brand band: the card's lowest row of blues, left to right, where its light is brightest. The
+/// island's glow while you talk with kaka and the talk's marks in the app draw it.
 enum BrandBand {
     static var colours: [Color] { CardSkin.light.rows[CardSkin.light.rows.count - 1].colours.map { Color(hex: $0) } }
 }
 
-/// While you talk with Poki: the brand band low in the expanded island, rising out of its bottom edge
+/// While you talk with kaka: the brand band low in the expanded island, rising out of its bottom edge
 /// and fading upward and toward the sides. Plain gradients and masks, no blur, so nothing in it asks
 /// for an effect a Live Activity may not draw. Seen in the simulator only so far, not on a phone.
 struct TalkGlow: View {

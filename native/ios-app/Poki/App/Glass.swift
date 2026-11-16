@@ -1,6 +1,6 @@
 import SwiftUI
 
-// Liquid Glass for Poki's own controls (ESP-340, the owner's "buttons and components support Liquid
+// Liquid Glass for kaka's own controls (ESP-340, the owner's "buttons and components support Liquid
 // Glass"). On iOS 26 and later these are Apple's own effect, written from the SDK's declarations
 // (SwiftUICore: `glassEffect(_:in:)`, `Glass`, `GlassEffectContainer`, `GlassEffectTransition`;
 // SwiftUI: `GlassButtonStyle`, `GlassProminentButtonStyle`) and from Apple's "Applying Liquid Glass to

@@ -32,11 +32,11 @@
 - (long long)platform;
 @end
 
-/// The session of Poki's own opened after a close. XCTest's accessibility client
+/// The session of kaka's own opened after a close. XCTest's accessibility client
 /// (XCUIDevice.accessibilityInterface) and XCUIScreen reach testmanagerd through
 /// +[XCTRunnerDaemonSession sharedSession], which keeps answering the session that was closed: on the
 /// phone (0.2.8 build 144) every tree read after a stand-by and reopen hung there while the new
-/// session answered. While Poki holds a session of its own, sharedSession answers that one.
+/// session answered. While kaka holds a session of its own, sharedSession answers that one.
 static id SROwnedSharedSession;
 static NSLock *SROwnedLock(void) {
     static NSLock *lock; static dispatch_once_t once;
@@ -181,6 +181,7 @@ static BOOL SRABI(id target, SEL selector, const char *result, NSArray<NSString 
     /// Signalled by the current session's invalidation handler: close waits on it, not on a clock.
     dispatch_semaphore_t _gone;
     NSMutableSet<NSString *> *_loaded;
+    NSLock *_frameworkLock;
     /// An open of this process's own session still under way: a prepare that gave up waiting for
     /// it leaves it running, and the next prepare waits for the same one instead of starting another.
     dispatch_semaphore_t _opening;
@@ -191,6 +192,7 @@ static BOOL SRABI(id target, SEL selector, const char *result, NSArray<NSString 
     if ((self = [super init])) {
         _prepareLock = [NSLock new]; _lifecycleLock = [NSRecursiveLock new];
         _loaded = [NSMutableSet new];
+        _frameworkLock = [NSLock new];
     }
     return self;
 }
@@ -305,7 +307,12 @@ static NSArray<NSString *> *SRSelectorsWith(Class cls, NSString *part) {
     @try { return [self prepareLocked:error]; }
     @finally { [_prepareLock unlock]; }
 }
-- (id)prepareLocked:(NSError **)error {
+- (BOOL)loadDeveloperFrameworks:(NSError **)error {
+    [_frameworkLock lock];
+    @try { return [self loadDeveloperFrameworksLocked:error]; }
+    @finally { [_frameworkLock unlock]; }
+}
+- (BOOL)loadDeveloperFrameworksLocked:(NSError **)error {
     // Ordered NSArray recovered from 0x100ce91a8 -> 0x100ce7ef0.
     NSArray *paths = @[
         @"/System/Developer/Library/PrivateFrameworks/XCTestSupport.framework/XCTestSupport",
@@ -329,10 +336,14 @@ static NSArray<NSString *> *SRSelectorsWith(Class cls, NSString *part) {
     for (NSString *path in paths) {
         if ([_loaded containsObject:path]) continue;
         if (!dlopen(path.UTF8String, RTLD_NOW | RTLD_GLOBAL)) {
-            SRFail(error, @"developer_framework_unavailable"); return nil;
+            return SRFail(error, @"developer_framework_unavailable");
         }
         [_loaded addObject:path]; // Keep loaded for the lifetime of the process.
     }
+    return YES;
+}
+- (id)prepareLocked:(NSError **)error {
+    if (![self loadDeveloperFrameworks:error]) return nil;
     Class cls = NSClassFromString(@"XCTRunnerDaemonSession");
     if (![cls respondsToSelector:@selector(sharedSessionPromiseAndImplicitlyInitiateSession:)]) {
         SRFail(error, @"session_api_unavailable"); return nil;

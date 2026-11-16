@@ -64,7 +64,7 @@ struct Issue: Identifiable {
         }
     }
 
-    /// Text from PokiCore and the launcher stays as it came; Poki's own sentences are localized.
+    /// Text from PokiCore and the launcher stays as it came; kaka's own sentences are localized.
     private static func local(_ text: String) -> String { AppLocalization.bundle.localizedString(forKey: text, value: text, table: nil) }
 
     @MainActor static func current(_ model: AppModel) -> [Issue] {
@@ -89,8 +89,9 @@ struct Issue: Identifiable {
                 if model.cellularNeedsWiFi, !runner.isRunning {
                     out.append(Issue(id: "cellular", title: AppLocalization.text(LocalizedStringResource("Connect to Wi-Fi first")), text: LoopbackMonitor.needsWiFi, fix: .none))
                 }
-            } else if !model.hasOpenInProcessSession, runner.code != "local_ddi",
-                      runner.state == "waiting_network" || !model.loopback.isWorking && model.loopback.state != .checking {
+            } else if !model.hasOpenInProcessSession, !model.canStartTasks, runner.code != "local_ddi",
+                      (runner.state == "waiting_network" && runner.code != "pairing_port" && !model.loopback.isWorking)
+                      || (!model.loopback.isWorking && model.loopback.state != .checking) {
                 out.append(Issue(id: "loopback", title: AppLocalization.text(LocalizedStringResource("Loopback is off")),
                                  text: AppLocalization.text(LocalizedStringResource("Turn on your proxy app with the kaka module, or connect LocalDevVPN.")), fix: .setup))
             }

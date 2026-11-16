@@ -1,12 +1,12 @@
 import AVFoundation
 import SwiftUI
 
-/// Talk to Poki: say what to do, Poki does it on this iPhone and answers out loud.
+/// Talk to kaka: say what to do, kaka does it on this iPhone and answers out loud.
 struct VoiceView: View {
     @Environment(AppModel.self) private var app
     /// Set when Voice is a sheet over Home: the Done button closes it.
     var close: (() -> Void)?
-    /// Pushed in the Poki tab: no navigation stack or Done of its own.
+    /// Pushed in the kaka tab: no navigation stack or Done of its own.
     var embedded = false
     @State private var micDenied = false
     @AppStorage(FieldDictation.buttonKey) private var dictationButton = FieldDictation.buttonShown
@@ -100,7 +100,7 @@ struct VoiceAdvancedRows: View {
                 Button("Remove Address", role: .destructive) {
                     voice.removeBridge()
                     bridgeText = ""
-                    // Now, not a second later: Poki closed in between would get the address back at its next launch.
+                    // Now, not a second later: kaka closed in between would get the address back at its next launch.
                     SettingsVault.save()
                 }
             } message: {

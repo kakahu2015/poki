@@ -2,7 +2,7 @@ import UIKit
 
 /// An app that shows as a capsule wherever one of its names is written (ESP-377): its icon and its
 /// name, as on the home page's pills. The names are the words that turn into the capsule; the plain
-/// text keeps exactly what was written. Every app Poki knows by name (`KnownApps`) is one.
+/// text keeps exactly what was written. Every app kaka knows by name (`KnownApps`) is one.
 struct AppCapsule: Hashable, Identifiable {
     let id: String
     let names: [String]

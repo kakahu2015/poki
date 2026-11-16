@@ -1,6 +1,6 @@
 //
 //  SessionsView.swift
-//  Poki
+//  kaka
 //
 //  The conversations list began as GetStream/swiftui-iMessage-clone's channel list (commit df114b4,
 //  iMessageClone/ChannelList, by Stefan Blos; the repository has no licence file). For ESP-326 it is a
@@ -10,7 +10,7 @@
 import SwiftUI
 import UIKit
 
-/// The conversations, in the drawer under the chat (iPhone) and beside it (iPad): Poki's name on
+/// The conversations, in the drawer under the chat (iPhone) and beside it (iPad): kaka's name on
 /// top, then one line per conversation, the newest first, and floating over the list the button for a
 /// new conversation and the way into Settings.
 struct SessionsView: View {
@@ -22,6 +22,9 @@ struct SessionsView: View {
     @State private var newName = ""
     @Environment(\.inThreadsDrawer) private var inDrawer
     @Environment(\.drawerSliding) private var sliding
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @ScaledMetric(relativeTo: .title) private var headerIcon = 32.0
+    var controlSize = CompactControlMetrics()
 
     private var store: SessionStore { SessionStore.shared }
     private var sampleHome: String? { UserDefaults.standard.string(forKey: "pokiHome") }
@@ -62,47 +65,61 @@ struct SessionsView: View {
     }
 
     private var header: some View {
-        HStack(spacing: 10) {
+        let iconSide = min(44, headerIcon)
+        return HStack(spacing: 10) {
             // The app's icon, small, rounded in the system's proportion for app icons.
-            Image("PokiIcon").resizable().scaledToFit().frame(width: 32, height: 32)
-                .clipShape(RoundedRectangle(cornerRadius: 32 * 0.225, style: .continuous))
+            Image("PokiIcon").resizable().scaledToFit().frame(width: iconSide, height: iconSide)
+                .clipShape(RoundedRectangle(cornerRadius: iconSide * 0.225, style: .continuous))
                 .accessibilityHidden(true)
             Spacer()
         }
         .padding(.horizontal, 32).padding(.top, 8).padding(.bottom, 12)
         .background(Tint.sidebar)
-        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
     }
 
-    /// Floating over the list's foot: a new conversation, in the leading corner, and Settings in the trailing one.
+    /// A new conversation in the leading corner, and Settings in the trailing one.
     private var controls: some View {
-        HStack(alignment: .center) {
+        HStack(spacing: 12) {
             Button {
                 guard !sliding else { return }
                 if !chat.running { chat.newConversation() }
                 openChat()
             } label: {
-                Label("New Conversation", systemImage: "square.and.pencil")
-                    .labelStyle(PillLabelStyle())
-                    .font(.body.weight(.semibold)).foregroundStyle(.white)
-                    // One line: "New Conversation" in English is the longest, and in a narrow drawer it
-                    // shrinks a little rather than wrapping.
-                    .lineLimit(1).minimumScaleFactor(0.8)
-                    .padding(.horizontal, 18).frame(minHeight: 48)
-                    .contentShape(.capsule)
+                ViewThatFits(in: .horizontal) {
+                    Label("New Conversation", systemImage: "square.and.pencil")
+                        .labelStyle(PillLabelStyle())
+                        .fixedSize()
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 8)
+                        .frame(minHeight: controlSize.side)
+                    Image(systemName: "square.and.pencil")
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                        .frame(width: controlSize.side, height: controlSize.side)
+                }
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.white)
+                .contentShape(.capsule)
             }
             .buttonStyle(.plain)
-            // Poki's blue, the send button's own.
+            // kaka's blue, the send button's own.
             .glassSurface(in: Capsule(), tint: Tint.blue, interactive: true)
             .opacity(chat.running ? 0.5 : 1)
             .disabled(chat.running)
+            .accessibilityLabel(Text("New Conversation"))
             .accessibilityIdentifier("threads.newChat")
-            Spacer(minLength: 12)
+            .accessibilityShowsLargeContentViewer {
+                Label("New Conversation", systemImage: "square.and.pencil")
+            }
+            Spacer(minLength: 0)
             SettingsEntryButton()
+                .fixedSize()
         }
         .glassGroup(spacing: 8)
         .padding(.horizontal, 20).padding(.top, 8).padding(.bottom, 4)
-        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+        .background {
+            // Keep large text and status marks from showing through the floating controls.
+            if typeSize.isAccessibilitySize { Tint.sidebar.ignoresSafeArea(edges: .bottom) }
+        }
     }
 
     private func heading(_ day: Day) -> some View {
@@ -154,7 +171,8 @@ struct SessionsView: View {
                 if needs { Circle().fill(Tint.amber).frame(width: 8, height: 8).accessibilityHidden(true) }
                 else if let trouble {
                     Image(systemName: trouble == .failed ? "exclamationmark.circle.fill" : "pause.circle.fill")
-                        .font(.system(size: 14)).foregroundStyle(trouble == .failed ? Tint.red : Color.secondary)
+                        .font(.subheadline).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                        .foregroundStyle(trouble == .failed ? Tint.red : Color.secondary)
                         .accessibilityHidden(true)
                 }
             }
@@ -366,13 +384,14 @@ struct ConversationTitle: View {
     @Environment(\.colorScheme) private var scheme
     @Environment(\.dynamicTypeSize) private var typeSize
     @ScaledMetric(relativeTo: .body) private var nameSize: CGFloat = 18
+    @ScaledMetric(relativeTo: .body) private var iconSize = 22.0
 
     var body: some View {
         let app = app ?? session.app
         HStack(spacing: 12) {
-            if let app, AppIconStore.shared.icon(app, dark: scheme == .dark) != nil { AppIconView(app: app, size: 22) }
+            if let app, AppIconStore.shared.icon(app, dark: scheme == .dark) != nil { AppIconView(app: app, size: min(34, iconSize)) }
             Text(verbatim: session.name).font(.system(size: nameSize)).foregroundStyle(Color(.label))
-                .lineLimit(typeSize.isAccessibilitySize ? 3 : 1)
+                .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
         }
         .task(id: app) { if let app { await AppIconStore.shared.load(app) } }
     }
@@ -380,7 +399,7 @@ struct ConversationTitle: View {
 
 /// What a row shows on its leading side: the icon of the app the conversation worked in, with the
 /// outside agent's badge on its corner for an agent's session or hand-off. Without an app icon, an
-/// agent's badge, or for a chat with Poki the one placeholder tile.
+/// agent's badge, or for a chat with kaka the one placeholder tile.
 struct SessionAvatar: View {
     var session: SavedSession
     /// The app it worked in, when the row knows better than what is saved (a task under way).
@@ -391,7 +410,7 @@ struct SessionAvatar: View {
     var body: some View {
         let app = app ?? session.app
         let agent = session.kind == .agent || session.kind == .handoff
-        // An agent's session shows the app only once its icon is at hand; a chat with Poki shows the
+        // An agent's session shows the app only once its icon is at hand; a chat with kaka shows the
         // placeholder while the icon is fetched.
         let icon = app.flatMap { name in agent ? (AppIconStore.shared.icon(name, dark: scheme == .dark) != nil ? name : nil) : name }
         ZStack(alignment: .bottomTrailing) {
@@ -442,7 +461,7 @@ struct AgentBadge: View {
 }
 
 /// The boards' guest thread (02b) for the screenshots (`-pokiHome sessions`, the first row): an
-/// outside agent borrowing Poki's hands, at step 2 of 3. Nothing runs.
+/// outside agent borrowing kaka's hands, at step 2 of 3. Nothing runs.
 private enum GuestSample {
     static var isOn: Bool { UserDefaults.standard.string(forKey: "pokiHome") != nil }
     static var plan: [String] { [AppLocalization.text(LocalizedStringResource("Open TestFlight")), AppLocalization.text(LocalizedStringResource("Find kaka")), AppLocalization.text(LocalizedStringResource("Tap Update"))] }
@@ -455,7 +474,7 @@ private enum GuestSample {
 }
 
 /// An outside agent's session or hand-off as a conversation: the agent's own steps as grey lines, its
-/// request and Poki's answer as bubbles. Live while the session runs.
+/// request and kaka's answer as bubbles. Live while the session runs.
 struct SessionView: View {
     @Environment(AppModel.self) private var model
     var id: String
@@ -470,7 +489,7 @@ struct SessionView: View {
         let running = AskPoki.live(id)
         let sample = GuestSample.isOn && id == "sample-1"
         let live = sample || (running?.running ?? (session?.live ?? false))
-        // The live task's card shows what Poki last saw of the screen, as in the chat.
+        // The live task's card shows what kaka last saw of the screen, as in the chat.
         let shot: Image? = sample ? SampleShot.image(dark: scheme == .dark) : live ? model.lastShot.map { Image(uiImage: $0) } : nil
         ChatTranscript(entries: sample ? GuestSample.entries : (running?.entries ?? session?.entries) ?? [],
                        typing: running?.awaitingModel ?? false, canRetry: false, retry: {}, session: id,
@@ -500,7 +519,7 @@ struct SessionView: View {
                 .frame(maxWidth: 720)
             }
         }
-        // The chat's own page colour, so Poki's white bubbles stand on it as they do there.
+        // The chat's own page colour, so kaka's white bubbles stand on it as they do there.
         .background(Tint.page.ignoresSafeArea())
         // The session's name is the title; its menu renames it (the system title menu).
         .navigationTitle(Text(verbatim: session?.name ?? (sample ? "Claude Code" : "")))

@@ -17,22 +17,22 @@ final class LoopbackTunnel {
     private var statusObserver: NSObjectProtocol?
     private var connectionDeadline: Task<Void, Never>?
     /// After the tunnel failed or dropped without the owner ending it, dial again with a backoff and a
-    /// cap (GitHub issue 44: it stayed down for 101 s and 134 s until someone opened Poki). The
+    /// cap (GitHub issue 44: it stayed down for 101 s and 134 s until someone opened kaka). The
     /// owner's own Disconnect, or Turn off, ends it for good until they connect again; so does another
-    /// VPN being detected when a try comes (best effort: a VPN that sets no proxy, such as Tailscale, may not be detected). Opening Poki dials nothing.
+    /// VPN being detected when a try comes (best effort: a VPN that sets no proxy, such as Tailscale, may not be detected). Opening kaka dials nothing.
     private var reconnect = ReconnectPlan()
     private var reconnectTask: Task<Void, Never>?
     private var reconnecting = false
-    /// When Poki itself last stopped the tunnel. The tunnel hears that as a stop by the user, and its
-    /// "stopped on purpose" notification must not cancel the retry Poki queued right after.
+    /// When kaka itself last stopped the tunnel. The tunnel hears that as a stop by the user, and its
+    /// "stopped on purpose" notification must not cancel the retry kaka queued right after.
     private var stoppedByAppAt: Date?
     /// The owner pressed Disconnect while a connection was still being brought up: stop it when that ends.
     private var stopAfterBringUp = false
-    /// Whether Poki is on and needs the local connection; the app model answers.
+    /// Whether kaka is on and needs the local connection; the app model answers.
     var wanted: () -> Bool = { false }
     /// The tunnel is up again after an automatic reconnect; the app checks the loopback at once.
     var onReconnected: (() -> Void)?
-    /// Something the owner has to see: Poki did not dial because another VPN is on. nil when it is over.
+    /// Something the owner has to see: kaka did not dial because another VPN is on. nil when it is over.
     var onAttention: ((String?) -> Void)?
 
     // Read the embedded id: signing tools can rewrite bundle identifiers.
@@ -73,7 +73,7 @@ final class LoopbackTunnel {
         #endif
     }
 
-    /// Called only after the owner chooses Poki's local VPN, never while using an external proxy.
+    /// Called only after the owner chooses kaka's local VPN, never while using an external proxy.
     func connect() async throws {
         reconnect.ownerStarted()
         try await bringUp()
@@ -106,8 +106,8 @@ final class LoopbackTunnel {
             manager.protocolConfiguration = configuration
             manager.localizedDescription = "kaka local connection"
             manager.isEnabled = true
-            // Never on demand: iOS must not bring Poki's tunnel up by itself (it could displace another VPN).
-            // Only the owner's connect, or Poki's own retry after its tunnel failed, dials it.
+            // Never on demand: iOS must not bring kaka's tunnel up by itself (it could displace another VPN).
+            // Only the owner's connect, or kaka's own retry after its tunnel failed, dials it.
             manager.isOnDemandEnabled = false
             state = .connecting
             try await manager.saveToPreferences()
@@ -186,7 +186,7 @@ final class LoopbackTunnel {
     }
 
     /// The tunnel posts this (a Darwin notification, no payload; named by `TunnelStopSignal`) when the
-    /// owner turned it off in Settings or another VPN took over. Poki then leaves it down until the
+    /// owner turned it off in Settings or another VPN took over. kaka then leaves it down until the
     /// owner connects it again.
     private func listenForEndedOnPurpose() {
         guard let providerID else { return }
@@ -198,7 +198,7 @@ final class LoopbackTunnel {
     }
 
     private func endedOnPurpose() {
-        // Poki's own stop (the 15 s try that did not connect, or the owner's Disconnect) is told as a stop by
+        // kaka's own stop (the 15 s try that did not connect, or the owner's Disconnect) is told as a stop by
         // the user too. For the first the retry stands; for the second nothing is queued anyway.
         if let at = stoppedByAppAt, Date().timeIntervalSince(at) < 5 {
             stoppedByAppAt = nil
@@ -221,7 +221,7 @@ final class LoopbackTunnel {
         }
     }
 
-    /// Dials again after `ReconnectPlan`'s next delay (jittered), if Poki is on and the owner has not
+    /// Dials again after `ReconnectPlan`'s next delay (jittered), if kaka is on and the owner has not
     /// ended the connection. The tries are counted when they fail, so a connect that works and drops
     /// again at once does not start over.
     private func scheduleReconnect(because cause: String) {
@@ -239,7 +239,7 @@ final class LoopbackTunnel {
             // A change the owner started a moment ago finishes first.
             for _ in 0..<10 where self.busy { try? await Task.sleep(for: .milliseconds(500)) }
             guard !Task.isCancelled, self.wanted(), !self.busy else { return }
-            // Poki's own tunnel stops first; what is left is somebody else's.
+            // kaka's own tunnel stops first; what is left is somebody else's.
             for _ in 0..<10 where self.manager?.connection.status == .disconnecting { try? await Task.sleep(for: .milliseconds(500)) }
             if self.anotherVPNIsOn() {
                 self.yieldToAnotherVPN()
@@ -258,7 +258,7 @@ final class LoopbackTunnel {
     }
 
     /// The owner has a VPN on, and a second packet tunnel would take its place: stop dialling and say so.
-    /// The owner's own tap on Enable Local Connection (or turning Poki on) is what starts it again.
+    /// The owner's own tap on Enable Local Connection (or turning kaka on) is what starts it again.
     private func yieldToAnotherVPN() {
         reconnect.ownerStopped()
         reconnecting = false

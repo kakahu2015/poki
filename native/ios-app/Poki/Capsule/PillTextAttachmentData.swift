@@ -2,7 +2,7 @@
 // ElementX/Sources/Other/Pills/PillTextAttachmentData.swift).
 // Copyright 2025 Element Creations Ltd. Copyright 2023-2025 New Vector Ltd.
 // SPDX-License-Identifier: AGPL-3.0-only. See THIRD_PARTY_NOTICES.md.
-// Poki's changes: a pill stands for an app and keeps the exact words typed for it, instead of a
+// kaka's changes: a pill stands for an app and keeps the exact words typed for it, instead of a
 // Matrix user or room; it is never encoded, so it is not Codable.
 
 import UIKit

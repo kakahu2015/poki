@@ -1,13 +1,13 @@
 import Foundation
 
-/// Information about the app's installed provisioning profile. Poki does not sign or update itself.
+/// Information about the app's installed provisioning profile. kaka does not sign or update itself.
 struct InstalledAppProfile {
-    /// Retained for the existing setup assertion; there is no Apple Account sign-in in Poki.
+    /// Retained for the existing setup assertion; there is no Apple Account sign-in in kaka.
     var signedIn: Bool { false }
 
     let expiry: Date? = Self.installedProfileExpiry() ?? Self.screenshotExpiry
 
-    /// New Poki Setup builds leave this marker so a fresh install starts Poki automatically.
+    /// New kaka Setup builds leave this marker so a fresh install starts kaka automatically.
     static var installHandoff: URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("PokiSetup/install-handoff.json")

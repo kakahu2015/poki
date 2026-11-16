@@ -1,14 +1,14 @@
 import CryptoKit
 import Foundation
 
-/// What Poki and the installer on the Mac (`bin/install-iphone.mjs`) tell each other through Poki's
-/// container, Documents/PokiSetup/, which Poki Setup or Xcode's devicectl reach over USB:
-/// - `poki-hello.json` (`poki.hello/1`), written by Poki whenever it runs: its version (a new one is
-///   the installer's sign that Poki is open), the public half of a key this phone made for a model
+/// What kaka and the installer on the Mac (`bin/install-iphone.mjs`) tell each other through kaka's
+/// container, Documents/PokiSetup/, which kaka Setup or Xcode's devicectl reach over USB:
+/// - `poki-hello.json` (`poki.hello/1`), written by kaka whenever it runs: its version (a new one is
+///   the installer's sign that kaka is open), the public half of a key this phone made for a model
 ///   key, the key it last took, and whether the local connection answers, with one sentence for the
 ///   person when it does not. Nothing in it is secret.
 /// - `model-key.json` (`poki.model-key/1`), written by the installer: a model key sealed to that public
-///   key (`ModelKeySeal`). Poki takes it once, deletes it and makes a new key pair.
+///   key (`ModelKeySeal`). kaka takes it once, deletes it and makes a new key pair.
 enum PokiHandoff {
     static var folder: URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("PokiSetup", isDirectory: true)

@@ -58,7 +58,7 @@ pub async fn start(device: &mut Device, bundle: &str, ios: &str) -> Result<Sessi
         .await
         .map_err(|e| Failure::new(format!("cannot read the runner's install info: {e}")).fix(RUNNER_FIX).code("runner"))?;
     // The runner checks POKI_LAUNCHER: opened any other way, it does nothing and sends people to
-    // Poki. USE_IP keeps this standalone, on-phone path off the LAN; pinned WebDriverAgent applies
+    // kaka. USE_IP keeps this standalone, on-phone path off the LAN; pinned WebDriverAgent applies
     // it to both the HTTP listener and its MJPEG screenshot listener.
     let mut env = config.runner_env.take().unwrap_or_default();
     secure_runner_environment(&mut env);

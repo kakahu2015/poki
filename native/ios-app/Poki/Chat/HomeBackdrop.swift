@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The light behind the chat (ESP-376, the owner's pick "fog blue"), two layers one over the other.
 /// The conversation's ground is always there: a clean pale page with a faint brand-blue glow behind
-/// the message field, under a quarter of the screen high, still unless Poki is at work. Over it, on the
+/// the message field, under a quarter of the screen high, still unless kaka is at work. Over it, on the
 /// home page, lies the home's light: paper white above, blue rising from the bottom edge, breathing
 /// slowly (ESP-470). In light, your first message makes the home's light sink 260 points and fade, so
 /// it seems to draw back to the glow and stop there. In dark it stays where it is, stops breathing and
@@ -23,7 +23,7 @@ import SwiftUI
 struct HomeBackdrop: View {
     /// The home page is in front.
     var home: Bool
-    /// Poki is at work in the conversation: its glow drifts.
+    /// kaka is at work in the conversation: its glow drifts.
     var working: Bool
     /// Stands still at rest, for laying a screenshot beside the design (`-pokiChat backdrop`).
     var frozen = false
@@ -146,7 +146,7 @@ struct LightMesh {
         period: HomeBreath.period, motion: HomeBreath.motion, glow: HomeBreath.glow)
 
     /// The conversation (section 10): the home's bottom colours taken 85 % of the way back to the
-    /// page, starting three quarters of the way down. While Poki works, the middle of the third and
+    /// page, starting three quarters of the way down. While kaka works, the middle of the third and
     /// fourth rows each go round a small ellipse about their place, 3 % of the page, once in 14
     /// seconds, each starting a quarter turn after the last so the glow does not sway as one piece.
     static let chat = LightMesh(

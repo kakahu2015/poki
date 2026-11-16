@@ -5,7 +5,7 @@ import Foundation
 /// reading of the front app could make any app the phone had been in before.
 ///
 /// In order: the app the task opened (a `launch` in its `do` calls); without one, the app most of its
-/// actions ran in. Poki itself and the home screen never count. Between several, the one the request
+/// actions ran in. kaka itself and the home screen never count. Between several, the one the request
 /// names (the last opened, if it names more than one). With none, no app: the row shows no icon rather than a wrong one.
 @MainActor
 struct TaskApps: Equatable {
@@ -15,14 +15,14 @@ struct TaskApps: Equatable {
     private(set) var steps: [String: Int] = [:]
     private var seen: [String] = []
 
-    /// The key an app is known by: its bundle ID when Poki knows the app, else the name PokiCore read.
-    /// Nil for Poki itself, the home screen and an unknown app.
+    /// The key an app is known by: its bundle ID when kaka knows the app, else the name PokiCore read.
+    /// Nil for kaka itself, the home screen and an unknown app.
     static func key(_ app: String?) -> String? {
         guard let app = app?.trimmingCharacters(in: .whitespacesAndNewlines), !app.isEmpty else { return nil }
         // PokiCore names the home screen, the App Switcher and system alerts "Home screen (…)".
         if app.hasPrefix("Home screen") || app == "unknown" || app == "com.apple.springboard" { return nil }
         let key = AppIconStore.bundleID(app) ?? app
-        if key == Bundle.main.bundleIdentifier || key.caseInsensitiveCompare("Poki") == .orderedSame { return nil }
+        if key == Bundle.main.bundleIdentifier || key.caseInsensitiveCompare("kaka") == .orderedSame { return nil }
         return key
     }
 

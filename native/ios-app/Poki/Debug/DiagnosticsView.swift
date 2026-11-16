@@ -66,7 +66,7 @@ struct DiagnosticsView: View {
     }
 }
 
-/// Poki's log, newest first, with Clear.
+/// kaka's log, newest first, with Clear.
 struct LogView: View {
     @State private var log = AppLog.shared
     var back: () -> Void
@@ -94,9 +94,9 @@ struct LogView: View {
     }
 }
 
-/// Poki › General › Testing Options: switches being tried, all in one place, and 752's Diagnostics
+/// kaka › General › Testing Options: switches being tried, all in one place, and 752's Diagnostics
 /// tools for testers: the automation path switch with its probes, and the background hold experiment.
-/// Ask Before Sensitive Steps and the Auto-Classifier are in Poki › Approvals.
+/// Ask Before Sensitive Steps and the Auto-Classifier are in kaka › Approvals.
 struct TestingOptionsView: View {
     @Environment(AppModel.self) private var model
     @StateObject private var hold = Hold()
@@ -137,6 +137,9 @@ struct TestingOptionsView: View {
             Section {
                 NavigationLink("Live Activity Preview") { ActivityPreview() }
             }
+            // Screen History, an experiment that reads only when started here (issue 356). Last, so
+            // the sections above keep their place.
+            HistoryTestingSection()
         }
         .navigationTitle(AppLocalization.text("Testing Options"))
         .navigationBarTitleDisplayMode(.inline)

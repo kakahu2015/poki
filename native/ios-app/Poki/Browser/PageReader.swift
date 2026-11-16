@@ -1,4 +1,4 @@
-/// The script Poki's browser runs in each page, in its own content world (the page's scripts cannot see
+/// The script kaka's browser runs in each page, in its own content world (the page's scripts cannot see
 /// or change it). It lists what a person would see and use on the page, in order: links, buttons and
 /// fields with a ref each, headings and text blocks without one. Clicks and typing go to an element by
 /// its ref. Refs live as long as the page: after a navigation the agent reads again.

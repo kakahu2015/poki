@@ -1,11 +1,11 @@
-// Talk to Poki from outside the app: the Action Button, Control Center, the Lock Screen, Shortcuts,
+// Talk to kaka from outside the app: the Action Button, Control Center, the Lock Screen, Shortcuts,
 // Siri and Spotlight. In both the app and the widget extension, because a control's action has to be
 // in both; it always runs in the app (`openAppWhenRun`).
 import AppIntents
 import Observation
 
-/// What a system entry asked Poki to show. The intent only records it; RootView takes it when its
-/// scene is up, so a cold launch, Poki in the background and Poki in front all go the same way.
+/// What a system entry asked kaka to show. The intent only records it; RootView takes it when its
+/// scene is up, so a cold launch, kaka in the background and kaka in front all go the same way.
 @MainActor
 @Observable
 final class PokiEntry {
@@ -29,7 +29,7 @@ final class PokiEntry {
     }
 }
 
-/// Opens Poki's chat and starts voice there. A task Poki is already doing is shown, not interrupted.
+/// Opens kaka's chat and starts voice there. A task kaka is already doing is shown, not interrupted.
 struct TalkToPokiIntent: AppIntent {
     static let title = LocalizedStringResource("Talk to kaka", table: "Entry")
     static let description = IntentDescription(LocalizedStringResource("Opens kaka and starts talking. If kaka is doing a task, it shows that task and leaves it running.", table: "Entry"))

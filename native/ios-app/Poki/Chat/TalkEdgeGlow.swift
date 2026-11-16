@@ -23,8 +23,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-// Changed for Poki:
-// - the colours are Poki's brand band (`BrandBand.glow`) instead of the six of Apple Intelligence;
+// Changed for kaka:
+// - the colours are kaka's brand band (`BrandBand.glow`) instead of the six of Apple Intelligence;
 // - only the lower part of the screen's edge shows (a mask), since the talk's light is at the bottom;
 // - the lines are `spread` times as wide and as soft, and the whole light takes a `strength`, both set
 //   by what the talk is doing;
@@ -35,7 +35,7 @@
 import Combine
 import SwiftUI
 
-/// The light along the bottom edge of the screen while you talk with Poki, in Poki's blues.
+/// The light along the bottom edge of the screen while you talk with kaka, in kaka's blues.
 struct TalkEdgeGlow: View {
     /// How much of the light shows, 0 to 1.
     var strength: Double

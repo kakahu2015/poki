@@ -1,10 +1,10 @@
 #if DEBUG && targetEnvironment(simulator)
 import Foundation
 
-/// `-pokiTalkRehearsal 1`, in a simulator's development build: Talk with Poki connects to this instead of
+/// `-pokiTalkRehearsal 1`, in a simulator's development build: Talk with kaka connects to this instead of
 /// OpenAI. It plays one talk's worth of the Realtime API's events into VoiceModel, the way the unit
 /// tests' FakeConnection does, so every state of the talk's screens can be seen without a key, a
-/// microphone or sound: Poki listens, hears a request, thinks, runs a step on the phone (a stand-in
+/// microphone or sound: kaka listens, hears a request, thinks, runs a step on the phone (a stand-in
 /// that only waits), speaks, is spoken over, and answers again. VoiceModel handles the events as it
 /// would OpenAI's: its phases, lines and the end after a quiet while are the real ones. Nothing is
 /// sent anywhere and no step runs on the phone.

@@ -287,7 +287,7 @@ private struct EyePads {
     }
 }
 
-/// Where the chat is covered (the conversations drawer, Poki's profile over it): the bear holds still.
+/// Where the chat is covered (the conversations drawer, kaka's profile over it): the bear holds still.
 extension EnvironmentValues {
     @Entry var bearCovered = false
 }

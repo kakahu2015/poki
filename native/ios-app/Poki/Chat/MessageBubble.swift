@@ -1,26 +1,29 @@
 // MessageBubble is from Mackarous/ConversationUI (commit e77c69e,
 // Sources/ConversationUI/MessageBubble.swift), Copyright (c) 2024 Andrew Mackarous, MIT License. See
-// THIRD_PARTY_NOTICES.md. Changed: Poki's message kinds, the tail corner on the last bubble of a run,
+// THIRD_PARTY_NOTICES.md. Changed: kaka's message kinds, the tail corner on the last bubble of a run,
 // 60 pt kept free on the far side, and the colours: an outside agent's request in ink, and for
-// ESP-376 your bubble in Poki's blue and Poki's words in a white bubble with a soft shadow; in your
+// ESP-376 your bubble in kaka's blue and kaka's words in a white bubble with a soft shadow; in your
 // bubble the apps you named show as capsules, as in the message field.
 import SwiftUI
 import UIKit
 
 struct MessageBubble: View {
-    /// Poki's words, yours, or an outside agent's request to Poki.
+    /// kaka's words, yours, or an outside agent's request to kaka.
     enum Direction { case incoming, outgoing, guest }
     var direction: Direction
     var text: String
     /// The last bubble of its run has the small corner on its side.
     var tail: Bool
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @ScaledMetric(relativeTo: .body) private var verticalInset = 13.0
+    @ScaledMetric(relativeTo: .body) private var horizontalInset = 18.0
     @Environment(\.displayScale) private var displayScale
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         HStack {
             if direction != .incoming {
-                Spacer(minLength: .messageInsetPadding)
+                Spacer(minLength: typeSize.isAccessibilitySize ? 16 : .messageInsetPadding)
             }
             if direction == .incoming {
                 answer
@@ -28,22 +31,22 @@ struct MessageBubble: View {
                     .tint(Tint.blueText)
                     .foregroundStyle(Color(.label))
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.vertical, .messageVerticalPadding)
-                    .padding(.horizontal, .messageHorizontalPadding)
+                    .padding(.vertical, min(18, verticalInset))
+                    .padding(.horizontal, min(24, horizontalInset))
                     .pokiBubble(tail: tail)
                     .contextMenu { copyButton { UIPasteboard.general.string = text } }
                     // A table takes the row's width before the space beside it, so it scrolls sideways
                     // only when it is wider than the bubble can be.
                     .layoutPriority(blocks.contains { if case .table = $0 { true } else { false } } ? 1 : 0)
-                Spacer(minLength: .messageInsetPadding)
+                Spacer(minLength: typeSize.isAccessibilitySize ? 16 : .messageInsetPadding)
             } else {
                 (direction == .outgoing ? withCapsules : Text(rendered))
                     .font(.body)
                     .accessibilityLabel(Text(verbatim: text))
                     .fixedSize(horizontal: false, vertical: true)
                     .foregroundStyle(direction == .guest ? Tint.onSolid : Color.white)
-                    .padding(.vertical, .messageVerticalPadding)
-                    .padding(.horizontal, .messageHorizontalPadding)
+                    .padding(.vertical, min(18, verticalInset))
+                    .padding(.horizontal, min(24, horizontalInset))
                     .background(direction == .guest ? Tint.solid : Tint.blue, in: shape)
                     // The bubble is one flat layer with its own outline, so the lifted copy of it (the
                     // long press) is cut to the same outline and the small corner stays where it is.
@@ -52,7 +55,7 @@ struct MessageBubble: View {
                     .contentShape(.contextMenuPreview, shape)
                     .contentShape(.interaction, shape)
                     .contextMenu { copyButton { UIPasteboard.general.string = text } }
-                    .frame(maxWidth: 320, alignment: .trailing)
+                    .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : 320, alignment: .trailing)
             }
         }
         .transaction { if direction == .incoming { $0.animation = nil } }
@@ -60,7 +63,7 @@ struct MessageBubble: View {
 
     private var blocks: [AnswerBlocks.Block] { AnswerBlocks.blocks(text) }
 
-    /// Poki's words: one text, or the text around the answer's tables.
+    /// kaka's words: one text, or the text around the answer's tables.
     @ViewBuilder private var answer: some View {
         let parts = blocks
         if parts.count == 1, case .text(let words) = parts[0] {
@@ -86,7 +89,7 @@ struct MessageBubble: View {
     private var withCapsules: Text {
         let segments = CapsuleText.segments(text)
         guard segments.contains(where: { if case .app = $0 { true } else { false } }) else { return Text(rendered) }
-        let font = UIFont.preferredFont(forTextStyle: .body)
+        let font = UIFont.preferredFont(forTextStyle: .body, compatibleWith: UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(typeSize)))
         return segments.reduce(Text(verbatim: "")) { line, segment in
             switch segment {
             case .text(let words):
@@ -492,7 +495,7 @@ private enum AnswerBlocks {
     }
 }
 
-/// A table in Poki's answer, in the GitHub theme's table style (Theme+GitHub.swift) on the system's
+/// A table in kaka's answer, in the GitHub theme's table style (Theme+GitHub.swift) on the system's
 /// colours: as wide as its columns, or as wide as the bubble and scrolled sideways when it is wider.
 private struct AnswerTable: View {
     var alignments: [RawTableColumnAlignment]
@@ -522,13 +525,11 @@ extension CGFloat {
     static let cornerRadius: CGFloat = 22
     static let tailRadius: CGFloat = 7
     static let messageInsetPadding: CGFloat = 60
-    static let messageVerticalPadding: CGFloat = 13
-    static let messageHorizontalPadding: CGFloat = 18
 }
 
 extension View {
-    /// Poki's bubble (ESP-376): the card's white with a soft shadow in light; in dark the card's grey
-    /// with a hairline, where a shadow does not show. The small corner sits on Poki's side.
+    /// kaka's bubble (ESP-376): the card's white with a soft shadow in light; in dark the card's grey
+    /// with a hairline, where a shadow does not show. The small corner sits on kaka's side.
     func pokiBubble(tail: Bool) -> some View {
         let shape = UnevenRoundedRectangle(topLeadingRadius: .cornerRadius, bottomLeadingRadius: tail ? .tailRadius : .cornerRadius,
                                            bottomTrailingRadius: .cornerRadius, topTrailingRadius: .cornerRadius, style: .continuous)

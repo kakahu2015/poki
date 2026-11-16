@@ -18,7 +18,6 @@
       }
     },
     "Opens kaka and starts talking." : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -35,7 +34,6 @@
       }
     },
     "Opens kaka and starts talking. If kaka is doing a task, it shows that task and leaves it running." : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -52,7 +50,6 @@
       }
     },
     "kaka couldn’t start the task. The chat says why." : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -69,7 +66,6 @@
       }
     },
     "kaka is still busy, so this task didn’t start. Here is what kaka is doing." : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -85,8 +81,39 @@
         }
       }
     },
+    "kaka is busy. Wait for the current task to finish and try again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kaka 正在忙，请等当前任务结束后再试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kaka 正在忙，請等目前的任務結束後再試。"
+          }
+        }
+      }
+    },
+    "Choose a model in kaka’s settings, then return to Split View and try again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请先在 kaka 的设置里选择模型，再回到分屏重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請先在 kaka 的設定裡選擇模型，再回到分割顯示重試。"
+          }
+        }
+      }
+    },
     "kaka started the task. Turn kaka on so it can act on the phone." : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -103,7 +130,6 @@
       }
     },
     "kaka starts the task on this iPhone and tells you when it is done." : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -120,7 +146,6 @@
       }
     },
     "kaka wasn’t ready. Try again in a moment." : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -153,7 +178,6 @@
       }
     },
     "Send ${task} to kaka" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -170,7 +194,6 @@
       }
     },
     "Send Task" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -186,8 +209,39 @@
         }
       }
     },
+    "Turn on kaka with on-device automation, then open the two apps in Split View and run the shortcut again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先打开 kaka 并启用本机自动化，再将两个 App 摆成分屏，然后重新运行快捷指令。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先開啟 kaka 並啟用裝置上的自動化，再以分割顯示開啟兩個 App，然後重新執行捷徑。"
+          }
+        }
+      }
+    },
+    "Use Split View" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用分屏"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用分割顯示"
+          }
+        }
+      }
+    },
     "Send Task to kaka" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -220,7 +274,6 @@
       }
     },
     "Talk to kaka" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -237,7 +290,6 @@
       }
     },
     "Task" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -254,7 +306,6 @@
       }
     },
     "What should kaka do?" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {

@@ -104,7 +104,7 @@ func runChecks() async -> [ProbeResult] {
     results.append(await probe(label: "Reflected lockdown (10.7.0.1)", host: "10.7.0.1", port: 62078))
     results.append(await probe(label: "Reflected RemotePairing (10.7.0.1)", host: "10.7.0.1", port: 49152))
     // iOS moves the remote pairing service off 49152 and names the port only in Bonjour: what it
-    // lists, the port Poki uses now, and whether each other listed port answers here.
+    // lists, the port kaka uses now, and whether each other listed port answers here.
     let listed = await RemotePairingBrowser.ports()
     let inUse = await RemotePairingPort.current
     results.append(ProbeResult(label: "Remote pairing ports in Bonjour", target: "_remotepairing._tcp",

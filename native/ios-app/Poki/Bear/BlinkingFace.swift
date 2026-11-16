@@ -1,14 +1,14 @@
 import SwiftUI
 import UIKit
 
-/// The bear's face for Poki's state, alive: it blinks every few seconds, now and then twice, and
+/// The bear's face for kaka's state, alive: it blinks every few seconds, now and then twice, and
 /// gives a small hop when its state changes (ESP-468). It fills the square it is given.
 ///
 /// It is drawn from the bear's cutouts. Each face with open eyes has a copy with both eyes, white and
 /// pupil, filled with the face's own colour (PokiBearLids-<face>.png, made by scripts/make-bear-blink.py),
 /// and the eyes of the cutout are laid back over it, so the whole eye is squeezed shut. A shut eye is
 /// a thin line on the face, as the sleeping face's, not a line across a white disc. When the
-/// three-dimensional bear arrives (ESP-319), its rendering takes the place of this view: Poki's
+/// three-dimensional bear arrives (ESP-319), its rendering takes the place of this view: kaka's
 /// picture in the top bar and in the flight from the home page draw nothing else.
 /// With Reduce Motion it neither blinks nor hops.
 struct BlinkingFace: View {

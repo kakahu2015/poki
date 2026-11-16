@@ -102,7 +102,7 @@ struct SettingsHome: View {
                 if model.relayAddress == nil { Text("Set your relay address first: each agent’s address is on your relay.") }
             }
 
-            // The in-process path has no Poki Runner to start or stop (ESP-152).
+            // The in-process path has no kaka Runner to start or stop (ESP-152).
             if model.automationPath == .runner {
                 Section {
                     LabeledContent("Runner", value: Health.runner(model).word)
@@ -170,7 +170,7 @@ struct SettingsHome: View {
     }
 }
 
-/// The person's own relay. There is no default: until it is set, Poki sends nothing anywhere. The
+/// The person's own relay. There is no default: until it is set, kaka sends nothing anywhere. The
 /// board does not draw this page; it is Settings' white card and footnote style.
 struct RelayView: View {
     @Environment(AppModel.self) private var model

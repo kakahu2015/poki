@@ -7,7 +7,7 @@
 // MIT License, Copyright (c) 2026 Henry Yuan. Interpolated text, the phase spring and margins kept
 // concentric with the island's corners are from leepokai/Codync (commit 848070d,
 // apps/ios/Widgets/CodyncWidgets.swift), Copyright 2026 Po Kai Lee, Apache License 2.0. The layout,
-// the bear that rises from the bottom edge, the two-line compact island and the colours are Poki's
+// the bear that rises from the bottom edge, the two-line compact island and the colours are kaka's
 // own: ESP-344's final design (定稿规格, drawn at 402 by 874 points). The design draws to the island's
 // edge; iOS does not (see `ActivityMetrics.islandClip`), so what stood on the edge stands on the
 // system's line instead. Run as a real Live Activity on the iOS 27 simulator; not yet on a phone.
@@ -57,6 +57,10 @@ enum ActivityMetrics {
     /// The brand mark's picture in the narrow and minimal circles.
     static let circleMark: CGFloat = 22.6
     static let button: CGFloat = 38
+    /// The Don’t Ask Again row under the two answers, and the space between. iOS cuts a Live Activity
+    /// off at about 160 points, so the row sits in the card's own height.
+    static let stopAskingText: CGFloat = 22
+    static let stopAskingGap: CGFloat = 6
     static let stopCircle: CGFloat = 46
     static let stopCapsule: CGFloat = 34
     static let smallThumbnail = CGSize(width: 34, height: 72)
@@ -106,7 +110,7 @@ extension ActivityFace.Bottom {
 
 extension ActivityFace {
     /// Where the outside agent's badge goes (ESP-344 定稿规格, section 14): after the app's name while
-    /// Poki works; after the reason while it waits for an answer on the island (on the card the reason
+    /// kaka works; after the reason while it waits for an answer on the island (on the card the reason
     /// may take two lines, so there it stays left of the countdown); beside the small value otherwise.
     enum BadgePlace { case afterPlace, afterReason, besideValue }
     func badgePlace(_ surface: ActivitySurface) -> BadgePlace {
@@ -221,6 +225,24 @@ struct LockScreenCard: View {
 
 // MARK: Dynamic Island, expanded
 
+/// Lays NoTapIntent under a region of the expanded island while `on` (`ActivityFace.shieldsTaps`): iOS
+/// opens the activity's app on any tap no control takes, and this button takes it and does nothing.
+/// Allow, Don't Allow, Stop and Continue sit above it and still work.
+struct TapShield: ViewModifier {
+    var on: Bool
+    func body(content: Content) -> some View {
+        if on {
+            content.background {
+                Button(intent: NoTapIntent()) { Color.clear.contentShape(.rect) }
+                    .buttonStyle(.plain)
+                    .accessibilityHidden(true)
+            }
+        } else {
+            content
+        }
+    }
+}
+
 /// Beside the camera, left: nothing. The bear stands in the bottom-left corner and says the state.
 struct IslandLeading: View {
     var face: ActivityFace
@@ -270,7 +292,7 @@ struct IslandBottom: View {
         }
         .frame(height: height)
         .frame(maxWidth: .infinity)
-        // A talk with Poki is on: the brand band along the island's lower edge, under the words.
+        // A talk with kaka is on: the brand band along the island's lower edge, under the words.
         .background(alignment: .bottom) {
             if face.talkGlow, !dimmed { TalkGlow().transition(.opacity) }
         }
@@ -503,7 +525,7 @@ private struct Kicker: View {
 private struct Title: View {
     var face: ActivityFace
     var palette: ActivityPalette
-    /// The Lock Screen's short cards say Poki's state in large type.
+    /// The Lock Screen's short cards say kaka's state in large type.
     var large = false
     private let theme = ActivityTheme.current
     var body: some View {
@@ -515,7 +537,7 @@ private struct Title: View {
                 .contentTransition(.numericText())
         } else {
             // 19 points semibold for a step and a finished run, 20 bold for a question or a thing to do,
-            // 24 bold for Poki's state on a short Lock Screen card.
+            // 24 bold for kaka's state on a short Lock Screen card.
             let stepLike = face.size == .working || face.size == .low
             Text(face.content)
                 .font(large ? theme.status : stepLike ? theme.step : theme.title).tracking(theme.titleTracking)
@@ -598,7 +620,7 @@ private struct StateSymbol: View {
     }
 }
 
-/// What sits at the bottom of a card: Stop, the approval's buttons, Done, Open Poki, or the setup
+/// What sits at the bottom of a card: Stop, the approval's buttons, Done, Open kaka, or the setup
 /// steps. On the expanded island a run's Stop is the round button beside the words instead.
 private struct Control: View {
     var face: ActivityFace
@@ -619,7 +641,7 @@ private struct Control: View {
                 .transition(.opacity)
             }
         case .approval(let id):
-            ApprovalButtons(approvalID: id, surface: surface)
+            ApprovalButtons(approvalID: id, surface: surface, stopAsking: face.offersStopAsking)
                 .transition(.activityRow)
         case .deciding(let text):
             Text(text)
@@ -756,12 +778,35 @@ private struct SegmentLine: View {
 struct ApprovalButtons: View {
     var approvalID: String
     var surface: ActivitySurface
+    /// Don’t Ask Again under the two answers, for a step that turning asking off reaches.
+    var stopAsking = false
     private let theme = ActivityTheme.current
 
     var body: some View {
+        VStack(spacing: ActivityMetrics.stopAskingGap) {
+            answers
+            if stopAsking { stopAskingButton }
+        }
+    }
+
+    /// Like Allow it asks for Face ID first (see StopAskingIntent), and it allows this step too.
+    private var stopAskingButton: some View {
+        let palette = theme.palette(surface)
+        return Button(intent: StopAskingIntent(approvalID: approvalID)) {
+            Text(String(activity: "Don’t ask again"))
+                .font(theme.button)
+                .foregroundStyle(palette.text.opacity(0.8))
+                .lineLimit(1).minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity, minHeight: ActivityMetrics.stopAskingText, maxHeight: ActivityMetrics.stopAskingText)
+                .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var answers: some View {
         let palette = theme.palette(surface)
         let height = ActivityMetrics.button
-        HStack(spacing: 8) {
+        return HStack(spacing: 8) {
             Button(intent: DenyActionIntent(approvalID: approvalID)) {
                 Text(String(activity: "Don’t Allow"))
                     .font(theme.button)
@@ -841,7 +886,7 @@ struct StopButton: View {
     }
 }
 
-/// End during a talk with Poki: ends the talk and closes the microphone; a task Poki is on goes on.
+/// End during a talk with kaka: ends the talk and closes the microphone; a task kaka is on goes on.
 /// Beside the island's Stop, a circle with the microphone struck through; elsewhere a white capsule
 /// that says End, drawn as Stop is. Ending a talk here is pull request #250's interaction.
 struct EndTalkButton: View {

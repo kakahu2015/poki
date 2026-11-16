@@ -2,7 +2,7 @@
 // ElementX/Sources/Other/Pills/PillView.swift).
 // Copyright 2025 Element Creations Ltd. Copyright 2023-2025 New Vector Ltd.
 // SPDX-License-Identifier: AGPL-3.0-only. See THIRD_PARTY_NOTICES.md.
-// Poki's changes: the app's icon in front of its name, as the home page's pills show an app (the
+// kaka's changes: the app's icon in front of its name, as the home page's pills show an app (the
 // owner, 2026-11-13), on a faint ground of the text's own colour, sized from the surrounding font; no
 // Compound colours, status emoji or loading context.
 
@@ -27,7 +27,7 @@ struct PillMetrics {
 }
 
 /// An app's capsule: its icon in the Home Screen's shape and its name in the semibold of the home
-/// page's pills. The icon is the one on this iPhone, else the one Poki carries, always in its light
+/// page's pills. The icon is the one on this iPhone, else the one kaka carries, always in its light
 /// look. In the message field it sits on a faint ground of the text's colour; in your blue bubble,
 /// on a faint white one with a white name.
 struct PillView: View {

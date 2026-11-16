@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Poki's existing icon where an app has no usable artwork.
+/// kaka's existing icon where an app has no usable artwork.
 struct DefaultAppIcon: View {
     var size: CGFloat
     var body: some View {

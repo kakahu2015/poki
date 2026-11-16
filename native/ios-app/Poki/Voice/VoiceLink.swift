@@ -16,7 +16,7 @@ protocol VoiceConnection: AnyObject, Sendable {
 /// secret; it never sees an API key. Callbacks arrive on the main actor.
 final class VoiceLink: NSObject, VoiceConnection, RTCPeerConnectionDelegate, RTCDataChannelDelegate, @unchecked Sendable {
     private static let factory: RTCPeerConnectionFactory = {
-        // Voice chat: echo cancellation on, so Poki's own voice from the speaker doesn't interrupt it.
+        // Voice chat: echo cancellation on, so kaka's own voice from the speaker doesn't interrupt it.
         let audio = RTCAudioSessionConfiguration.webRTC()
         audio.category = AVAudioSession.Category.playAndRecord.rawValue
         audio.mode = AVAudioSession.Mode.voiceChat.rawValue
@@ -83,7 +83,7 @@ final class VoiceLink: NSObject, VoiceConnection, RTCPeerConnectionDelegate, RTC
             return true
         }) else { peer.close(); throw CancellationError() }
         if microphone {
-            // Poki's background keep-alive may have left the shared session in .playback, which cannot
+            // kaka's background keep-alive may have left the shared session in .playback, which cannot
             // record; set voice chat explicitly before the microphone track starts.
             try await AudioSessionWork.perform {
                 guard !self.lock.withLock({ self.closed }) else { throw CancellationError() }
@@ -196,7 +196,7 @@ final class VoiceLink: NSObject, VoiceConnection, RTCPeerConnectionDelegate, RTC
         return channel.sendData(RTCDataBuffer(data: data, isBinary: false))
     }
 
-    /// 0 mutes Poki's voice (silent test runs); 1 is normal.
+    /// 0 mutes kaka's voice (silent test runs); 1 is normal.
     func setRemoteVolume(_ value: Double) {
         lock.withLock {
             volume = value

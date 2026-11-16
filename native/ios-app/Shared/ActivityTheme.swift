@@ -4,7 +4,7 @@
 // THIRD_PARTY_NOTICES.md.
 import SwiftUI
 
-/// Poki's brand colours, used by the app's screens.
+/// kaka's brand colours, used by the app's screens.
 enum Brand {
     static let blue = Color(red: 0x20 / 255, green: 0x84 / 255, blue: 0xFD / 255)
 }
@@ -93,14 +93,14 @@ struct ActivityPalette {
     var done: Color
     var problem: Color
     var reason: Color
-    /// Secondary buttons (Don't Allow, Open Poki) and the answer on its way.
+    /// Secondary buttons (Don't Allow, Open kaka) and the answer on its way.
     var buttonFill: Color
     /// The steps gone through (the one under way included), and those still to come.
     var segmentDone: Color
     /// A step with a failed action.
     var segmentFailed: Color
     var track: Color
-    /// The one main button (Allow, Done): Poki's blue with white words on the black island, a white
+    /// The one main button (Allow, Done): kaka's blue with white words on the black island, a white
     /// capsule with blue words on the blue card.
     var primaryFill: Color
     var primaryText: Color
@@ -123,7 +123,7 @@ struct ActivityPalette {
 /// Every colour, font and size the Live Activity draws with: the website's design language (ESP-139
 /// final board 02 and ESP-171 final Dynamic Island / Lock Screen boards).
 struct ActivityTheme {
-    /// ESP-344's one rule: black, white and the system's grey, and one accent, Poki's blue. Red is
+    /// ESP-344's one rule: black, white and the system's grey, and one accent, kaka's blue. Red is
     /// only the square in Stop, a failed step's segment and the mark of a problem. Green and yellow are gone.
     /// On the blue card everything is white.
     var lock = ActivityPalette(
@@ -169,7 +169,7 @@ struct ActivityTheme {
     var title: Font { Self.font("Geist-Bold", .bold, 20) }
     /// What the step under way does, and a finished run's title: 19 points, semibold.
     var step: Font { Self.font("Geist-SemiBold", .semibold, 19) }
-    /// What Poki is up to on a short Lock Screen card ("Poki's asleep", "Poki's done"): the card's main
+    /// What kaka is up to on a short Lock Screen card ("kaka's asleep", "kaka's done"): the card's main
     /// line, large enough to read at a glance on the Lock Screen (ESP-467).
     var status: Font { Self.font("Geist-Bold", .bold, 24) }
     var titleTracking: CGFloat { Self.usesGeist ? -0.2 : 0 }

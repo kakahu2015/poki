@@ -16,7 +16,10 @@ final class LiveCore: CoreSession {
     init(host: AppCoreHost, transport: HTTPTransport) {
         self.host = host
         var config = CoreConfig()
-        // Signing tools may rename the app; its own id is Poki too.
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown"
+        config.relayAppVersion = "\(version) (\(build))"
+        // Signing tools may rename the app; its own id is kaka too.
         if let own = Bundle.main.bundleIdentifier { config.ownApps.append(own) }
         // Read at each step, from the saved choice the Approvals page shows: Never Ask lets optional
         // steps go; payments, deletions and guarded apps still wait.
@@ -48,12 +51,22 @@ final class LiveCore: CoreSession {
     func setHostTools(_ tools: [HostTool]) { core.setHostTools(tools) }
     func tool(_ name: String, arguments: String) async -> ToolResult { await core.tool(name, arguments: arguments) }
     /// `look`, `do` or `status` for the chat's model loop inside the app.
-    func callTool(_ name: String, arguments: String) async -> PokiCore.ToolAnswer { await core.callTool(name, arguments: arguments) }
+    func callTool(_ name: String, arguments: String, localSession: String? = nil, expectedApps: Set<String>? = nil) async -> PokiCore.ToolAnswer {
+        await core.callTool(name, arguments: arguments, localSession: localSession, expectedApps: expectedApps)
+    }
     func settle(timeout: Double) async -> Bool { await core.settle(timeout: timeout) }
+    func prepareWorkspace(session: String) async -> Bool { await core.prepareWorkspace(session: session) }
+    func clearWorkspacePaneForSetup(session: String) async -> Bool {
+        await core.clearWorkspacePaneForSetup(session: session)
+    }
+    func workspaceLauncherStep(session: String, request: JSON) async throws -> JSON {
+        try await core.workspaceLauncherStep(session: session, request: request)
+    }
     /// Ends the task: the phone goes back to the app it began in (or, `switching: false`, stays). The
     /// line says what happened.
-    func finishTask(switching: Bool = true) async -> String? { await core.finishTask(switching: switching) }
-    /// Ends one agent's task without affecting another session's active task.
+    func finishTask(switching: Bool = true, localSession: String? = nil, ifNoLocalWorkspace: Bool = false) async -> String? {
+        await core.finishTask(switching: switching, localSession: localSession, ifNoLocalWorkspace: ifNoLocalWorkspace)
+    }
     func finishTask(session: String) async -> String? { await core.finishTask(session: session) }
 
     private static func map(_ event: CoreEvent) -> ShellEvent {
@@ -67,7 +80,7 @@ final class LiveCore: CoreSession {
             switch outcome { case .done(let text): delivery = text; case .failed(let text): delivery = "failed: \(text)" }
             return .toolFinished(summary: activity.summary, delivery: delivery, app: facts.app, thumbnail: facts.thumbnail, error: facts.error, session: activity.session)
         case .approvalRequested(let approval):
-            return .approvalRequested(PendingApproval(id: approval.id, app: approval.app, summary: approval.summary, reason: approval.reason, expires: approval.expires))
+            return .approvalRequested(PendingApproval(id: approval.id, app: approval.app, summary: approval.summary, reason: approval.reason, expires: approval.expires, stopsWhenOff: approval.stopsWhenOff))
         case .approvalEnded(let id, let approved): return .approvalEnded(id: id, approved: approved)
         case .handoffRequested(let id, let kind, let text, let app): return .handoffRequested(id: id, kind: kind, text: text, app: app)
         case .handoffEnded(let id, let how): return .handoffEnded(id: id, how: how)
@@ -112,7 +125,7 @@ final class AppCoreHost: CoreHost, @unchecked Sendable {
     func setPaused(_ value: Bool) { lock.withLock { paused = value } }
 
     func signingKey() throws -> RelayKey {
-        guard let key = lock.withLock({ self.key }) else { throw NSError(domain: "Poki", code: 1, userInfo: [NSLocalizedDescriptionKey: "no relay key in the keychain"]) }
+        guard let key = lock.withLock({ self.key }) else { throw NSError(domain: "kaka", code: 1, userInfo: [NSLocalizedDescriptionKey: "no relay key in the keychain"]) }
         return DeviceKey(key: key)
     }
     func accessHashes() -> [String] { lock.withLock { hashes } }
@@ -123,16 +136,21 @@ final class AppCoreHost: CoreHost, @unchecked Sendable {
         guard let ask = lock.withLock({ consent }) else { return false }
         return await ask(client, callback, connector)
     }
-    /// PokiCore asks before every device tool. A paused runner is started here, so the call answers
-    /// "starting" and the next one finds it running. A failed one is answered as it is, and the app
-    /// is asked to try again for the next call.
+    /// PokiCore asks as each device tool begins. A paused runner is started here, so the call answers
+    /// "starting" and the next one finds it running. A failed session is opened again for this call,
+    /// which waits for it: the call that heard the failure has already ended without asking.
     func runnerState() -> RunnerState {
         let (state, then) = lock.withLock { () -> (RunnerState, (@Sendable () -> Void)?) in
             guard paused else {
                 // Failed, or still starting: the app is asked to (re)open its session. Opening is
                 // idempotent and the app ignores the ask while an open is under way, so a call that
-                // waits on "starting" can never wait on an open nobody started.
-                if case .failed = runner { return (runner, retry) }
+                // waits on "starting" can never wait on an open nobody started. After the ask the app
+                // sets the state again, so a failure it does not retry (a missed passcode) still
+                // reaches the call.
+                if case .failed = runner, retry != nil {
+                    runner = .starting("opening a new automation session after the last one failed; it takes a few seconds")
+                    return (runner, retry)
+                }
                 if case .starting = runner { return (runner, retry) }
                 return (runner, nil)
             }
@@ -154,12 +172,12 @@ final class AppCoreHost: CoreHost, @unchecked Sendable {
     func jpeg(fromPNG png: Data, width: Int, quality: Double) throws -> Data {
         guard let source = CGImageSourceCreateWithData(png as CFData, nil),
               let image = CGImageSourceCreateThumbnailAtIndex(source, 0, [kCGImageSourceCreateThumbnailFromImageAlways: true, kCGImageSourceThumbnailMaxPixelSize: Self.maxSide(source, width: width)] as CFDictionary) else {
-            throw NSError(domain: "Poki", code: 2, userInfo: [NSLocalizedDescriptionKey: "the screenshot is not an image"])
+            throw NSError(domain: "kaka", code: 2, userInfo: [NSLocalizedDescriptionKey: "the screenshot is not an image"])
         }
         let out = NSMutableData()
-        guard let destination = CGImageDestinationCreateWithData(out, UTType.jpeg.identifier as CFString, 1, nil) else { throw NSError(domain: "Poki", code: 3) }
+        guard let destination = CGImageDestinationCreateWithData(out, UTType.jpeg.identifier as CFString, 1, nil) else { throw NSError(domain: "kaka", code: 3) }
         CGImageDestinationAddImage(destination, image, [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary)
-        guard CGImageDestinationFinalize(destination) else { throw NSError(domain: "Poki", code: 4) }
+        guard CGImageDestinationFinalize(destination) else { throw NSError(domain: "kaka", code: 4) }
         return out as Data
     }
 

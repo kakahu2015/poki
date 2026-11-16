@@ -1,8 +1,8 @@
 import Foundation
 
-/// Poki's status words, in standard product language: two to four Chinese characters, no subject, no
+/// kaka's status words, in standard product language: two to four Chinese characters, no subject, no
 /// voice of its own ("Ready", "Paused", "Needs approval"; the owner, 2026-11-12). The one table every
-/// place that says Poki's state reads (Status.xcstrings): the bear's word (`PokiMood.word`) and through
+/// place that says kaka's state reads (Status.xcstrings): the bear's word (`PokiMood.word`) and through
 /// it the top of the chat, the home page, the status card and Settings; and, in the widget extension,
 /// which cannot see the app's `PokiMood`, the Dynamic Island, the Lock Screen card and their alerts.
 enum StatusWord: CaseIterable {

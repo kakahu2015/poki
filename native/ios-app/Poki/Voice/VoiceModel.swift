@@ -5,7 +5,7 @@ import UIKit
 
 /// The voice bridge on the person's Mac (`bin/voice-bridge.mjs`): it hands out short-lived OpenAI
 /// Realtime credentials, so the phone never holds an API key, and runs the voice tools that move the
-/// phone through the Mac's Poki MCP. Entered once, like the relay address.
+/// phone through the Mac's kaka MCP. Entered once, like the relay address.
 struct VoiceBridge: Equatable {
     /// http://<Mac>:47830/voice/<secret>
     let base: URL
@@ -123,7 +123,7 @@ enum VoiceError: LocalizedError {
         }
     }
 
-    /// For the talk bar, in Poki's language. A reason the bridge or OpenAI sent stays in their words.
+    /// For the talk bar, in kaka's language. A reason the bridge or OpenAI sent stays in their words.
     var words: String {
         switch self {
         case .bridge(404, _): AppLocalization.text(LocalizedStringResource("The voice bridge doesn't know this address. Copy it again from the Mac."))
@@ -138,8 +138,8 @@ enum VoiceError: LocalizedError {
         }
     }
 
-    /// Why a talk could not start or listen, for the talk bar: Poki's own reasons and the network
-    /// failures it can name in Poki's language, anything else as iOS words it.
+    /// Why a talk could not start or listen, for the talk bar: kaka's own reasons and the network
+    /// failures it can name in kaka's language, anything else as iOS words it.
     static func reason(for error: Error) -> String {
         if let error = error as? VoiceError { return error.words }
         switch (error as? URLError)?.code {
@@ -233,7 +233,7 @@ struct VoiceClock {
     var sleep: @MainActor (Duration) async -> Void = { try? await Task.sleep(for: $0) }
 }
 
-/// Talking to Poki: one Realtime session at a time over WebRTC, the calls it asked for, and what was
+/// Talking to kaka: one Realtime session at a time over WebRTC, the calls it asked for, and what was
 /// said. The model hears the microphone and speaks through the speaker; `get_ios_version` is answered
 /// here, the other tools by the voice bridge.
 @MainActor
@@ -245,7 +245,7 @@ final class VoiceModel {
     /// The live conversation's row in the session list, and the lines that belong to it.
     private var transcript: (id: String, started: Date, from: Int)?
     private(set) var calls: [VoiceCall] = []
-    /// The person spoke over Poki's answer, or stopped it: the talk's screens say so for `interruptedShows`.
+    /// The person spoke over kaka's answer, or stopped it: the talk's screens say so for `interruptedShows`.
     private(set) var interrupted = false
     private var interruptedLapse: Task<Void, Never>?
     static let interruptedShows: Duration = .milliseconds(1400)
@@ -269,7 +269,7 @@ final class VoiceModel {
     /// An answer is expected (the person stopped speaking, or response.create went out) and the server
     /// has not started it yet.
     private var awaitingAnswer = false
-    /// The event_id of the response.create Poki sent and the server has not started yet: an error naming
+    /// The event_id of the response.create kaka sent and the server has not started yet: an error naming
     /// it means that answer is not coming.
     private var requestedAnswer: String?
     /// Running while the conversation waits for the person to go on after an answer.
@@ -277,9 +277,9 @@ final class VoiceModel {
     /// Running while a conversation is open: ends it when the server owes something and says nothing.
     private var stallWatch: Task<Void, Never>?
     /// The last time the server said anything, a request went out to it, a step's result was handed over, or
-    /// Poki went to the background: the wait for the server counts from here.
+    /// kaka went to the background: the wait for the server counts from here.
     private var lastActivity = Date()
-    /// When the last live conversation with something said in it ended, and what the person and Poki
+    /// When the last live conversation with something said in it ended, and what the person and kaka
     /// said. One opened soon after is told those lines (kept in memory only). A conversation nobody spoke
     /// in leaves both as they were.
     private var lastEnd: Date?
@@ -298,7 +298,7 @@ final class VoiceModel {
     static let backgroundStall: Duration = .seconds(30)
     private var localTools: Set<String> = []
     private let log = AppLog.shared
-    /// Poki's approval for a tap (PokiCore's rules and approval card): text, app bundle id, app name.
+    /// kaka's approval for a tap (PokiCore's rules and approval card): text, app bundle id, app name.
     private let clearTap: @MainActor (String, String?, String?) async -> TapClearance
 
     /// How long a tap waits for the owner's OK on the phone: about as long as the card says it lasts.
@@ -307,8 +307,8 @@ final class VoiceModel {
     /// look and do, run by PokiCore on this phone (the relay's tools): name, JSON arguments → text, failed.
     private let phoneTool: @MainActor (String, String) async -> (String, Bool)
 
-    /// true while a conversation with the microphone is on: Poki's silent keep-alive audio steps aside
-    /// (its .playback session cannot record), and the voice-chat session keeps Poki running instead.
+    /// true while a conversation with the microphone is on: kaka's silent keep-alive audio steps aside
+    /// (its .playback session cannot record), and the voice-chat session keeps kaka running instead.
     private let holdMicrophone: @MainActor (Bool) -> Void
 
     /// Opens the connection for one session: events, then why it closed.
@@ -325,7 +325,7 @@ final class VoiceModel {
         self.holdMicrophone = holdMicrophone
         self.connection = connection
         self.time = time
-        // Poki in the background goes on with the talk (the owner, 2026-11-13): you speak to it from the
+        // kaka in the background goes on with the talk (the owner, 2026-11-13): you speak to it from the
         // app you went to, and the Live Activity says what it is doing and carries End. It ends there as
         // it does in front, when nobody speaks for `followUp` after an answer. Only the wait for a server
         // that says nothing is shorter there.
@@ -354,15 +354,15 @@ final class VoiceModel {
     private var isConnecting: Bool { if case .connecting = phase { return true }; return false }
 
     /// Voice can start: the OpenAI key on this iPhone (Realtime, no bridge), the Mac's voice bridge, or
-    /// dictation into the chat with whichever model Poki uses.
+    /// dictation into the chat with whichever model kaka uses.
     var canTalk: Bool { VoiceDirect.apiKey != nil || bridge != nil || VoiceDirect.canDictate }
 
     /// A live (Realtime) conversation can start: the OpenAI key on this iPhone or the voice bridge.
     /// Without one, voice is dictation into the message field, turn by turn.
     var canTalkLive: Bool { VoiceDirect.apiKey != nil || bridge != nil || rehearsing }
 
-    /// Talk with Poki was asked for with no live voice (no OpenAI key, no voice bridge), from the message
-    /// field's button, Poki's profile or `poki://voice`: the message field says what is missing, with
+    /// Talk with kaka was asked for with no live voice (no OpenAI key, no voice bridge), from the message
+    /// field's button, kaka's profile or `poki://voice`: the message field says what is missing, with
     /// the way to the key, and sets this back.
     var keyAsked = false
 
@@ -436,7 +436,7 @@ final class VoiceModel {
 
     /// `poki://voice` can come from any web page, message or app, so it only shows the Voice tab. A link
     /// never changes the voice bridge and never turns on the microphone: the person enters the address
-    /// and taps Talk to Poki in the app.
+    /// and taps Talk to kaka in the app.
     func open(_ url: URL) {
         let asked = (URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []).map(\.name)
         if !asked.isEmpty { log.add("voice", "a link asked for \(asked.joined(separator: ", ")); links only bring the chat to the front") }
@@ -497,7 +497,7 @@ final class VoiceModel {
             do {
                 try await link.connect(secret: token.value, microphone: microphone, direct: false)
             } catch VoiceError.noPath(let ice) {
-                // No path opened (ICE \(ice)): once more, off VPN interfaces (Poki's loopback, a proxy
+                // No path opened (ICE \(ice)): once more, off VPN interfaces (kaka's loopback, a proxy
                 // app) and with a fresh key, before telling the owner.
                 guard number == session else { return }
                 log.add("voice", "no network path opened (ICE \(ice)); trying again off VPN interfaces")
@@ -511,6 +511,8 @@ final class VoiceModel {
                 try await link.connect(secret: retry.value, microphone: microphone, direct: true)
             }
             guard number == session else { link.close(); return }
+            lastActivity = time.now()
+            watchForStall(session: number)
             link.setRemoteVolume(muted ? 0 : 1)
             log.add("voice", "connected (\(token.model)), session \(number)")
             if microphone { link.diagnose { [log] line in log.add("voice", line) } }
@@ -531,7 +533,7 @@ final class VoiceModel {
         SessionStore.shared.save(voice: transcript.id, started: transcript.started, lines: Array(lines[transcript.from...]), live: link != nil)
     }
 
-    /// The chat the conversation was held in (Poki's chat): when it ends, what was said and done goes
+    /// The chat the conversation was held in (kaka's chat): when it ends, what was said and done goes
     /// into that chat's history, where it stays, instead of a separate row that the next conversation
     /// or a relaunch would take off the screen.
     var onConversationEnded: (@MainActor (_ lines: [VoiceLine], _ started: Date) -> Void)?
@@ -543,7 +545,7 @@ final class VoiceModel {
         let said = lines.count >= ended.from ? Array(lines[ended.from...]) : []
         guard let onConversationEnded, !said.isEmpty else { return }
         onConversationEnded(said, ended.started)
-        // Now in the chat's own session: the voice row (kept while it ran, in case Poki closed) goes.
+        // Now in the chat's own session: the voice row (kept while it ran, in case kaka closed) goes.
         SessionStore.shared.delete(ended.id)
         lines.removeAll()
     }
@@ -602,7 +604,7 @@ final class VoiceModel {
     /// The server owes something: the end of the person's speech, an answer, the end of the audio. A step
     /// that is running is not the server's to answer for, and it has its own time limits.
     private var waitingOnServer: Bool {
-        (awaitingAnswer || activeResponse != nil || wantsResponse || phase == .hearing || phase == .speaking)
+        !ready || (awaitingAnswer || activeResponse != nil || wantsResponse || phase == .hearing || phase == .speaking)
             && !calls.contains { $0.state == .running }
     }
 
@@ -748,7 +750,7 @@ final class VoiceModel {
         }
     }
 
-    /// Stops Poki's voice reply. Anything running on the phone keeps running.
+    /// Stops kaka's voice reply. Anything running on the phone keeps running.
     func stopTalking() {
         if let dictation { dictation.stopSpeaking(); if phase == .speaking { phase = .listening }; return }
         guard let link else { return }
@@ -805,7 +807,7 @@ final class VoiceModel {
         case "input_audio_buffer.speech_started":
             keepOpen()
             if phase != .hearing { log.add("voice", "speech started") }
-            // Spoken over Poki's answer: the server drops the answer's audio, and the talk says so.
+            // Spoken over kaka's answer: the server drops the answer's audio, and the talk says so.
             if phase == .speaking { markInterrupted() }
             phase = .hearing
         case "input_audio_buffer.speech_stopped":
@@ -850,8 +852,8 @@ final class VoiceModel {
         case "error":
             let message = ((event["error"] as? [String: Any])?["message"] as? String) ?? "unknown error"
             log.add("voice", "realtime error: \(message)")
-            // An error can be all the server sends after the person spoke, or the answer to Poki's own
-            // response.create; no answer is coming then. An error about something else, while Poki's
+            // An error can be all the server sends after the person spoke, or the answer to kaka's own
+            // response.create; no answer is coming then. An error about something else, while kaka's
             // request for an answer is out, leaves that answer expected.
             let about = (event["error"] as? [String: Any])?["event_id"] as? String
             if requestedAnswer == nil || about == requestedAnswer {
@@ -889,7 +891,7 @@ final class VoiceModel {
                     var result = try await bridge.run(callID: call.id, name: call.name, arguments: call.arguments)
                     var note = ""
                     if result.state == "check", let target = result.target {
-                        // A tap: Poki's approval rules first, and the owner's OK on the phone when they ask for it.
+                        // A tap: kaka's approval rules first, and the owner's OK on the phone when they ask for it.
                         let app = result.app
                         let clearance = await clearTap(target.says, app?.bundle_id, app?.name)
                         if clearance.mayTap {
@@ -967,13 +969,13 @@ final class VoiceModel {
 
     #if DEBUG
     /// `-pokiVoiceLink "poki://voice?test=1-20"`: each turn opens a fresh session, plays recorded utterance n from the bridge
-    /// over the data channel (no microphone, Poki's voice muted), waits for the spoken result and reports
+    /// over the data channel (no microphone, kaka's voice muted), waits for the spoken result and reports
     /// the turn to the bridge.
     func runTest(_ numbers: ClosedRange<Int>) async {
         guard let bridge else { phase = .lost(VoiceError.noBridge.words); return }
         muted = true
-        // Test runs have no microphone, so no voice-chat audio session keeps Poki running while a step
-        // brings another app to the front; a silent one does, as for a Poki session.
+        // Test runs have no microphone, so no voice-chat audio session keeps kaka running while a step
+        // brings another app to the front; a silent one does, as for a kaka session.
         let awake = KeepAlive()
         try? await awake.start()
         defer { awake.stop() }

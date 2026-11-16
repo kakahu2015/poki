@@ -1,6 +1,6 @@
-//! On-device pairing (iOS 27): Poki plays the "pairable host". It listens on a TCP port, the app
+//! On-device pairing (iOS 27): kaka plays the "pairable host". It listens on a TCP port, the app
 //! advertises `_remotepairing-pairable-host._tcp` with the TXT records below (Bonjour, from Swift),
-//! the person picks Poki in Settings and types the PIN Poki shows, and the result is an RPPairing file
+//! the person picks kaka in Settings and types the PIN kaka shows, and the result is an RPPairing file
 //! the launcher then uses over the loopback. This is what StikPair does.
 
 use idevice::remote_pairing::{PAIRABLE_HOST_SERVICE_TYPE, PairableHost, PairableHostInfo, RpPairingFile, RpPairingSocket};
@@ -11,11 +11,11 @@ use tokio::net::TcpListener;
 pub struct PairConfig {
     pub host_name: String,
     pub out_path: PathBuf,
-    /// Where to keep the host identity (alt_irk) so the phone recognizes Poki later.
+    /// Where to keep the host identity (alt_irk) so the phone recognizes kaka later.
     pub identity_path: Option<PathBuf>,
 }
 
-/// How long a pairing may wait for the person. On the phone, finding Poki in Settings and typing the
+/// How long a pairing may wait for the person. On the phone, finding kaka in Settings and typing the
 /// PIN took about three minutes; ten leave room for someone who gets lost in Settings. The app keeps
 /// itself running with silent audio while it waits, so a pairing the person gave up on must end.
 pub const PAIRING_LIMIT: Duration = Duration::from_secs(10 * 60);
@@ -44,7 +44,7 @@ async fn pair(config: &PairConfig, emit: &(impl Fn(Value) + Send + Sync)) -> Res
     }
     let mut file = RpPairingFile::generate(&config.host_name);
     let identifier = file.identifier().to_string();
-    // Both IPv6 and IPv4 (a dual-stack socket on "::"): Settings may reach Poki over either.
+    // Both IPv6 and IPv4 (a dual-stack socket on "::"): Settings may reach kaka over either.
     let listener = match TcpListener::bind(("::", 0)).await {
         Ok(l) => l,
         Err(_) => TcpListener::bind(("0.0.0.0", 0)).await.map_err(|e| format!("cannot listen for the phone: {e}"))?,

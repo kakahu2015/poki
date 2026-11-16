@@ -62,7 +62,7 @@ enum ActivityBear: String, Hashable {
 /// What the Live Activity shows for a state, worked out once per phase. The Lock Screen, the expanded
 /// island, the compact island and the minimal circle all draw this, so a phase's words and colours
 /// live in one table (`PokiState.face`) instead of a switch in every view. Layout, words and colours
-/// follow ESP-344's final design (定稿规格): black, white and grey, and Poki's blue as the one accent.
+/// follow ESP-344's final design (定稿规格): black, white and grey, and kaka's blue as the one accent.
 struct ActivityFace: Hashable {
     enum Meta: Hashable {
         case none
@@ -87,7 +87,7 @@ struct ActivityFace: Hashable {
         case text(String, ActivityTone)
         /// The pairing code, tabular digits.
         case code(String)
-        /// Poki waits for your answer: a word saying so ("Allow?") over the time left (ESP-467). The
+        /// kaka waits for your answer: a word saying so ("Allow?") over the time left (ESP-467). The
         /// island opens by itself when the approval comes and folds back after a few seconds; folded,
         /// it still says what it waits for.
         case asking(String, Date)
@@ -105,13 +105,13 @@ struct ActivityFace: Hashable {
         case deciding(String)
         /// "Continue" for a screen the agent handed to the person.
         case handoff(id: String)
-        /// Open Poki to fix a stopped runner or pairing error.
+        /// Open kaka to fix a stopped runner or pairing error.
         case openPoki
         /// The setup steps: done, the current one, the rest.
         case segments(number: Int, count: Int)
     }
     enum Thumbnail: Hashable { case none, large, small }
-    /// What the compact island's right side shows while Poki works: the icon of the app the run is in
+    /// What the compact island's right side shows while kaka works: the icon of the app the run is in
     /// (`.icon`, which falls back to the time where the app is not known), or always the run's time
     /// (`.time`). The design has both; until one is chosen, this line picks it.
     enum WorkingTrailing { case icon, time }
@@ -140,18 +140,25 @@ struct ActivityFace: Hashable {
     var subtitle: String? = nil
     var subtitleLines = 1
     var bottom: Bottom
+    /// The card has a Don’t Ask Again row under Allow and Don’t Allow.
+    var offersStopAsking = false
     /// The latest screenshot on the right of the Lock Screen card.
     var thumbnail: Thumbnail = .none
     var compact: Compact
     /// The screen a tap opens.
     var link: URL = ActivityLink.chat
+    /// While the agent may be acting (a run, an approval, a hand-off), a tap on the expanded island
+    /// that misses its controls does nothing instead of opening kaka (`TapShield`): the expanded
+    /// island lies over the top of the app being worked in, so the agent's taps there, and the owner's
+    /// near misses of Allow and Don't Allow, brought kaka to the front in the middle of the task.
+    var shieldsTaps = false
     /// The app has not updated the activity for longer than it should have: what it shows may be old.
     var stale = false
     /// Who is calling: the outside agent whose badge sits beside the meta value.
     var caller: String?
-    /// A talk with Poki is on: the card and the island carry End, which ends the talk (EndTalkIntent).
+    /// A talk with kaka is on: the card and the island carry End, which ends the talk (EndTalkIntent).
     var endsTalk = false
-    /// A talk with Poki is on: the expanded island draws the brand band along its lower edge.
+    /// A talk with kaka is on: the expanded island draws the brand band along its lower edge.
     var talkGlow = false
 }
 
@@ -181,8 +188,8 @@ extension PokiActivityAttributes.Event {
 extension PokiState {
     var hasThumbnail: Bool { thumbnailVersion > 0 }
 
-    /// Nothing to say: no work, nobody needed, no talk with Poki. Where something else already says
-    /// Poki is on, the Live Activity steps aside then.
+    /// Nothing to say: no work, nobody needed, no talk with kaka. Where something else already says
+    /// kaka is on, the Live Activity steps aside then.
     var isQuiet: Bool { phase == .idle && voice == nil }
 
     /// Where and how long a finished run took: "Done in Messages, took 1:24". Never a count of steps,
@@ -198,7 +205,7 @@ extension PokiState {
         }
     }
 
-    /// What a finished run did: the plan's title, else Poki's own line.
+    /// What a finished run did: the plan's title, else kaka's own line.
     var doneTitle: String { plan?.title?.nonBlank ?? StatusWord.done.text }
 
     /// The plan's step under way, from 1.
@@ -209,9 +216,10 @@ extension PokiState {
 
     /// What the run is doing, worded so a glance at the island says which part of the task this is
     /// (ESP-467): the plan's step under way in the model's words, else the task's name, else a line of
-    /// Poki's own ("Thinking"). Never the action under it ("Tap “Send”"): on its own that says nothing
+    /// kaka's own ("Thinking"). Never the action under it ("Tap “Send”"): on its own that says nothing
     /// about the task. nil when none of these is known.
     var doing: String? {
+        if headline == "Waiting for Split View" { return String(activity: "Waiting for Split View") }
         if let words = taskWords { return words }
         if let to = plan?.to?.nonBlank { return String(activity: "kaka’s messaging \(to)") }
         return ActivityWords.statusLines.contains(headline) ? ActivityWords.local(headline) : nil
@@ -229,7 +237,7 @@ extension PokiState {
         return plan.steps[number - 1].nonBlank
     }
 
-    /// The compact island's right side while Poki works (`ActivityFace.workingTrailing`): the app's
+    /// The compact island's right side while kaka works (`ActivityFace.workingTrailing`): the app's
     /// icon, or the run's time where the app is not known.
     private func workingCompact(app: String?) -> ActivityFace.Compact {
         if ActivityFace.workingTrailing == .icon, let app { return .app(app, since: since) }
@@ -243,11 +251,12 @@ extension PokiState {
     func face(stale: Bool) -> ActivityFace {
         var face = baseFace
         face.caller = caller
-        // During a talk the card and the island carry End, while Poki listens, speaks or works on a step
+        // During a talk the card and the island carry End, while kaka listens, speaks or works on a step
         // of the talk. Anything that needs the person (an approval, a hand-off) or tells of a problem
         // keeps them to itself.
         face.endsTalk = voice != nil && (phase == .idle || phase == .working) && !stale
         face.talkGlow = voice != nil && !stale
+        face.shieldsTaps = !stale && [.working, .approval, .deciding, .handoff].contains(phase)
         // A fresh event ("Started", "Allowed") shows beside the app's name for a few seconds. An app
         // switch is the app's name itself, already there.
         if let event, !phase.holdsApproval, event.kind != .app {
@@ -295,6 +304,7 @@ extension PokiState {
                     meta: .none,
                     content: question,
                     bottom: .deciding(allowed ? String(activity: "Continuing") : String(activity: "Telling the agent")),
+                    offersStopAsking: approval.offersStopAsking,
                     thumbnail: hasThumbnail ? .small : .none,
                     compact: .symbol(allowed ? "checkmark" : "xmark", allowed ? .accent : .quiet))
             }
@@ -304,6 +314,7 @@ extension PokiState {
                 meta: .countdown(approval.expires),
                 content: question,
                 bottom: .approval(id: approval.id),
+                offersStopAsking: approval.offersStopAsking,
                 thumbnail: hasThumbnail ? .small : .none,
                 compact: .asking(String(activity: "Pending approval"), approval.expires))
         case .done:
@@ -407,7 +418,7 @@ extension PokiState {
                     ? String(activity: "The runner wakes when an agent asks.")
                     : String(activity: "Runner on. Waiting for the agent."))
             }
-        // Standing by looks ready: it takes the next request by itself (the owner, 2026-11-13).
+        // Standing by looks ready: it takes the next request by itself.
         return ActivityFace(
             symbol: "checkmark",
             bear: .ready, size: .low,

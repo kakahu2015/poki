@@ -2,8 +2,8 @@ import AppIntents
 import SwiftUI
 import WidgetKit
 
-/// Talk to Poki as a control: in Control Center, on the Lock Screen and under the Action Button's
-/// Controls. It runs TalkToPokiIntent, which opens Poki.
+/// Talk to kaka as a control: in Control Center, on the Lock Screen and under the Action Button's
+/// Controls. It runs TalkToPokiIntent, which opens kaka.
 struct TalkToPokiControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: "PokiTalk") {

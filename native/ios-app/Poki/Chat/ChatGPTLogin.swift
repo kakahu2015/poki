@@ -6,10 +6,10 @@ import WebKit
 
 /// The ChatGPT sign-in: OpenAI's Sign in with ChatGPT for open-source apps
 /// (developers.openai.com/siwc/token-sharing-open-source), through PiSwiftAI's `loginOpenAIChatGPT`.
-/// The first sign-in registers Poki with `dynamic_agent_client` and this installation's id; the page
-/// opens in ASWebAuthenticationSession and redirects to a listener inside Poki on
+/// The first sign-in registers kaka with `dynamic_agent_client` and this installation's id; the page
+/// opens in ASWebAuthenticationSession and redirects to a listener inside kaka on
 /// http://127.0.0.1:1455/auth/callback, the only redirect the flow accepts. The chat then runs on the
-/// OpenAI API (Responses, store off) on the owner's ChatGPT plan. Poki does not use Codex's own client.
+/// OpenAI API (Responses, store off) on the owner's ChatGPT plan. kaka does not use Codex's own client.
 ///
 /// The tokens go into the keychain as one JSON item and are never printed or logged.
 enum ChatGPTAccount {
@@ -35,7 +35,7 @@ enum ChatGPTAccount {
 
 @MainActor
 final class ChatGPTBrowserLogin: NSObject, ASWebAuthenticationPresentationContextProviding {
-    /// In-app: OpenAI's page opens in Poki's own sheet, which hands the last redirect (to Poki's listener
+    /// In-app: OpenAI's page opens in kaka's own sheet, which hands the last redirect (to kaka's listener
     /// on 127.0.0.1) straight to the listener, so no browser ever loads that local address (Safari tried
     /// it over https first and showed a certificate warning). Off: the system sign-in sheet.
     var inApp = true
@@ -170,7 +170,7 @@ struct ChatGPTSignIn: View {
 
 extension URL: @retroactive Identifiable { public var id: String { absoluteString } }
 
-/// OpenAI's sign-in page in Poki. The redirect to Poki's own listener (127.0.0.1 or localhost, port
+/// OpenAI's sign-in page in kaka. The redirect to kaka's own listener (127.0.0.1 or localhost, port
 /// 1455, http or https) is not loaded: it is sent to the listener over plain http from here, which ends
 /// the sign-in and closes this sheet.
 struct SignInPage: UIViewRepresentable {
@@ -189,7 +189,7 @@ struct SignInPage: UIViewRepresentable {
     func updateUIView(_ view: WKWebView, context: UIViewRepresentableContext<SignInPage>) {}
 }
 
-/// Hands the redirect to Poki's own listener instead of loading it.
+/// Hands the redirect to kaka's own listener instead of loading it.
 final class SignInRedirect: NSObject, WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping @MainActor @Sendable (WKNavigationActionPolicy) -> Void) {

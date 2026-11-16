@@ -3,8 +3,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// Settings › Memory: the routines agents saved on this iPhone (each repeats a task in one call) and
-/// the owner's notes, both shared by Poki's own chat and every connected agent. Export and Import move
-/// them between iPhones as one file; Poki Setup on the computer keeps the same file as a backup.
+/// the owner's notes, both shared by kaka's own chat and every connected agent. Export and Import move
+/// them between iPhones as one file; kaka Setup on the computer keeps the same file as a backup.
 /// The maintainers' run log is on Settings › Advanced; the archived conversations have their own row on
 /// the settings home.
 struct MemoryView: View {

@@ -3,12 +3,12 @@ import Foundation
 /// A copy of the owner's settings in the Keychain, so they survive an update, a reinstall or a
 /// sideloading tool that re-signs the app with a fresh container (UserDefaults lives in the container;
 /// Keychain items outlive it). At launch, any setting missing from UserDefaults is put back from the
-/// copy; while Poki runs, every change to a setting rewrites the copy. Development switches (`poki…`
+/// copy; while kaka runs, every change to a setting rewrites the copy. Development switches (`poki…`
 /// launch arguments) are never kept.
 enum SettingsVault {
     private static let account = "settings.v1"
     /// The settings kept: exact keys and prefixes.
-    private static let keys: Set<String> = ["setup", "relayAddress", "relayEnabled", "voiceBridge", "wantsOn", "automationPath", "chatEngine", "appearance", AppLocalization.key]
+    private static let keys: Set<String> = ["setup", "relayAddress", "relayEnabled", "voiceBridge", "wantsOn", "automationPath", "chatEngine", "appearance", AppLocalization.key, AppInterfaceSize.defaultsKey]
     private static let prefixes = ["chat.", "voice.", "models.", "idleStopSeconds"]
 
     private static func kept(_ key: String) -> Bool { keys.contains(key) || prefixes.contains { key.hasPrefix($0) } }

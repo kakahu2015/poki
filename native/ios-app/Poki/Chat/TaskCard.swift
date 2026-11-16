@@ -2,12 +2,12 @@ import SwiftUI
 import UIKit
 
 // The task card, the approval card and the "Your turn" card (ESP-326 boards "31 Task card: every state",
-// "03 Chat: Back in Poki mid-task", "04 Chat: Needs you", "05 Chat: Your turn"). Sizes, radii and
+// "03 Chat: Back in kaka mid-task", "04 Chat: Needs you", "05 Chat: Your turn"). Sizes, radii and
 // spacing are the prototype's (原型/src/chat.tsx), type through the system's text styles. They take
 // plain values, so the chat, an outside agent's session and the screenshots' sample scenes draw the
 // same thing.
 
-/// How a task's card reads: Poki has the phone (blue), it waits for you (amber), or it is over.
+/// How a task's card reads: kaka has the phone (blue), it waits for you (amber), or it is over.
 enum TaskCardState: Equatable {
     case running, needsYou, yourTurn, done, failed, stopped
 
@@ -26,8 +26,8 @@ enum TaskCardState: Equatable {
 /// How the card's marks read: on the blue card, amber while the task waits for you, plain once it is over.
 private enum TaskTone { case blue, amber, plain }
 
-/// One task's steps. While Poki has the phone it is the blue card: the only large blue block in the
-/// chat, with what Poki sees of the screen beside the steps. The moment it stops to wait for you the
+/// One task's steps. While kaka has the phone it is the blue card: the only large blue block in the
+/// chat, with what kaka sees of the screen beside the steps. The moment it stops to wait for you the
 /// card goes back to plain and its marks turn amber; over, it folds to one row that opens on a tap.
 struct TaskCard: View {
     var title: String
@@ -52,6 +52,8 @@ struct TaskCard: View {
     /// Nil until you fold or unfold it. A task that tripped starts unfolded, so the step it tripped on
     /// shows; so does one handed back to you. One waiting for your answer folds: the approval card speaks.
     @State private var open: Bool?
+    @ScaledMetric(relativeTo: .footnote) private var endingSide = 20.0
+    @ScaledMetric(relativeTo: .subheadline) private var cardInset = 12.0
     @Environment(\.dynamicTypeSize) private var typeSize
 
     private var total: Int { steps.count + upcoming.count }
@@ -84,7 +86,7 @@ struct TaskCard: View {
                             .transition(.opacity)
                     }
                 }
-                .padding(.vertical, 12).padding(.horizontal, 14)
+                .padding(.vertical, min(18, cardInset)).padding(.horizontal, min(20, cardInset + 2))
             } else if blue {
                 VStack(alignment: .leading, spacing: 14) {
                     header
@@ -101,7 +103,9 @@ struct TaskCard: View {
                     header
                 }
                 .tint(Color(.tertiaryLabel))
-                .padding(.vertical, isOpen ? 16 : 12).padding(.leading, isOpen ? 16 : 12).padding(.trailing, isOpen ? 16 : 14)
+                .padding(.vertical, min(20, cardInset + (isOpen ? 4 : 0)))
+                .padding(.leading, min(20, cardInset + (isOpen ? 4 : 0)))
+                .padding(.trailing, min(20, cardInset + (isOpen ? 4 : 2)))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -117,8 +121,8 @@ struct TaskCard: View {
         HStack(spacing: over ? 12 : 10) {
             mark
             VStack(alignment: .leading, spacing: over ? 2 : 1) {
-                Text(verbatim: title).font(.subheadline.weight(.semibold)).foregroundStyle(ink).lineLimit(big ? 3 : 1)
-                subline.font(over ? .footnote : .caption).foregroundStyle(soft).lineLimit(big ? 2 : 1)
+                Text(verbatim: title).font(.subheadline.weight(.semibold)).foregroundStyle(ink).lineLimit(big ? nil : 1)
+                subline.font(over ? .footnote : .caption).foregroundStyle(soft).lineLimit(big ? nil : 1)
                 // At the accessibility text sizes the title wraps and the label goes under it.
                 if big, !over || asker != nil { pill }
             }
@@ -139,11 +143,11 @@ struct TaskCard: View {
     }
 
     private func endMark(_ name: String, _ color: Color, size: CGFloat = 9) -> some View {
-        Image(systemName: name).font(.system(size: size, weight: .heavy)).foregroundStyle(.white)
-            .frame(width: 20, height: 20).background(color, in: .circle)
+        Image(systemName: name).font(.system(size: size * min(32, endingSide) / 20, weight: .heavy)).foregroundStyle(.white)
+            .frame(width: min(32, endingSide), height: min(32, endingSide)).background(color, in: .circle)
     }
 
-    /// Poki's face while the task is alive; a tick, a cross or a stop sign once it is over.
+    /// kaka's face while the task is alive; a tick, a cross or a stop sign once it is over.
     @ViewBuilder private var mark: some View {
         switch state {
         case .running:
@@ -206,7 +210,7 @@ struct TaskCard: View {
         }
     }
 
-    // MARK: The steps, what Poki sees, and how far it is
+    // MARK: The steps, what kaka sees, and how far it is
 
     @ViewBuilder private var details: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -253,14 +257,13 @@ private struct TaskPill: View {
     var ink: Color
     var ground: Color
     var body: some View {
-        text.font(.caption.weight(.medium)).foregroundStyle(ink).lineLimit(1)
+        text.font(.caption.weight(.medium)).foregroundStyle(ink).fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, 10).frame(minHeight: 24)
             .background(ground, in: .capsule)
-            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
     }
 }
 
-/// What Poki last saw of the screen, at the screen's own proportions: the core's small picture of its
+/// What kaka last saw of the screen, at the screen's own proportions: the core's small picture of its
 /// latest look (96 pixels wide, the Live Activity's), so it is soft, and enough to tell which screen it is.
 private struct TaskShot: View {
     var image: Image
@@ -368,7 +371,7 @@ private struct TaskStepRow: View {
         }
     }
 
-    /// What Poki types or taps stands out: the words between curly quotes are set stronger, as on the board.
+    /// What kaka types or taps stands out: the words between curly quotes are set stronger, as on the board.
     static func words(_ text: String) -> AttributedString {
         var out = AttributedString(text)
         var from = out.startIndex
@@ -384,12 +387,14 @@ private struct TaskStepRow: View {
 
 /// A step waiting for your answer, above the message field: what is asked, where, the words or the
 /// button it is about, how long it waits, and the two answers. Allow takes a hold, so a stray tap
-/// never lets a step through.
+/// never lets a step through, and so does Don’t ask again, which allows the step too.
 /// An approval, as one question from the rules' kind ("Allow payment?"), its countdown and the answers.
 struct ApprovalAskCard: View {
     var title: String
     var expires: Date?
     var answer: (Bool) -> Void
+    /// Allows this step and turns asking off. Nil on a step turning asking off does not reach.
+    var stopAsking: (() -> Void)? = nil
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
@@ -419,6 +424,10 @@ struct ApprovalAskCard: View {
                 }
                 .buttonStyle(QuietCapsuleButtonStyle())
                 HoldToAllowButton { answer(true) }
+            }
+            if let stopAsking {
+                // Allows this step and turns every approval off, so like Allow it takes a hold.
+                HoldToAllowButton(title: "Don’t ask again", quiet: true, action: stopAsking)
             }
         }
         .padding(18)
@@ -474,8 +483,11 @@ private struct AnswerRow: Layout {
 }
 
 /// Touch and hold: the button fills from the leading edge and allows when it is full. VoiceOver and
-/// Switch Control activate it directly, as they can't hold.
+/// Switch Control activate it directly, as they can't hold. `quiet` is Don’t ask again: the same hold
+/// as plain text under the two answers, which allows this step and turns approvals off.
 struct HoldToAllowButton: View {
+    var title: LocalizedStringKey = "Hold to Allow"
+    var quiet = false
     var action: () -> Void
     @State private var filled: CGFloat = 0
     @State private var pressing = false
@@ -486,14 +498,14 @@ struct HoldToAllowButton: View {
     static let hold: Double = 0.7
 
     var body: some View {
-        Text("Hold to Allow")
-            .font(.subheadline.weight(.semibold)).foregroundStyle(Tint.onSolid)
-            .frame(maxWidth: .infinity, minHeight: 50)
+        Text(title)
+            .font(.subheadline.weight(quiet ? .medium : .semibold)).foregroundStyle(quiet ? AnyShapeStyle(.secondary) : AnyShapeStyle(Tint.onSolid))
+            .frame(maxWidth: .infinity, minHeight: quiet ? 36 : 50)
             .background {
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
-                        Tint.solid
-                        Tint.onSolid.opacity(0.32).frame(width: geometry.size.width * filled)
+                        if !quiet { Tint.solid }
+                        (quiet ? Color.primary.opacity(0.14) : Tint.onSolid.opacity(0.32)).frame(width: geometry.size.width * filled)
                     }
                 }
                 .clipShape(.capsule)
@@ -511,17 +523,17 @@ struct HoldToAllowButton: View {
             .sensoryFeedback(.success, trigger: allowed)
             .sensoryFeedback(.impact(weight: .light), trigger: pressing) { _, down in down }
             .accessibilityElement()
-            .accessibilityLabel(Text("Allow"))
-            .accessibilityHint(Text("Allows this step"))
+            .accessibilityLabel(quiet ? Text(title) : Text("Allow"))
+            .accessibilityHint(quiet ? Text("Allows this step and turns approvals off.") : Text("Allows this step"))
             .accessibilityAddTraits(.isButton)
             .accessibilityAction { action() }
-            .accessibilityIdentifier("approval.allow")
+            .accessibilityIdentifier(quiet ? "approval.stopAsking" : "approval.allow")
     }
 }
 
 // MARK: Your turn
 
-/// Poki handed the phone back for something only you can do (a passcode, a password, Face ID): what
+/// kaka handed the phone back for something only you can do (a passcode, a password, Face ID): what
 /// it asks, that it sends no input meanwhile, and the button that tells it to carry on. Amber is your
 /// turn, so the whole card is.
 struct TurnCard: View {
@@ -564,7 +576,7 @@ struct TurnCard: View {
 
 // MARK: Buttons and surfaces
 
-/// Your own solid button: ink in light, white in dark. Blue stays Poki's.
+/// Your own solid button: ink in light, white in dark. Blue stays kaka's.
 struct SolidCapsuleButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

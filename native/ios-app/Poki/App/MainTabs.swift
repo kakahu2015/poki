@@ -2,17 +2,17 @@ import PokiCore
 import SwiftUI
 
 // The app's three tabs (the owner's layout, Nov 7 2026):
-// - Poki: every session, with Poki's state and controls on top; the button at the bottom left starts a
-//   new chat with Poki's own agent.
-// - Agents: the agents that drive this iPhone (their MCP addresses and the relay), Poki's own agent
+// - kaka: every session, with kaka's state and controls on top; the button at the bottom left starts a
+//   new chat with kaka's own agent.
+// - Agents: the agents that drive this iPhone (their MCP addresses and the relay), kaka's own agent
 //   (accounts, models, voice, memory) and the Activity Log.
-// - Setup: everything Poki needs, read live, each item fixed on its own page; advanced preferences and
+// - Setup: everything kaka needs, read live, each item fixed on its own page; advanced preferences and
 //   debugging tools behind the button at the top right.
 
 /// Agents › a page.
 enum AgentsRoute: Hashable { case accounts, voice, activityLog, approvals }
 
-/// Agents › Safety › Approvals: how Poki asks before a sensitive step, and how much it decides itself.
+/// Agents › Safety › Approvals: how kaka asks before a sensitive step, and how much it decides itself.
 struct ApprovalsView: View {
     var body: some View {
         Form { ApprovalsSections() }
@@ -21,7 +21,7 @@ struct ApprovalsView: View {
     }
 }
 
-/// The two sections of Approvals, for the page above and for Poki › Approvals (ESP-340), which shows
+/// The two sections of Approvals, for the page above and for kaka › Approvals (ESP-340), which shows
 /// them with what the phone does when a task ends.
 struct ApprovalsSections: View {
     @Environment(AppModel.self) private var model
@@ -69,6 +69,7 @@ struct ApprovalsSections: View {
                         } maximumValueLabel: {
                             Image(systemName: "lock.shield").foregroundStyle(.secondary).accessibilityLabel(Text("Asks most"))
                         }
+                        .sensoryFeedback(.selection, trigger: model.classifierLevel)
                         .accessibilityValue(Text(model.classifierLevel.title))
                         .accessibilityIdentifier("approvals.sensitivity")
                     }
@@ -87,7 +88,7 @@ struct ApprovalsSections: View {
 }
 
 struct AgentsView: View {
-    /// The line under MCP Relay: the address to set, Poki being off, or the relay's live state.
+    /// The line under MCP Relay: the address to set, kaka being off, or the relay's live state.
     private var relayLine: String {
         if model.relayAddress == nil { return AppLocalization.text(LocalizedStringResource("Set an address first")) }
         if !model.relayEnabled { return AppLocalization.text(LocalizedStringResource("Off, agents can’t reach this iPhone")) }
@@ -177,8 +178,8 @@ struct AgentsView: View {
                             Image(systemName: "antenna.radiowaves.left.and.right")
                         }
                     }
-                    // Poki stopped: the switch keeps the owner's choice but is greyed, since nothing
-                    // connects until Poki is on; the line under it says so.
+                    // kaka stopped: the switch keeps the owner's choice but is greyed, since nothing
+                    // connects until kaka is on; the line under it says so.
                     .disabled(model.relayAddress == nil || !model.sessionOn)
                     NavigationLink(value: SettingsRoute.relay) {
                         LabeledContent {

@@ -66,8 +66,8 @@ enum SetupVault {
         } catch { return false }
     }
 
-    /// A pairing file put in the container from outside (Poki Setup on a computer writes it there
-    /// over house_arrest) is mirrored too, so it survives a reinstall like one Poki took itself.
+    /// A pairing file put in the container from outside (kaka Setup on a computer writes it there
+    /// over house_arrest) is mirrored too, so it survives a reinstall like one kaka took itself.
     static func mirrorPairingFromContainer() {
         guard let data = try? Data(contentsOf: AppFiles.pairingFile), !data.isEmpty else { return }
         if (try? Keychain.read(pairingAccount)) != data { storePairing(data) }
@@ -78,14 +78,14 @@ enum SetupVault {
 
 enum AppFiles {
     static var support: URL {
-        let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Poki", isDirectory: true)
+        let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("kaka", isDirectory: true)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }
     /// The pairing file lives in the app's container with complete-until-first-unlock protection, so
     /// the launcher can read it in the background after the first unlock.
     static var pairingFile: URL { support.appendingPathComponent("pairing.plist") }
-    /// A copy of the pairing made on this iPhone (RPPairing). Poki Setup's hand-off writes its own
+    /// A copy of the pairing made on this iPhone (RPPairing). kaka Setup's hand-off writes its own
     /// lockdown record over pairing.plist, and on iOS 27 that record does not open the loopback; this
     /// copy is used first.
     static var phonePairingFile: URL { support.appendingPathComponent("pairing-phone.plist") }
@@ -96,20 +96,20 @@ enum AppFiles {
     }
 }
 
-/// The setup steps, in the order a new user does them. App signing is handled by Xcode or Poki Setup
+/// The setup steps, in the order a new user does them. App signing is handled by Xcode or kaka Setup
 /// on a computer; the iPhone app has no Apple Account sign-in or self-signing feature.
 enum SetupStep: String, CaseIterable, Identifiable {
     case runner, developerMode, loopback, pairing, automation, background
     var id: String { rawValue }
 
-    /// The steps this launch shows: the in-process path has no Poki Runner to install.
-    /// Poki automates the phone itself (ESP-152): step text names Poki, not Poki Runner.
+    /// The steps this launch shows: the in-process path has no kaka Runner to install.
+    /// kaka automates the phone itself (ESP-152): step text names kaka, not kaka Runner.
     static var inProcess: Bool { AutomationPath.current == .inProcess }
 
     static var shown: [SetupStep] { AutomationPath.current == .inProcess ? allCases.filter { $0 != .runner } : Array(allCases) }
 
     /// Pairing on the phone itself (Settings > Privacy & Security > Developer Mode > Pair) exists from
-    /// iOS 27. Earlier versions get their pairing file from a computer (Poki Setup), by AirDrop, a
+    /// iOS 27. Earlier versions get their pairing file from a computer (kaka Setup), by AirDrop, a
     /// link or Files; the pairing step shows only what this iPhone can do.
     static var onDevicePairing: Bool {
         ProcessInfo.processInfo.isOperatingSystemAtLeast(OperatingSystemVersion(majorVersion: 27, minorVersion: 0, patchVersion: 0))

@@ -1,7 +1,7 @@
 import Foundation
 import PokiCore
 
-/// `ask_poki`: an outside agent (Claude, Codex, any MCP client) hands a whole task to Poki's own agent,
+/// `ask_poki`: an outside agent (Claude, Codex, any MCP client) hands a whole task to kaka's own agent,
 /// which runs it on this iPhone with the owner's model (their key or ChatGPT sign-in) and answers with
 /// the result. The agent can still call look and do itself; this is the other way of working. It is
 /// listed only once the owner has set up a model, and it waits while the owner's own chat runs a task.

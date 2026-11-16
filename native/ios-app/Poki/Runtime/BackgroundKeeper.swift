@@ -2,10 +2,10 @@ import AVFoundation
 import CoreLocation
 import Foundation
 
-/// Keeps Poki running in the background while it is on, so the relay connection and the launcher stay
+/// Keeps kaka running in the background while it is on, so the relay connection and the launcher stay
 /// up. Silent audio does it; location is the backup only when it is needed: while a pairing waits in
 /// Settings, and when the silent audio cannot play (it failed to start, or another app's audio
-/// interrupted it), when iOS would otherwise suspend Poki mid-session. Then it is the coarsest
+/// interrupted it), when iOS would otherwise suspend kaka mid-session. Then it is the coarsest
 /// accuracy, with no indicator under Always Allow, and it stops again as soon as the audio is back.
 /// The location is never read or sent anywhere.
 @MainActor
@@ -29,7 +29,7 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
     var allowed: Bool { authorization == .authorizedWhenInUse || authorization == .authorizedAlways }
     var denied: Bool { authorization == .denied || authorization == .restricted }
 
-    /// Always Allow lets Poki stay up without the location pill. iOS asks for While Using first and
+    /// Always Allow lets kaka stay up without the location pill. iOS asks for While Using first and
     /// offers the upgrade on the second request.
     var always: Bool { authorization == .authorizedAlways }
 
@@ -37,11 +37,11 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
         if authorization == .notDetermined { manager.requestWhenInUseAuthorization() } else { manager.requestAlwaysAuthorization() }
     }
 
-    /// Called while Poki is in front (iOS only starts background location from the foreground).
+    /// Called while kaka is in front (iOS only starts background location from the foreground).
     func start() {
         guard !isOn else { return }
         isOn = true
-        // iOS 27 and later: the system's continued processing task keeps Poki up, with no audio and
+        // iOS 27 and later: the system's continued processing task keeps kaka up, with no audio and
         // no location. Silent audio only when iOS refuses it or ends it early.
         let run = ContinuedRun.shared
         continued = run
@@ -62,7 +62,7 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
     /// The iOS 27 continued run.
     private var continued: ContinuedRun?
 
-    /// Silent audio could not hold Poki up (it would be suspended): location stands in until it can.
+    /// Silent audio could not hold kaka up (it would be suspended): location stands in until it can.
     private(set) var audioLost = false
     private var deactivationObserver: NSObjectProtocol?
     private var resumptionObserver: NSObjectProtocol?
@@ -117,8 +117,8 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
     }
 
     /// A voice conversation needs the audio session for the microphone; the voice-chat session keeps
-    /// Poki running meanwhile. The silent audio comes back when it ends, if Poki is still on.
-    /// While a voice conversation holds the audio session (it keeps Poki running itself).
+    /// kaka running meanwhile. The silent audio comes back when it ends, if kaka is still on.
+    /// While a voice conversation holds the audio session (it keeps kaka running itself).
     private var audioPaused = false
     func pauseAudio() { audioPaused = true; stopAudio() }
     func resumeAudio() {
@@ -142,7 +142,7 @@ final class BackgroundKeeper: NSObject, CLLocationManagerDelegate {
         stopAudio()
     }
 
-    /// While a pairing waits in Settings, location keeps Poki running (with the silent audio), so the
+    /// While a pairing waits in Settings, location keeps kaka running (with the silent audio), so the
     /// pairing listener answers when Settings connects. While Using is enough here: the updates start
     /// in front, and a CLBackgroundActivitySession carries them into the background (iOS shows its
     /// location indicator meanwhile). Ended when the pairing ends.

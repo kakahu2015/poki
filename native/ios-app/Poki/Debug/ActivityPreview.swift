@@ -163,7 +163,7 @@ struct ActivityPreview: View {
         done.since = now.addingTimeInterval(-84); done.endedAt = now
         done.stepCount = 12; done.failedCount = 1
 
-        // A two-step task from Poki's own chat says the step under way in the plan's words, not the tap
+        // A two-step task from kaka's own chat says the step under way in the plan's words, not the tap
         // (ESP-467), and never how many steps there are.
         let steps = [AppLocalization.text(LocalizedStringResource("Open Messages")), AppLocalization.text(LocalizedStringResource("Open the chat with Mom"))]
         var plan = working
@@ -201,7 +201,7 @@ struct ActivityPreview: View {
 
         var voice = PokiState(phase: .idle, headline: "Listening", thumbnailVersion: 0)
         voice.voice = .listening
-        // A step of the talk has Poki in another app: Stop for the step, End for the talk.
+        // A step of the talk has kaka in another app: Stop for the step, End for the talk.
         var voiceWorking = working
         voiceWorking.voice = .thinking
         // An approval during a talk keeps the card and the island to itself.
@@ -386,7 +386,7 @@ enum DemoActivity {
         if var approval = state.approval {
             approval.expires = now.addingTimeInterval(120); state.approval = approval
         }
-        // Poki keeps running in the background while it is on; the demo asks for time to send its alert.
+        // kaka keeps running in the background while it is on; the demo asks for time to send its alert.
         let task = UIApplication.shared.beginBackgroundTask(withName: "activity demo")
         defer { UIApplication.shared.endBackgroundTask(task) }
         guard let activity = try? Activity.request(attributes: PokiActivityAttributes(deviceName: "iPhone"), content: .init(state: state, staleDate: nil), pushType: nil) else {

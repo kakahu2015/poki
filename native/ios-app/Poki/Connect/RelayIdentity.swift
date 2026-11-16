@@ -57,7 +57,7 @@ final class RelayIdentity {
     }
 
     func sign(_ message: Data) throws -> Data {
-        guard let key else { throw NSError(domain: "Poki", code: 1, userInfo: [NSLocalizedDescriptionKey: "no relay key"]) }
+        guard let key else { throw NSError(domain: "kaka", code: 1, userInfo: [NSLocalizedDescriptionKey: "no relay key"]) }
         return try key.signature(for: message)
     }
 
@@ -153,7 +153,7 @@ enum Keychain {
 }
 
 extension RelayAddress {
-    /// The relay the person entered in Connect, kept across launches. Poki has no default relay.
+    /// The relay the person entered in Connect, kept across launches. kaka has no default relay.
     static var saved: RelayAddress? {
         get { UserDefaults.standard.string(forKey: "relayAddress").flatMap { RelayAddress($0) } }
         set { UserDefaults.standard.set(newValue?.origin.absoluteString, forKey: "relayAddress") }

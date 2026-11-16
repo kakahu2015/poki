@@ -1,12 +1,21 @@
 import SwiftUI
 import UIKit
 
+/// Sizing for custom icon controls that share space with scrolling content.
+struct CompactControlMetrics: DynamicProperty {
+    @ScaledMetric(relativeTo: .body) private var scale = 1.0
+    var base: CGFloat = 48
+    var maximum: CGFloat = 56
+
+    var side: CGFloat { min(maximum, max(44, base * scale)) }
+}
+
 /// The app's own colours (ESP-326 prototype, theme.ts), each one a light and a dark value. Blue belongs
-/// to Poki: the bear, the task card while it has the phone, the links to what it can do. Amber is your
+/// to kaka: the bear, the task card while it has the phone, the links to what it can do. Amber is your
 /// turn, green is done, red is a problem. Surfaces, text and separators are the system's own semantic
 /// colours, so they follow Increase Contrast and elevated sheets as the system's apps do.
 enum Tint {
-    /// Poki's blue, the bear images' own background: the same in light and dark, never the system blue.
+    /// kaka's blue, the bear images' own background: the same in light and dark, never the system blue.
     static let blue = Color(hex: 0x0177FD)
     /// The asleep image's background.
     static let night = Color(hex: 0x0F2172)
@@ -42,15 +51,15 @@ enum Tint {
     /// The conversations drawer, in the home light's own colours and still: a pale blue white in light,
     /// the deep blue of the home page's dark middle in dark.
     static let sidebar = Color(light: 0xEFF4FC, dark: 0x081329)
-    /// The drawer's selected row, a breath of Poki's blue.
+    /// The drawer's selected row, a breath of kaka's blue.
     static let sidebarSelected = Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(hex: 0x3A8CFE).withAlphaComponent(0.18) : UIColor(hex: 0x0177FD).withAlphaComponent(0.08) })
     /// The drawer's faint day headings, a blue grey.
     static let sidebarHeading = Color(light: 0x7D8BA6, dark: 0x6F82AA)
     /// The Settings gear in the drawer: a deep navy in light, a pale blue in dark.
     static let sidebarInk = Color(light: 0x1B2F57, dark: 0xC9D7F2)
-    /// The round ground of Poki's picture in the top bar.
+    /// The round ground of kaka's picture in the top bar.
     static let portrait = Color(light: 0xE3EEFF, dark: 0x0C2748)
-    /// The shadow under Poki's white bubble (0 2 12, ink at 5 %); none in dark.
+    /// The shadow under kaka's white bubble (0 2 12, ink at 5 %); none in dark.
     static let bubbleShadow = Color(UIColor { $0.userInterfaceStyle == .dark ? .clear : UIColor(hex: 0x11191C).withAlphaComponent(0.05) })
     /// Words on the home page's gradient, each measured there for contrast (ESP-376's table, 5.3 to 7.8
     /// against the least favourable pixels): the line under the title, the message field's

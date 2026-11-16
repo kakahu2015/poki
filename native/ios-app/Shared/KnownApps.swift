@@ -1,11 +1,11 @@
 import Foundation
 
-/// An app Poki knows by name: its bundle ID, the icon Poki carries for it, and its names as the
+/// An app kaka knows by name: its bundle ID, the icon kaka carries for it, and its names as the
 /// iPhone shows them. The one list behind the app icons (`AppIconStore`), the home page's pills and
 /// the message field's app capsules (`AppCapsule`).
 struct KnownApp {
     let id: String
-    /// `Poki/AppIcons/<icon>.png`, the App Store artwork Poki carries (AppIcons.md); nil when only
+    /// `kaka/AppIcons/<icon>.png`, the App Store artwork kaka carries (AppIcons.md); nil when only
     /// the iPhone's own icon or the App Store's lookup can show it.
     let icon: String?
     let english: String

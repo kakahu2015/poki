@@ -1,7 +1,7 @@
 import RealityKit
 import simd
 
-/// What the three-dimensional bear plays for Poki's state, with its own joints and the faces the model
+/// What the three-dimensional bear plays for kaka's state, with its own joints and the faces the model
 /// has (the closed eyes' arcs, the open mouth, the sparkles, the raised paw of its wave), on top of what
 /// it does by itself (`BearIdle`). The model and its look are unchanged; each state means what its flat
 /// picture means.
@@ -22,7 +22,7 @@ enum BearAct: Equatable {
     case failed
     /// Off: asleep, its head on one side, its eyes shut.
     case paused
-    /// Poki cannot reach the phone: a paw up beside its head, rubbing there, looking up, puzzled.
+    /// kaka cannot reach the phone: a paw up beside its head, rubbing there, looking up, puzzled.
     case lost
     /// A paw up beside its ear, its head tilted, nodding now and then.
     case listening

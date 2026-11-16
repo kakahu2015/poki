@@ -1,6 +1,6 @@
 import Foundation
 
-/// The local pairing check Poki uses to reach iPhone developer services through 10.7.0.1.
+/// The local pairing check kaka uses to reach iPhone developer services through 10.7.0.1.
 enum PairingBridge {
     struct Failure: LocalizedError {
         let message: String

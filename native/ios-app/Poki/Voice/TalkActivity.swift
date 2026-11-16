@@ -4,14 +4,14 @@ import Foundation
 // the code is written here. The talk goes into the state's existing `voice` field, follows the talk's
 // phase, and takes the Live Activity with it when it ends only if nothing else is on it.
 
-/// The Live Activity during a talk with Poki, in front and while a step of the talk has Poki in another
-/// app: it says whether Poki is listening, working or speaking, and its End ends the talk.
+/// The Live Activity during a talk with kaka, in front and while a step of the talk has kaka in another
+/// app: it says whether kaka is listening, working or speaking, and its End ends the talk.
 @MainActor
 final class TalkActivity {
     private let voice: VoiceModel
     private let activity: ActivityController
     private let deviceName: @MainActor () -> String
-    /// Poki is on: its Live Activity stays when the talk ends.
+    /// kaka is on: its Live Activity stays when the talk ends.
     private let keepsActivity: @MainActor () -> Bool
     private var shown: PokiState.Voice?
     /// What EndTalkIntent's notification reaches; it holds this weakly, so an ended TalkActivity hears nothing.
@@ -51,7 +51,7 @@ final class TalkActivity {
         let started = shown == nil
         shown = talk
         activity.update { $0.voice = talk }
-        // Started from a tap in Poki, the one time iOS lets a Live Activity start.
+        // Started from a tap in kaka, the one time iOS lets a Live Activity start.
         if started, talk != nil { activity.start(deviceName: deviceName()) }
         // Only a Live Activity that shows nothing else goes with the talk: an approval, a hand-off, a
         // problem, pairing or setup stays.

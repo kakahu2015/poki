@@ -1,12 +1,12 @@
 import SwiftUI
 import UIKit
 
-// The bear's faces are the ESP-326 prototype's own images (原型/assets/poki/states-1024, drawn for Poki),
+// The bear's faces are the ESP-326 prototype's own images (原型/assets/poki/states-1024, drawn for kaka),
 // scaled to 768 px (PokiBear-<face>.png, the hero and the greeting) and 192 px (PokiBearSmall-<face>.png,
 // avatars). The names are ESP-338's `BearFace` cases, so the Live Activity's small faces and these can
 // become one set once that branch lands.
 
-/// The bear's face: one per state Poki can be in.
+/// The bear's face: one per state kaka can be in.
 enum PokiMood: String, CaseIterable {
     case ready, thinking
     case onYourPhone = "on-your-phone"
@@ -41,7 +41,7 @@ enum PokiMood: String, CaseIterable {
         }
     }
 
-    /// Blue while it is Poki's own business; amber when it waits for you, green for done, red for a
+    /// Blue while it is kaka's own business; amber when it waits for you, green for done, red for a
     /// problem, grey asleep.
     var dot: Color {
         switch self {
@@ -80,7 +80,7 @@ struct PokiStatus: Equatable {
     }
 
     /// Read from what the app already knows, most pressing first: a live voice turn, a step waiting for
-    /// your answer, a hand-over, a task under way, a problem, and at rest whether Poki is on.
+    /// your answer, a hand-over, a task under way, a problem, and at rest whether kaka is on.
     @MainActor static func current(model: AppModel, chat: ChatModel) -> PokiStatus {
         // The demo conversation (`-pokiChat demo`) has no phone behind it: its own script says what shows.
         if chat.isDemo {
@@ -106,12 +106,12 @@ struct PokiStatus: Equatable {
         if !model.approvals.isEmpty { return PokiStatus(.needsYou) }
         if model.handoffText != nil { return PokiStatus(.yourTurn) }
         if chat.running { return PokiStatus(running(chat.entries)) }
-        // An outside agent has the phone (its own MCP session, or a task it handed to Poki).
+        // An outside agent has the phone (its own MCP session, or a task it handed to kaka).
         if model.currentCaller != nil { return PokiStatus(.onYourPhone) }
         if SetupIssueHint.runnerIssue(model: model) != nil { return PokiStatus(.cantReach) }
         if chat.canRetry { return PokiStatus(.tripped) }
         if DoneLinger.shared.showing { return PokiStatus(.done) }
-        // Setup is open, unless only the loopback is missing and Poki can start without it (main's rule for Home).
+        // Setup is open, unless only the loopback is missing and kaka can start without it (main's rule for Home).
         if !model.canStartTasks { return PokiStatus(.hello) }
         if !(model.sessionOn || model.wantsOn) { return PokiStatus(.paused, word: StatusWord.off.text) }
         // Standing by (after Turn On, after the idle minute, or after the owner's pause) is Ready: the

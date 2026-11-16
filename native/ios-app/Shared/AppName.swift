@@ -1,6 +1,6 @@
 import Foundation
 
-/// The language Poki names known apps in, from its effective UI language: Simplified or Traditional
+/// The language kaka names known apps in, from its effective UI language: Simplified or Traditional
 /// Chinese, or English for any other. Apps' names (`AppIconStore.name`) and the home page's default
 /// quick actions (`HomeIdea`) follow it.
 enum AppLanguage {

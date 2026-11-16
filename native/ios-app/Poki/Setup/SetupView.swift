@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// Setup, one step per page (ESP-139 board 03). Steps the phone can check by itself (the loopback,
-/// pairing, location and Live Activities) move on when they pass; steps it can't (Poki Runner,
+/// pairing, location and Live Activities) move on when they pass; steps it can't (kaka Runner,
 /// Developer Mode, UI Automation) keep a switch the person turns on, and Continue lights up after it.
 /// Steps that send the person to Settings put the step and what to tap in the Live Activity.
 struct SetupView: View {
@@ -52,14 +52,14 @@ struct SetupView: View {
             if !was, now, step != .loopback { advanceSoon() }
         }
         // The loopback moves on when it comes on while this page is open, when the first check after
-        // opening finds it already on (a proxy app set up before Poki: the page opened on `checking`),
-        // and when Poki's own session opens without it (ESP-448).
+        // opening finds it already on (a proxy app set up before kaka: the page opened on `checking`),
+        // and when kaka's own session opens without it (ESP-448).
         .onChange(of: model.isDone(.loopback)) { was, now in
             if step == .loopback, !was, now { advanceSoon() }
         }
         .onAppear { model.loopback.resume(); reconnectBuiltIn() }
         .onChange(of: step) { _, now in if now == .loopback { reconnectBuiltIn() } }
-        // Leaving the pairing step in Poki (another step, or closing setup) stops the pairing and its
+        // Leaving the pairing step in kaka (another step, or closing setup) stops the pairing and its
         // background keep-alive. Going to Settings is not leaving.
         .onChange(of: index) { old, _ in if steps[old] == .pairing { model.leftPairing() } }
         .onDisappear { model.leftPairing() }
@@ -94,7 +94,7 @@ struct SetupView: View {
                 "Open **Settings › General › VPN & Device Management**, tap your Apple ID, then tap **Trust**.",
                 "Don’t open kaka Runner yourself. kaka starts it when an agent needs this iPhone.",
             ])
-            SetupFootnote(text: "With a free Apple ID, self-signed apps expire after 7 days and are limited to 3 at a time; kaka and kaka Runner use 2. For free Apple ID signing, install the external-connection build and use LocalDevVPN or a compatible VPN app.")
+            SetupFootnote(text: "Apps installed with a free Apple ID expire after 7 days. Open kaka Setup on the Mac that installed this iPhone to renew the app.")
             ConfirmCard(step: .runner, title: "kaka Runner is installed and trusted", isOn: binding(\.runnerInstalled))
         case .developerMode:
             InstructionsCard(lines: [
@@ -129,7 +129,7 @@ struct SetupView: View {
         }
     }
 
-    /// The built-in connection was chosen and set up before, but it goes down whenever Poki is off, so
+    /// The built-in connection was chosen and set up before, but it goes down whenever kaka is off, so
     /// the step opened on "Not on yet" with nothing to tap in view: it is dialled again here, and the
     /// check that follows moves the page on.
     private func reconnectBuiltIn() {
@@ -181,7 +181,7 @@ extension SetupStep {
 }
 
 func settingsURL(for step: SetupStep?) -> URL? {
-    // 系统配置步骤打开设置首页；后台权限等步骤仍打开 Poki 的 App 权限页。
+    // 系统配置步骤打开设置首页；后台权限等步骤仍打开 kaka 的 App 权限页。
     switch step {
     case .runner?, .developerMode?, .pairing?, .automation?:
         return URL(string: "App-prefs:")
@@ -415,7 +415,6 @@ private struct ProxyAppPage: View {
     @Environment(AppModel.self) private var model
     var app: ProxyApp
     @State private var copied = false
-    @State private var openFailed = false
 
     var body: some View {
         Form {
@@ -435,7 +434,7 @@ private struct ProxyAppPage: View {
             Section {
                 switch app.install {
                 case .url(let url):
-                    Button(app.id == "surge" ? "Install kaka Module" : "Install kaka Plugin") { choose(); open(url) }
+                    Button(app.id == "surge" ? "Install kaka Module" : "Install kaka Plugin") { choose(); UIApplication.shared.open(url) }
                 case .toggle:
                     Button("Open \(app.name)") { choose(); openApp() }
                 case .snippet(let line):
@@ -450,20 +449,9 @@ private struct ProxyAppPage: View {
         }
         .navigationTitle(Text(verbatim: app.name))
         .navigationBarTitleDisplayMode(.inline)
-        .alert("Couldn’t Open \(app.name)", isPresented: $openFailed) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Make sure \(app.name) is installed, then try again.")
-        }
     }
 
-    private func openApp() { if let url = URL(string: "\(app.scheme)://") { open(url) } }
-
-    private func open(_ url: URL) {
-        UIApplication.shared.open(url) { succeeded in
-            Task { @MainActor in openFailed = !succeeded }
-        }
-    }
+    private func openApp() { if let url = URL(string: "\(app.scheme)://") { UIApplication.shared.open(url) } }
 
     private func choose() {
         model.chooseConnection(.proxy)
@@ -620,7 +608,7 @@ private struct PairingPage: View {
             if let importError { Text(importError).foregroundStyle(.red) }
         }
         .sheet(isPresented: $scanning) { PairingScannerSheet() }
-        // Poki Setup on a computer may be writing the file into Poki right now.
+        // kaka Setup on a computer may be writing the file into kaka right now.
         .task { while !Task.isCancelled { model.lookForHandedPairing(); try? await Task.sleep(for: .seconds(3)) } }
         .fileImporter(isPresented: $importing, allowedContentTypes: [.propertyList, .xml, .data]) { result in
             do { try model.importPairingFile(from: result.get()); importError = nil }
@@ -632,6 +620,9 @@ private struct PairingPage: View {
         switch model.diskImage.state {
         case .ready:
             LabeledContent("Status", value: AppLocalization.text(LocalizedStringResource("Ready")))
+        case .downloaded:
+            LabeledContent("Status", value: AppLocalization.text(LocalizedStringResource("Downloaded, not available")))
+            Text(DiskImageStore.unavailableMessage).font(.footnote).foregroundStyle(.orange)
         case .downloading(let step):
             LabeledContent("Downloading") { HStack { Text(verbatim: "\(step)"); ProgressView() } }
         case .missing:
@@ -690,8 +681,8 @@ private struct BackgroundPage: View {
 
 // MARK: Checklist
 
-/// Setup as one checklist: everything Poki needs to run on this iPhone, each with a tick or what is
-/// wrong, and a tap opens its fix. It is on the Chats page (the steps still open) and in the Poki tab.
+/// Setup as one checklist: everything kaka needs to run on this iPhone, each with a tick or what is
+/// wrong, and a tap opens its fix. It is on the Chats page (the steps still open) and in the kaka tab.
 struct SetupChecklist: View {
     @Environment(AppModel.self) private var model
     @State private var guiding = false
@@ -703,7 +694,7 @@ struct SetupChecklist: View {
                     NavigationLink(value: step) { SetupStepRow(step: step) }
                 }
             } footer: {
-                Text(model.setupComplete ? "Everything kaka needs is in place." : "kaka needs every item ticked before an agent or the chat can use this iPhone. Items tick themselves when the phone can check them.")
+                Text(model.setupReadyForUse ? "Everything kaka needs is in place." : "kaka needs every item ticked before an agent or the chat can use this iPhone. Items tick themselves when the phone can check them.")
             }
             Section {
                 Button { guiding = true } label: { Label("Setup Guide", systemImage: "list.number") }
@@ -724,10 +715,12 @@ struct SetupStepRow: View {
     var step: SetupStep
 
     var body: some View {
-        let done = model.isDone(step)
+        let done = model.stepReadyForUse(step)
         LabeledContent {
-            if step == .loopback && !model.loopback.isWorking && model.hasOpenInProcessSession {
+            if step == .loopback && !model.loopback.isWorking && (model.hasOpenInProcessSession || model.canStartTasks) {
                 Text("Local automation ready").foregroundStyle(.secondary)
+            } else if step == .loopback && model.loopback.state == .checking && model.setup.loopback != .none {
+                Text("Checking…").foregroundStyle(.secondary)
             } else if done {
                 Image(systemName: "checkmark.circle.fill").foregroundStyle(.green).accessibilityLabel(Text("Done"))
             } else {
@@ -745,7 +738,7 @@ struct SetupStepRow: View {
             return model.setup.loopback == .none ? AppLocalization.text(LocalizedStringResource("Needed")) : AppLocalization.text(LocalizedStringResource("Off"))
         case .pairing:
             if model.pairingTrouble != nil { return AppLocalization.text(LocalizedStringResource("Pair Again")) }
-            if model.pairingPath != nil, !model.diskImage.isReady { return AppLocalization.text(LocalizedStringResource("Downloading")) }
+            if model.pairingPath != nil, !model.diskImage.hasFiles { return AppLocalization.text(LocalizedStringResource("Downloading")) }
             return AppLocalization.text(LocalizedStringResource("Needed"))
         default: return AppLocalization.text(LocalizedStringResource("Needed"))
         }
@@ -833,7 +826,11 @@ struct SetupStepPage: View {
         Form {
             Section {
                 LabeledContent {
-                    Text(model.isDone(step) ? "Done" : "Needed").foregroundStyle(model.isDone(step) ? Color.green : Color.orange)
+                    if step == .loopback && model.loopback.state == .checking && model.setup.loopback != .none {
+                        Text("Checking…").foregroundStyle(.secondary)
+                    } else {
+                        Text(model.stepReadyForUse(step) ? "Done" : "Needed").foregroundStyle(model.stepReadyForUse(step) ? Color.green : Color.orange)
+                    }
                 } label: {
                     Label(step.pageTitle, systemImage: step.symbol)
                 }

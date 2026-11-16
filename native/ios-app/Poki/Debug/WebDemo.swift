@@ -1,10 +1,10 @@
 import Foundation
 
-/// `-pokiInProcess web -pokiProbeModelURL URL -pokiProbeModel ID -pokiProbeTask TEXT`: Poki's own browser
+/// `-pokiInProcess web -pokiProbeModelURL URL -pokiProbeModel ID -pokiProbeTask TEXT`: kaka's own browser
 /// end to end in the app (ESP-145), with no phone automation. The chat is pointed at an
 /// OpenAI-compatible endpoint (or, with `-pokiProbeProvider gemini`, at that provider as the owner sets
 /// it up in Accounts & Models), gets the task as if the owner had typed it, and the agent works the
-/// website in Poki's browser on screen. The tool calls, replies and browser steps go to
+/// website in kaka's browser on screen. The tool calls, replies and browser steps go to
 /// Documents/web-probe.json. `-pokiProbeTakeOver S` takes the page over S seconds after the task starts
 /// and hands it back `-pokiProbeHold` seconds later; `-pokiProbeStop S` presses Stop S seconds in. Both
 /// run what the panel's buttons run.

@@ -2,7 +2,7 @@
 // ElementX/Sources/Other/Pills/PillTextAttachment.swift).
 // Copyright 2025 Element Creations Ltd. Copyright 2023-2025 New Vector Ltd.
 // SPDX-License-Identifier: AGPL-3.0-only. See THIRD_PARTY_NOTICES.md.
-// Poki's changes: the pill is drawn into the attachment's image (PillView through ImageRenderer)
+// kaka's changes: the pill is drawn into the attachment's image (PillView through ImageRenderer)
 // instead of a hosted view, because Element's PillAttachmentViewProvider never received a view on
 // the iOS 27 simulator; the attachment sizes itself from the pill's metrics.
 

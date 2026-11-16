@@ -16,12 +16,12 @@ struct HomeShortcut: Identifiable, Equatable {
     var prompt: String
     /// The owner changed it (long press, Edit): it keeps its place and words whatever the ranking does.
     var edited = false
-    /// The icon for a pill with no app, a PNG in Poki/AppIcons (`AppIconView.carried`); nil draws Poki's.
+    /// The icon for a pill with no app, a PNG in kaka/AppIcons (`AppIconView.carried`); nil draws kaka's.
     var icon: String?
     var id: String { key }
 }
 
-/// The app a quick action works in, found from what Poki has: a routine's recorded app, or the name
+/// The app a quick action works in, found from what kaka has: a routine's recorded app, or the name
 /// a request starts with. Only apps `AppIconStore` knows by name: a pill always shows an app's icon
 /// and name, so an action without a known app is not a pill.
 @MainActor
@@ -72,7 +72,7 @@ enum ShortcutApp {
     }
 
     /// The app an edited sentence goes with: the one it now begins with; none when it began with `app`
-    /// and names it no more (the pill then shows Poki's icon); otherwise `app` as it was, as for a
+    /// and names it no more (the pill then shows kaka's icon); otherwise `app` as it was, as for a
     /// routine whose words never named its app.
     static func following(_ sentence: String, was old: String, app: String?) -> String? {
         if let lead = leading(sentence) { return lead.id }
@@ -94,7 +94,7 @@ enum ShortcutApp {
 }
 
 /// The home page's quick actions, worked out on this iPhone from what the owner did before. Nothing
-/// is uploaded and no model is asked. In order: the routines Poki remembered (their description, or
+/// is uploaded and no model is asked. In order: the routines kaka remembered (their description, or
 /// their name, and the app they were recorded in), then requests the owner made at least twice
 /// (similar wordings counted as one) that begin with an app, then the default examples. Each is an app
 /// and an action; a routine or request without both is left out.
@@ -154,7 +154,7 @@ enum HomeShortcuts {
         return pills
     }
 
-    /// An edit as its pill: its app's icon and name, or Poki's icon and no name when it has no app this
+    /// An edit as its pill: its app's icon and name, or kaka's icon and no name when it has no app this
     /// iPhone knows; the words after the app's name when the sentence begins with it.
     static func pill(_ edit: Edit) -> HomeShortcut {
         let app = ShortcutApp.named(edit.app)
