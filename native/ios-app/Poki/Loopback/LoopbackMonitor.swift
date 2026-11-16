@@ -222,7 +222,7 @@ final class LoopbackMonitor {
         case .working(let ms): AppLocalization.text(LocalizedStringResource("This iPhone answers at 10.7.0.1 (\(ms) ms)."))
         case .noAnswer where cellularOnly: Self.cellularHint
         case .noAnswer: AppLocalization.text(LocalizedStringResource("The local interface is present, but this iPhone does not answer at 10.7.0.1. Reconnect the local connection and check Wi-Fi. If it still does not answer, pair again in Setup › Pairing, then check Developer Mode."))
-        case .off: AppLocalization.text(LocalizedStringResource("This iPhone does not answer yet. Enable Poki's local connection, or choose an external connection in Setup."))
+        case .off: AppLocalization.text(LocalizedStringResource("This iPhone does not answer yet. Enable kaka's local connection, or choose an external connection in Setup."))
         }
     }
 }

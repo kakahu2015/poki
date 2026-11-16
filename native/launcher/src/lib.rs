@@ -1,5 +1,5 @@
 //! PokiLauncher: gets the WebDriverAgent runner up on the phone it runs on, keeps it up, and pairs
-//! the phone with itself. A C ABI for the Poki app (include/poki_launcher.h); docs/ios-core.md §3.
+//! the phone with itself. A C ABI for the kaka app (include/poki_launcher.h); docs/ios-core.md §3.
 
 pub mod ddi;
 pub mod device;
@@ -141,7 +141,7 @@ pub extern "C" fn poki_set_remote_pairing_port(port: u16) {
 
 /// The app is looking for a moved remote pairing port in Bonjour (true) or has stopped (false).
 /// While it looks, a refused connection waits for the port (code `pairing_port`); otherwise it is
-/// handled as before (on a mounted disk image, Poki's own session; else the loopback's fix).
+/// handled as before (on a mounted disk image, kaka's own session; else the loopback's fix).
 #[unsafe(no_mangle)]
 pub extern "C" fn poki_set_pairing_port_search(searching: bool) {
     remote::set_searching(searching);
@@ -158,7 +158,7 @@ pub struct PokiPairing {
     task: tokio::task::JoinHandle<()>,
 }
 
-/// Starts one on-device pairing. config_json: {"host_name": "Poki", "out_path": "...",
+/// Starts one on-device pairing. config_json: {"host_name": "kaka", "out_path": "...",
 /// "identity_path": "..."}. Events: advertise {service_type, instance, port, txt}, pin {pin},
 /// paired {path}, failed {detail}. Null when the config is unreadable.
 #[unsafe(no_mangle)]
@@ -168,7 +168,7 @@ pub unsafe extern "C" fn poki_pair_start(config_json: *const c_char, cb: EventCa
     let Ok(value) = serde_json::from_str::<Value>(&text) else { return std::ptr::null_mut() };
     let Some(out_path) = value["out_path"].as_str() else { return std::ptr::null_mut() };
     let config = pair::PairConfig {
-        host_name: value["host_name"].as_str().unwrap_or("Poki").to_string(),
+        host_name: value["host_name"].as_str().unwrap_or("kaka").to_string(),
         out_path: out_path.into(),
         identity_path: value["identity_path"].as_str().map(Into::into),
     };

@@ -25,7 +25,7 @@ final class AppLog {
         if let file, let text = try? String(contentsOf: file, encoding: .utf8) {
             lines = Array(text.split(separator: "\n").map(String.init).suffix(limit))
         }
-        add("app", "Poki started (\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?") build \(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"))")
+        add("app", "kaka started (\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?") build \(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"))")
     }
 
     func add(_ area: String, _ message: String) {
@@ -44,8 +44,8 @@ final class AppLog {
     var text: String {
         let info = Bundle.main.infoDictionary ?? [:]
         let header = [
-            "Poki log, \(ISO8601DateFormatter().string(from: Date()))",
-            "Poki \(info["CFBundleShortVersionString"] as? String ?? "?") (\(info["CFBundleVersion"] as? String ?? "?")), \(UIDevice.current.model), iOS \(UIDevice.current.systemVersion)",
+            "kaka log, \(ISO8601DateFormatter().string(from: Date()))",
+            "kaka \(info["CFBundleShortVersionString"] as? String ?? "?") (\(info["CFBundleVersion"] as? String ?? "?")), \(UIDevice.current.model), iOS \(UIDevice.current.systemVersion)",
             "Relay \(RelayAddress.saved?.origin.host() ?? "not set")",
         ].joined(separator: "\n")
         return ([header] + lines).joined(separator: "\n")

@@ -46,12 +46,12 @@ struct ApprovalsSections: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Sensitive steps are paying, deleting, sending a message, placing a call, typing a password and anything in Wallet.")
                     switch model.approvalMode {
-                    case .reply: Text("With Message Reply, Poki asks you in the chat and your yes lets the step through. Away from Poki you can answer from the notification. Outside agents have no chat, so their steps ask with Allow and Don’t Allow.")
-                    case .confirm: Text("With Confirmation, you tap Allow or Don’t Allow on the Live Activity, in a notification, or here in Poki.")
+                    case .reply: Text("With Message Reply, kaka asks you in the chat and your yes lets the step through. Away from kaka you can answer from the notification. Outside agents have no chat, so their steps ask with Allow and Don’t Allow.")
+                    case .confirm: Text("With Confirmation, you tap Allow or Don’t Allow on the Live Activity, in a notification, or here in kaka.")
                     case .off: Text("Optional steps continue without asking. Payments, deletions and actions in Wallet still need your confirmation.")
                     }
                     Text("Payments, deletions and actions in Wallet always need your confirmation.")
-                    Text("Changes apply right away, starting from Poki’s next step.")
+                    Text("Changes apply right away, starting from kaka’s next step.")
                 }
             }
             if model.approvalMode != .off {
@@ -75,9 +75,9 @@ struct ApprovalsSections: View {
                     .padding(.vertical, 4)
                 } footer: {
                     switch model.classifierLevel {
-                    case .permissive: Text("Permissive. Your chat model approves a step in Poki’s own chat unless it clearly has nothing to do with what you asked, or you said no.")
-                    case .balanced: Text("Balanced. Your chat model approves a step in Poki’s own chat when it directly serves what you asked for. You are asked about the rest.")
-                    case .strict: Text("Strict. Your chat model approves a step in Poki’s own chat only when you asked for that exact action. You are asked about the rest.")
+                    case .permissive: Text("Permissive. Your chat model approves a step in kaka’s own chat unless it clearly has nothing to do with what you asked, or you said no.")
+                    case .balanced: Text("Balanced. Your chat model approves a step in kaka’s own chat when it directly serves what you asked for. You are asked about the rest.")
+                    case .strict: Text("Strict. Your chat model approves a step in kaka’s own chat only when you asked for that exact action. You are asked about the rest.")
                     case .everything: Text("Ask All. Nothing is approved automatically. Each request needs your answer.")
                     }
                 }
@@ -91,7 +91,7 @@ struct AgentsView: View {
     private var relayLine: String {
         if model.relayAddress == nil { return AppLocalization.text(LocalizedStringResource("Set an address first")) }
         if !model.relayEnabled { return AppLocalization.text(LocalizedStringResource("Off, agents can’t reach this iPhone")) }
-        if !model.sessionOn { return AppLocalization.text(LocalizedStringResource("Waiting for Poki, turn Poki on and agents can connect")) }
+        if !model.sessionOn { return AppLocalization.text(LocalizedStringResource("Waiting for kaka, turn kaka on and agents can connect")) }
         return Health.relay(model).word
     }
 
@@ -120,9 +120,9 @@ struct AgentsView: View {
                         } label: { Label("Memory", systemImage: "brain") }
                     }
                 } header: {
-                    Text("Poki Agent")
+                    Text("kaka Agent")
                 } footer: {
-                    Text("The model Poki’s chat and voice use on this iPhone. Memory holds the routines and notes every agent shares.")
+                    Text("The model kaka’s chat and voice use on this iPhone. Memory holds the routines and notes every agent shares.")
                 }
 
                 Section {
@@ -191,7 +191,7 @@ struct AgentsView: View {
                 } header: {
                     Text("MCP Relay")
                 } footer: {
-                    Text("The relay forwards agents’ requests to this iPhone while Poki is open or in the background. It stores nothing.")
+                    Text("The relay forwards agents’ requests to this iPhone while kaka is open or in the background. It stores nothing.")
                 }
 
                 Section {
@@ -205,7 +205,7 @@ struct AgentsView: View {
                 } header: {
                     Text("Safety")
                 } footer: {
-                    Text("When Poki asks you before a sensitive step, and the record of every action any agent ran on this iPhone.")
+                    Text("When kaka asks you before a sensitive step, and the record of every action any agent ran on this iPhone.")
                 }
             }
             .listStyle(.insetGrouped)

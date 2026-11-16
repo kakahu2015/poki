@@ -207,9 +207,6 @@ enum ActivityMotion {
     static let phase = Animation.spring(duration: 0.6, bounce: 0.3)
     /// A new step within the same phase: its words blend into the old ones where they stand. No bounce.
     static let step = Animation.easeOut(duration: 0.35)
-    /// A new pose: the bear stays where it stands and the new pose fades in over the old one (ESP-467).
-    /// No movement and no bounce, which on the phone read as the bear dropping and pressing.
-    static let pose = Animation.easeInOut(duration: 0.35)
 }
 
 extension AnyTransition {

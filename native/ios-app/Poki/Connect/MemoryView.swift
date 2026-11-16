@@ -55,7 +55,7 @@ struct MemoryView: View {
             } header: {
                 SettingsHeader("Move or Back Up")
             } footer: {
-                Text(message ?? AppLocalization.text(LocalizedStringResource("One file with every routine and note. Importing merges it in; the newer copy of a routine wins. Poki Setup on your computer can back it up and put it back.")))
+                Text(message ?? AppLocalization.text(LocalizedStringResource("One file with every routine and note. Importing merges it in; the newer copy of a routine wins. kaka Setup on your computer can back it up and put it back.")))
             }
 
             Section {

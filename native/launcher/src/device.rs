@@ -50,22 +50,22 @@ impl<E: std::error::Error> From<E> for Failure {
     }
 }
 
-pub const LOOPBACK_FIX: &str = "Turn on the loopback in your proxy app: the Poki module in Surge or Loon, loopback_address in sing-box, or Shadowrocket's Settings → Other → \"Include route 10.7.0.1/32\". Then connect to Wi-Fi.";
+pub const LOOPBACK_FIX: &str = "Turn on the loopback in your proxy app: the kaka module in Surge or Loon, loopback_address in sing-box, or Shadowrocket's Settings → Other → \"Include route 10.7.0.1/32\". Then connect to Wi-Fi.";
 /// 10.7.0.1 refused the remote pairing port: the loopback is on, and the phone's remote pairing
 /// service listens on another port (or not at all). The app finds the port in Bonjour.
-pub const PAIRING_PORT_FIX: &str = "The loopback is on. iOS moved its pairing service to another port, and Poki finds it through the local network. Keep Wi-Fi on and allow Local Network for Poki in Settings → Privacy & Security. If this stays, restart the iPhone.";
-pub const NETWORK_FIX: &str = "Poki needs the internet once after each restart of the phone to get Apple's signature for the developer disk image. Check Wi-Fi or cellular; Poki tries again by itself.";
-pub const DDI_TIMEOUT_FIX: &str = "Mounting the developer disk image timed out. Poki needs the internet once after each restart to get Apple's signature; check Wi-Fi or cellular. Poki tries again by itself.";
-pub const DDI_REFUSED_FIX: &str = "This iOS version needs a newer developer disk image. Open Poki's setup to download the latest image, or update Poki.";
-pub const DDI_BAD_FIX: &str = "The developer disk image did not install. Poki downloads it again by itself.";
-pub const PAIRING_FIX: &str = "Pair again in Poki's setup.";
+pub const PAIRING_PORT_FIX: &str = "The loopback is on. iOS moved its pairing service to another port, and kaka finds it through the local network. Keep Wi-Fi on and allow Local Network for kaka in Settings → Privacy & Security. If this stays, restart the iPhone.";
+pub const NETWORK_FIX: &str = "kaka needs the internet once after each restart of the phone to get Apple's signature for the developer disk image. Check Wi-Fi or cellular; kaka tries again by itself.";
+pub const DDI_TIMEOUT_FIX: &str = "Mounting the developer disk image timed out. kaka needs the internet once after each restart to get Apple's signature; check Wi-Fi or cellular. kaka tries again by itself.";
+pub const DDI_REFUSED_FIX: &str = "This iOS version needs a newer developer disk image. Open kaka's setup to download the latest image, or update kaka.";
+pub const DDI_BAD_FIX: &str = "The developer disk image did not install. kaka downloads it again by itself.";
+pub const PAIRING_FIX: &str = "Pair again in kaka's setup.";
 /// The loopback took the connection, then the phone's remote pairing service did not answer, before
 /// the pairing was checked. Seen with Developer Mode on (GitHub issue 69): the loopback, or a new
 /// pairing made over it, is the fix.
 pub const HANDSHAKE_FIX: &str = "Open Setup › Loopback and check the loopback, then pair this iPhone again in Setup › Pairing with the loopback on.";
 /// After pair-verify, the listener, the tunnel or the RSD handshake failed. Nothing said why, so the
 /// checks go in order, most likely first; Developer Mode only after the loopback and the pairing.
-pub const UNREACHABLE_FIX: &str = "Poki can't reach this iPhone. Check in this order: Setup › Loopback (your proxy app or LocalDevVPN is connected, with 10.7.0.1 set), then Setup › Pairing (pair again with the loopback on), then Developer Mode in Settings → Privacy & Security.";
+pub const UNREACHABLE_FIX: &str = "kaka can't reach this iPhone. Check in this order: Setup › Loopback (your proxy app or LocalDevVPN is connected, with 10.7.0.1 set), then Setup › Pairing (pair again with the loopback on), then Developer Mode in Settings → Privacy & Security.";
 /// Only when the phone said Developer Mode is off.
 pub const DEVELOPER_MODE_FIX: &str = "Turn on Developer Mode: Settings → Privacy & Security → Developer Mode, then restart the phone.";
 
@@ -102,7 +102,7 @@ impl Pairing {
     pub fn read(path: &Path, host_name: Option<&str>) -> Result<Self> {
         let bytes = std::fs::read(path).map_err(|e| Failure::new(format!("cannot read the pairing file: {e}")).fix(PAIRING_FIX).code("pairing"))?;
         if let Ok(file) = RpPairingFile::from_bytes(&bytes) {
-            let name = remote::sending_host(&bytes).or_else(|| host_name.map(String::from)).unwrap_or_else(|| "Poki".into());
+            let name = remote::sending_host(&bytes).or_else(|| host_name.map(String::from)).unwrap_or_else(|| "kaka".into());
             return Ok(Self::Remote { file, host_name: name });
         }
         match PairingFile::from_bytes(&bytes) {

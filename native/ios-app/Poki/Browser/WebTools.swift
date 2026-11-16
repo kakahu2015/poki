@@ -13,10 +13,10 @@ enum WebTools {
 
     static let specs: [ToolSpec] = [
         ToolSpec(name: "web_open",
-                 description: "Open a website in Poki's sandbox browser. For a pure website task, use web tools only: do not also call look or do, launch Safari, or start phone controls. Answers with the page's elements, as web_read does.",
+                 description: "Open a website in kaka's sandbox browser. For a pure website task, use web tools only: do not also call look or do, launch Safari, or start phone controls. Answers with the page's elements, as web_read does.",
                  schema: object(["url": ["type": "string", "description": "A full address, such as https://www.fandango.com"]], ["url"])),
         ToolSpec(name: "web_read",
-                 description: "Read the page in Poki's browser: links, buttons and fields with refs such as [e12], headings and text, in page order. find keeps the lines containing that text. A long page comes in parts: pass offset to read on.",
+                 description: "Read the page in kaka's browser: links, buttons and fields with refs such as [e12], headings and text, in page order. find keeps the lines containing that text. A long page comes in parts: pass offset to read on.",
                  schema: object(["find": ["type": "string"], "offset": ["type": "integer", "minimum": 0]], [])),
         ToolSpec(name: "web_click",
                  description: "Tap an element of the page by its ref from the latest page read. Answers with the page after the tap.",
@@ -25,12 +25,12 @@ enum WebTools {
                  description: "Type text into a field by its ref (replacing what is there), or choose an option of a select by its label. submit presses Enter. Answers with the page after typing.",
                  schema: object(["ref": ["type": "string"], "text": ["type": "string"], "submit": ["type": "boolean"]], ["ref", "text"])),
         ToolSpec(name: "web_handoff",
-                 description: "Give the page in Poki's browser to the owner and wait until they hand it back: for signing in, a human check or captcha, a payment, or anything only they should do. reason is shown to them.",
+                 description: "Give the page in kaka's browser to the owner and wait until they hand it back: for signing in, a human check or captcha, a payment, or anything only they should do. reason is shown to them.",
                  schema: object(["reason": ["type": "string"]], ["reason"])),
     ]
 
     static let instructions = """
-    Poki has its own browser for websites, apart from Safari and the phone's screen. For a task on a website (showtimes, prices, opening hours, anything read from a site), use web_open, web_read, web_click and web_type instead of opening Safari with look and do: the owner keeps using the phone meanwhile. Start with web_open on the site's main address. A pure website task, including a Wikipedia lookup, must not also call look or do, launch Safari, or start phone controls. Finish with finish_task, never a do call. Use phone controls alongside the browser only for a separate app part explicitly requested by the owner, with its own report_plan step naming that app. A failed webpage is not permission to switch to phone controls. Pages answer as lines; act on the refs in brackets from the latest answer, since refs change when the page changes. Prefer find over reading a long page twice. Never sign in, pay, buy, book or submit the owner's personal details: when the site needs a sign-in, shows a human check or captcha, or asks for payment, call web_handoff with a short reason and continue after it returns. Banners and pop-ups come in two kinds. A notice that only informs and covers the page (a cookie or privacy banner, or a site-use notice such as "by continuing to use this site you agree to our terms") is yours to dismiss: tap its reject or necessary-only choice (such as Reject all, Decline, Only necessary) when it has one, otherwise Continue, Close or Accept. Anything that would give the owner an obligation or an identity is the owner's, so call web_handoff: signing up or in, subscribing or paying, a free trial, entering an age or birthday, a human check, a form that needs "I agree to the terms" ticked before it can be sent, and any pop-up with an email or password field. When unsure which kind it is, treat it as the owner's. A notice you dismiss shows as its own step; you need not mention it in your answer. If the owner did not name a place and the site needs one, use the place the site suggests and say which one you used. Report only what the pages showed, with the date and place it applies to; when a list was cut short, say so rather than filling it in. Finish with finish_task: for an answer read from a website use answer.kind field or list with the facts in details, and leave answer.items empty.
+    kaka has its own browser for websites, apart from Safari and the phone's screen. For a task on a website (showtimes, prices, opening hours, anything read from a site), use web_open, web_read, web_click and web_type instead of opening Safari with look and do: the owner keeps using the phone meanwhile. Start with web_open on the site's main address. A pure website task, including a Wikipedia lookup, must not also call look or do, launch Safari, or start phone controls. Finish with finish_task, never a do call. Use phone controls alongside the browser only for a separate app part explicitly requested by the owner, with its own report_plan step naming that app. A failed webpage is not permission to switch to phone controls. Pages answer as lines; act on the refs in brackets from the latest answer, since refs change when the page changes. Prefer find over reading a long page twice. Never sign in, pay, buy, book or submit the owner's personal details: when the site needs a sign-in, shows a human check or captcha, or asks for payment, call web_handoff with a short reason and continue after it returns. Banners and pop-ups come in two kinds. A notice that only informs and covers the page (a cookie or privacy banner, or a site-use notice such as "by continuing to use this site you agree to our terms") is yours to dismiss: tap its reject or necessary-only choice (such as Reject all, Decline, Only necessary) when it has one, otherwise Continue, Close or Accept. Anything that would give the owner an obligation or an identity is the owner's, so call web_handoff: signing up or in, subscribing or paying, a free trial, entering an age or birthday, a human check, a form that needs "I agree to the terms" ticked before it can be sent, and any pop-up with an email or password field. When unsure which kind it is, treat it as the owner's. A notice you dismiss shows as its own step; you need not mention it in your answer. If the owner did not name a place and the site needs one, use the place the site suggests and say which one you used. Report only what the pages showed, with the date and place it applies to; when a list was cut short, say so rather than filling it in. Finish with finish_task: for an answer read from a website use answer.kind field or list with the facts in details, and leave answer.items empty.
     """
 
     /// A short button or link label that pays or orders.
@@ -57,7 +57,7 @@ enum WebTools {
             browser.end(step, ok: !result.isError, started: started)
         case "web_read":
             let find = (args["find"] as? String)?.trimmingCharacters(in: .whitespaces) ?? ""
-            guard browser.isOpen else { return answer("Nothing is open in Poki's browser. Call web_open first.", error: true) }
+            guard browser.isOpen else { return answer("Nothing is open in kaka's browser. Call web_open first.", error: true) }
             let step = browser.begin(find.isEmpty ? AppLocalization.text(LocalizedStringResource("Read the page")) : AppLocalization.text(LocalizedStringResource("Look for “\(find)”")))
             result = await page(browser, find: find, offset: args["offset"] as? Int ?? 0, budget: 9000)
             browser.end(step, ok: !result.isError, started: started)
@@ -102,7 +102,7 @@ enum WebTools {
             result = await after(browser, typed, ref: ref, did: "Typed into “\(label)”: \(typed?["value"] as? String ?? text).")
             browser.end(step, ok: !result.isError, started: started)
         case "web_handoff":
-            guard browser.isOpen else { return answer("Nothing is open in Poki's browser to hand over.", error: true) }
+            guard browser.isOpen else { return answer("Nothing is open in kaka's browser to hand over.", error: true) }
             let reason = (args["reason"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             let step = browser.begin(AppLocalization.text(LocalizedStringResource("Waiting for you: \(reason)")))
             browser.markWaiting(step)
@@ -185,7 +185,7 @@ enum WebTools {
             case "disabled": return answer("[\(ref)] is disabled.", error: true)
             case "owner": return answer("That field is for the owner (a password, card or one-time code): call web_handoff.", error: true)
             case "option": return answer("No such option. The options are: \((result["options"] as? [String] ?? []).joined(separator: " | "))", error: true)
-            default: return answer("[\(ref)] is not a field Poki can type into.", error: true)
+            default: return answer("[\(ref)] is not a field kaka can type into.", error: true)
             }
         }
         var text = did

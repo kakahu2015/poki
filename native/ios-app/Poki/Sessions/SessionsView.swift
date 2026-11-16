@@ -67,8 +67,6 @@ struct SessionsView: View {
             Image("PokiIcon").resizable().scaledToFit().frame(width: 32, height: 32)
                 .clipShape(RoundedRectangle(cornerRadius: 32 * 0.225, style: .continuous))
                 .accessibilityHidden(true)
-            Text(verbatim: "Poki").font(Prominent.font(size: 28, relativeTo: .title, .bold)).foregroundStyle(Color(.label))
-                .accessibilityAddTraits(.isHeader)
             Spacer()
         }
         .padding(.horizontal, 32).padding(.top, 8).padding(.bottom, 12)
@@ -248,14 +246,14 @@ struct SessionsView: View {
                 id: "sample-1",
                 kind: .handoff,
                 client: "Claude Code",
-                title: "Claude → Poki",
+                title: "Claude → kaka",
                 started: now,
                 updated: now,
                 live: true,
                 outcome: nil,
                 entries: [ChatEntry(.poki(AppLocalization.text(LocalizedStringResource("Needs your OK: send “On my way” to Mom")))), ChatEntry(.note(.waiting))],
                 calls: [],
-                customName: "Claude → Poki"
+                customName: "Claude → kaka"
             ),
             SavedSession(
                 id: "sample-2",
@@ -447,12 +445,12 @@ struct AgentBadge: View {
 /// outside agent borrowing Poki's hands, at step 2 of 3. Nothing runs.
 private enum GuestSample {
     static var isOn: Bool { UserDefaults.standard.string(forKey: "pokiHome") != nil }
-    static var plan: [String] { [AppLocalization.text(LocalizedStringResource("Open TestFlight")), AppLocalization.text(LocalizedStringResource("Find Poki")), AppLocalization.text(LocalizedStringResource("Tap Update"))] }
+    static var plan: [String] { [AppLocalization.text(LocalizedStringResource("Open TestFlight")), AppLocalization.text(LocalizedStringResource("Find kaka")), AppLocalization.text(LocalizedStringResource("Tap Update"))] }
     static let entries: [ChatEntry] = {
         var steps = ChatEntry(.plan([PlanStep(plan[0], state: .done), PlanStep(plan[1])]))
         steps.at = Date().addingTimeInterval(-42)
         steps.title = AppLocalization.text(LocalizedStringResource("Install the newest build"))
-        return [ChatEntry(.request(AppLocalization.text(LocalizedStringResource("Open TestFlight and install the newest Poki build.")), from: "Claude Code")), steps]
+        return [ChatEntry(.request(AppLocalization.text(LocalizedStringResource("Open TestFlight and install the newest kaka build.")), from: "Claude Code")), steps]
     }()
 }
 
@@ -492,9 +490,9 @@ struct SessionView: View {
                     }
                     if running != nil || sample {
                         // Said where Stop is, and only there: the words promise what the button does.
-                        Text("A guest is borrowing Poki’s hands. You can tap Stop anytime.")
+                        Text("A guest is borrowing kaka’s hands. You can tap Stop anytime.")
                             .font(.footnote).foregroundStyle(Color(.secondaryLabel)).multilineTextAlignment(.center)
-                        Button("Stop Poki", systemImage: "stop.fill") { AskPoki.live(id)?.stop() }
+                        Button("Stop kaka", systemImage: "stop.fill") { AskPoki.live(id)?.stop() }
                             .buttonStyle(.bordered).buttonBorderShape(.capsule).tint(Tint.red)
                     }
                 }
@@ -522,7 +520,7 @@ struct SessionView: View {
         guard let session else { return "" }
         switch session.kind {
         case .agent: return AppLocalization.text(LocalizedStringResource("Over MCP, \(ChatTime.row(session.started))"))
-        case .handoff: return AppLocalization.text(LocalizedStringResource("Handed to Poki, \(ChatTime.row(session.started))"))
+        case .handoff: return AppLocalization.text(LocalizedStringResource("Handed to kaka, \(ChatTime.row(session.started))"))
         case .voice: return AppLocalization.text(LocalizedStringResource("Voice, \(ChatTime.row(session.started))"))
         case .poki: return ""
         }

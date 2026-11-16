@@ -69,7 +69,7 @@ final class LoopbackTunnel {
         busy = true
         defer { busy = false }
         do { manager = try await savedManager(); updateStatus() }
-        catch { state = .failed("Cannot read Poki's VPN configuration. Try again, or choose an external connection.") }
+        catch { state = .failed("Cannot read kaka's VPN configuration. Try again, or choose an external connection.") }
         #endif
     }
 
@@ -104,7 +104,7 @@ final class LoopbackTunnel {
             configuration.disconnectOnSleep = false
             configuration.includeAllNetworks = false
             manager.protocolConfiguration = configuration
-            manager.localizedDescription = "Poki local connection"
+            manager.localizedDescription = "kaka local connection"
             manager.isEnabled = true
             // Never on demand: iOS must not bring Poki's tunnel up by itself (it could displace another VPN).
             // Only the owner's connect, or Poki's own retry after its tunnel failed, dials it.
@@ -129,7 +129,7 @@ final class LoopbackTunnel {
             updateStatus()
             throw CancellationError()
         } catch {
-            let message = "Could not start Poki's local VPN. Allow the VPN configuration when asked. If signing does not include Network Extensions, use the external-connection build with LocalDevVPN or a compatible proxy."
+            let message = "Could not start kaka's local VPN. Allow the VPN configuration when asked. If signing does not include Network Extensions, use the external-connection build with LocalDevVPN or a compatible proxy."
             state = .failed(message)
             throw failure(message)
         }
@@ -175,7 +175,7 @@ final class LoopbackTunnel {
             if busy && state == .connecting { return }
             connectionDeadline?.cancel()
             if state == .connecting || state == .connected {
-                state = .failed("The local VPN disconnected. Reconnect here. If it keeps stopping, check that both Poki and its tunnel were signed with Network Extensions, or choose an external connection.")
+                state = .failed("The local VPN disconnected. Reconnect here. If it keeps stopping, check that both kaka and its tunnel were signed with Network Extensions, or choose an external connection.")
                 logStopReason()
                 scheduleReconnect(because: "the local VPN disconnected")
             } else if case .failed = state {
@@ -202,7 +202,7 @@ final class LoopbackTunnel {
         // the user too. For the first the retry stands; for the second nothing is queued anyway.
         if let at = stoppedByAppAt, Date().timeIntervalSince(at) < 5 {
             stoppedByAppAt = nil
-            AppLog.shared.add("loopback", "local VPN: stopped by Poki itself; the retry stands")
+            AppLog.shared.add("loopback", "local VPN: stopped by kaka itself; the retry stands")
             return
         }
         AppLog.shared.add("loopback", "local VPN: ended on purpose (turned off in Settings, or another VPN took over); not reconnecting")
@@ -262,7 +262,7 @@ final class LoopbackTunnel {
     private func yieldToAnotherVPN() {
         reconnect.ownerStopped()
         reconnecting = false
-        let message = "Another VPN appears to be on, so Poki did not turn its local connection back on. Turn that VPN off and tap Enable Local Connection, or choose an external connection in Setup."
+        let message = "Another VPN appears to be on, so kaka did not turn its local connection back on. Turn that VPN off and tap Enable Local Connection, or choose an external connection in Setup."
         AppLog.shared.add("loopback", "local VPN: another VPN is on; not reconnecting")
         state = .failed(message)
         onAttention?(message)

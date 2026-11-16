@@ -26,7 +26,7 @@ enum ConnectionCheck {
             switch self {
             case .works(let model): AppLocalization.text(LocalizedStringResource("Connection works. Model: \(model)"))
             case .badKey: AppLocalization.text(LocalizedStringResource("The key is not valid. Check that it was copied in full."))
-            case .unreachable: AppLocalization.text(LocalizedStringResource("Poki can’t reach this address. Check the address and the network."))
+            case .unreachable: AppLocalization.text(LocalizedStringResource("kaka can’t reach this address. Check the address and the network."))
             case .noEndpoint: AppLocalization.text(LocalizedStringResource("The address answers, but has no chat API there. Check that it ends in /v1."))
             case .timedOut: AppLocalization.text(LocalizedStringResource("No answer within 10 seconds. Check the address and the network, then try again."))
             case .noModel(let model, _): AppLocalization.text(LocalizedStringResource("The model \(model) doesn’t exist, or this key can’t use it."))

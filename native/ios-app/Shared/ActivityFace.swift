@@ -213,7 +213,7 @@ extension PokiState {
     /// about the task. nil when none of these is known.
     var doing: String? {
         if let words = taskWords { return words }
-        if let to = plan?.to?.nonBlank { return String(activity: "Poki’s messaging \(to)") }
+        if let to = plan?.to?.nonBlank { return String(activity: "kaka’s messaging \(to)") }
         return ActivityWords.statusLines.contains(headline) ? ActivityWords.local(headline) : nil
     }
 
@@ -334,7 +334,7 @@ extension PokiState {
                     bear: .checking, size: .asking,
                     meta: .text(String(activity: "Settings")),
                     content: pin.count == 6 ? "\(pin.prefix(3)) \(pin.suffix(3))" : pin, contentIsCode: true,
-                    subtitle: String(activity: "Tap Pair with Poki, then enter this code."), subtitleLines: 2,
+                    subtitle: String(activity: "Tap Pair with kaka, then enter this code."), subtitleLines: 2,
                     bottom: .none,
                     compact: .code(pin),
                     link: ActivityLink.setup("pairing"))
@@ -344,7 +344,7 @@ extension PokiState {
                 bear: .checking, size: .working,
                 meta: .text(String(activity: "Settings")),
                 content: String(activity: "Pair in Settings"),
-                subtitle: String(activity: "Open Pair with Poki there. The code shows up here."), subtitleLines: 2,
+                subtitle: String(activity: "Open Pair with kaka there. The code shows up here."), subtitleLines: 2,
                 bottom: .none,
                 compact: .symbol("link", .accent),
                 link: ActivityLink.setup("pairing"))
@@ -374,9 +374,9 @@ extension PokiState {
         case .idle:
             if let voice {
                 let (line, hint, bear): (String, String, ActivityBear) = switch voice {
-                case .listening: (StatusWord.listening.text, String(activity: "Talk with Poki"), .ready)
+                case .listening: (StatusWord.listening.text, String(activity: "Talk with kaka"), .ready)
                 case .thinking: (StatusWord.thinking.text, String(activity: "Working out the next step."), .thinking)
-                case .speaking: (StatusWord.speaking.text, String(activity: "Talk with Poki"), .ready)
+                case .speaking: (StatusWord.speaking.text, String(activity: "Talk with kaka"), .ready)
                 }
                 return ActivityFace(
                     symbol: "waveform",
@@ -425,23 +425,23 @@ extension PokiState {
         case "Loopback Off", "Turn On Loopback", "Can’t Reach iPhone":
             return (String(activity: "Turn On Loopback"), String(activity: "In your proxy app, or connect LocalDevVPN."))
         case "No Internet", "Connect to the Internet":
-            return (String(activity: "Connect to the Internet"), String(activity: "Poki needs it once after each restart, then tries again."))
+            return (String(activity: "Connect to the Internet"), String(activity: "kaka needs it once after each restart, then tries again."))
         case "Disk Image Outdated", "Update the Disk Image":
-            return (String(activity: "Update the Disk Image"), String(activity: "Open Poki's setup to download the latest one."))
+            return (String(activity: "Update the Disk Image"), String(activity: "Open kaka's setup to download the latest one."))
         case "Fetching Disk Image", "Downloading the Disk Image":
-            return (String(activity: "Downloading the Disk Image"), String(activity: "Poki downloads it again by itself."))
+            return (String(activity: "Downloading the Disk Image"), String(activity: "kaka downloads it again by itself."))
         case "Pairing Refused", "Pair Again":
-            return (String(activity: "Pair Again"), String(activity: "In Poki's setup."))
+            return (String(activity: "Pair Again"), String(activity: "In kaka's setup."))
         case "Loopback or Pairing":
-            return (String(activity: "Turn On Loopback"), String(activity: "In your proxy app, or pair again in Poki's setup."))
+            return (String(activity: "Turn On Loopback"), String(activity: "In your proxy app, or pair again in kaka's setup."))
         case "Developer Mode Off", "Check Developer Mode", "Turn On Developer Mode":
             return (String(activity: "Turn On Developer Mode"), String(activity: "Privacy & Security › Developer Mode, then restart."))
-        case "Poki Runner Missing", "Poki Runner Didn’t Start", "Install Poki Runner":
-            return (String(activity: "Install Poki Runner"), String(activity: "With the same signing tool and Apple ID as Poki."))
+        case "kaka Runner Missing", "kaka Runner Didn’t Start", "Install kaka Runner":
+            return (String(activity: "Install kaka Runner"), String(activity: "With the same signing tool and Apple ID as kaka."))
         case "Update iOS":
             return (String(activity: "Update iOS"), String(activity: "This feature requires a newer version of iOS."))
         default:
-            return (ActivityWords.local(headline), String(activity: "Open Poki to fix it."))
+            return (ActivityWords.local(headline), String(activity: "Open kaka to fix it."))
         }
     }
 
@@ -449,18 +449,18 @@ extension PokiState {
     /// matching ESP-139 final board 02.
     private static func setupPresentation(for title: String) -> (String, String?) {
         switch title {
-        case "Poki Runner", "Install Poki Runner":
-            return (String(activity: "Install Poki Runner"), String(activity: "General › VPN & Device Management. Trust Poki Runner's developer."))
+        case "kaka Runner", "Install kaka Runner":
+            return (String(activity: "Install kaka Runner"), String(activity: "General › VPN & Device Management. Trust kaka Runner's developer."))
         case "Developer Mode", "Turn On Developer Mode":
             return (String(activity: "Turn On Developer Mode"), String(activity: "Privacy & Security › Developer Mode. Restart, then tap Turn On."))
         case "Loopback", "Turn On Loopback":
-            return (String(activity: "Turn On Loopback"), String(activity: "In your proxy app, or connect LocalDevVPN. Then come back to Poki."))
+            return (String(activity: "Turn On Loopback"), String(activity: "In your proxy app, or connect LocalDevVPN. Then come back to kaka."))
         case "Pairing", "Pair This iPhone":
-            return (String(activity: "Pair This iPhone"), String(activity: "Privacy & Security › Developer Mode › Pair with Poki."))
+            return (String(activity: "Pair This iPhone"), String(activity: "Privacy & Security › Developer Mode › Pair with kaka."))
         case "UI Automation", "Allow UI Automation":
             return (String(activity: "Allow UI Automation"), String(activity: "Developer › Enable UI Automation."))
-        case "Background", "Let Poki Stay On":
-            return (String(activity: "Let Poki Stay On"), String(activity: "Allow location While Using the App, and keep Live Activities on."))
+        case "Background", "Let kaka Stay On":
+            return (String(activity: "Let kaka Stay On"), String(activity: "Allow location While Using the App, and keep Live Activities on."))
         default:
             return (ActivityWords.local(title), nil)
         }
@@ -493,7 +493,7 @@ extension PokiActivityAttributes.Handoff {
         if let text, !text.isEmpty { return text }
         switch kind {
         case .runnerPasscode: return String(activity: "iOS asks for it once after a restart. The agent waits.")
-        case .automationPasscode: return String(activity: "iOS asks after Poki restarts or 8 hours later. The agent waits.")
+        case .automationPasscode: return String(activity: "iOS asks after kaka restarts or 8 hours later. The agent waits.")
         case .payment: return String(activity: "The agent does not pay for you. It waits, then carries on.")
         default: return String(activity: "The agent can't act on this screen. It waits for you.")
         }

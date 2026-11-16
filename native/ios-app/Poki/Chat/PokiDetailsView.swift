@@ -8,9 +8,8 @@ import SwiftUI
 // what only a few need is on one page, Advanced, by where it came from. Nothing has two ways in: the
 // approval method is changed on Poki's card in the chat only. The rows are PokiSettingsKit's.
 
-/// Settings: Poki on top, as a group of rows like the groups under it (the owner, 2026-11-13: not a
-/// card of its own): the bear and its name, where Poki stands, and the Activity Log. Then any problem
-/// that keeps Poki from working, and the parts of Poki in three groups of rows.
+/// Settings: the current status and Activity Log, then any problem that keeps the app from working
+/// and its settings in three groups of rows.
 struct PokiDetailsView: View {
     @Environment(AppModel.self) private var model
     @Environment(ChatModel.self) private var chat
@@ -32,8 +31,6 @@ struct PokiDetailsView: View {
             ScrollViewReader { scroll in
             List {
                 Section {
-                    // The first two rows only show: Connection's Automation switch turns Poki on and pauses it.
-                    PokiNameRow(mood: status.mood)
                     SettingsRow(title: "Status", symbol: "dot.radiowaves.left.and.right", value: PokiStatusCopy.word(status), dot: status.mood.dot)
                         .accessibilityElement(children: .combine)
                         .accessibilityIdentifier("details.status")
@@ -122,7 +119,7 @@ struct PokiDetailsView: View {
                     let info = Bundle.main.infoDictionary ?? [:]
                     let version = info["CFBundleShortVersionString"] as? String ?? ""
                     let build = info["CFBundleVersion"] as? String ?? ""
-                    Text(verbatim: "Poki \(version) (\(build))")
+                    Text(verbatim: "kaka \(version) (\(build))")
                         .monospacedDigit()
                         .frame(maxWidth: .infinity)
                         .padding(.top, 12)
@@ -295,34 +292,6 @@ private struct ConversationsSettingsView: View {
     }
 }
 
-/// The first row of Settings: the bear's face where the rows under it have their icon, and Poki's name.
-private struct PokiNameRow: View {
-    var mood: PokiMood
-    @ScaledMetric(relativeTo: .body) private var face = 34.0
-
-    var body: some View {
-        HStack(spacing: 14) {
-            Group {
-                if let image = PokiMood.cutout(mood, small: true) {
-                    Image(uiImage: image).resizable().interpolation(.high).scaledToFit()
-                }
-            }
-            .frame(width: face, height: face)
-            .background(mood == .paused ? Tint.night : Tint.portrait, in: .circle)
-            .clipShape(.circle)
-            .overlay(Circle().strokeBorder(Tint.ring, lineWidth: 1))
-            // As the rows' icons: the face does not make the row taller.
-            .padding(.vertical, -4)
-            .accessibilityHidden(true)
-            Text(verbatim: "Poki").font(.body.weight(.semibold)).foregroundStyle(Color(.label))
-                .accessibilityAddTraits(.isHeader)
-            Spacer(minLength: 8)
-        }
-        .padding(.vertical, 6)
-        .animation(.easeInOut(duration: 0.3), value: mood)
-    }
-}
-
 /// A plain button that dims while pressed, for tiles that draw their own surface.
 struct PressedDimStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
@@ -353,10 +322,10 @@ struct ConnectionView: View {
             } footer: {
                 VStack(alignment: .leading, spacing: 6) {
                     // Paused is not a lock: an agent's request, or a task you send, starts Poki again.
-                    Text(model.sessionStarting ? "Poki is turning on."
-                         : on ? "Poki can tap, type, and scroll on this iPhone."
-                         : model.sessionOn ? "Poki is paused. It resumes automatically upon a new task or agent request."
-                         : "Poki is off. Agents can’t reach this iPhone.")
+                    Text(model.sessionStarting ? "kaka is turning on."
+                         : on ? "kaka can tap, type, and scroll on this iPhone."
+                         : model.sessionOn ? "kaka is paused. It resumes automatically upon a new task or agent request."
+                         : "kaka is off. Agents can’t reach this iPhone.")
                     // Why turning on failed, under the switch that was turned on (not only on Poki's
                     // page). Poki's own sentences are localized; PokiCore's stay as they came.
                     if !on, !model.sessionStarting, let problem = model.problem {
@@ -382,7 +351,7 @@ struct ConnectionView: View {
             } header: {
                 SettingsHeader("This iPhone")
             } footer: {
-                Text("Poki uses Apple’s developer tools on this iPhone. Keep all of these on.")
+                Text("kaka uses Apple’s developer tools on this iPhone. Keep all of these on.")
             }
         }
         .navigationTitle(AppLocalization.text("Connection"))
@@ -433,7 +402,7 @@ struct AdvancedSettingsView: View {
                 } header: {
                     SettingsHeader("Connection")
                 } footer: {
-                    Text("iOS shows the automation banner only while the runner is active. Poki starts it when needed and stops it when idle. Don’t close Poki Runner while an agent is working.")
+                    Text("iOS shows the automation banner only while the runner is active. kaka starts it when needed and stops it when idle. Don’t close kaka Runner while an agent is working.")
                 }
             }
 
@@ -453,7 +422,7 @@ struct AdvancedSettingsView: View {
             } header: {
                 SettingsHeader("Memory")
             } footer: {
-                Text("The run log lists each routine run, where it stopped and how long it took, with no typed text. It helps the Poki maintainers make routines more reliable.")
+                Text("The run log lists each routine run, where it stopped and how long it took, with no typed text. It helps the kaka maintainers make routines more reliable.")
             }
 
             Section {
@@ -602,20 +571,20 @@ struct ApprovalsSettingsView: View {
                     .accessibilityIdentifier("approvals.mode.current")
             } footer: {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Change it on Poki’s card: tap Poki’s picture at the top of the chat.")
+                    Text("Change it on kaka’s card: tap kaka’s picture at the top of the chat.")
                     switch model.approvalMode {
-                    case .reply: Text("Poki asks in the chat and proceeds after you reply.")
-                    case .confirm: Text("Tap Allow or Don’t Allow in the Live Activity, a notification, or Poki.")
+                    case .reply: Text("kaka asks in the chat and proceeds after you reply.")
+                    case .confirm: Text("Tap Allow or Don’t Allow in the Live Activity, a notification, or kaka.")
                     case .off: Text("Optional steps run automatically without asking.")
                     }
                     if more {
                         switch model.approvalMode {
-                        case .reply: Text("With Message Reply, Poki asks you in the chat and your yes lets the step through. Away from Poki you can answer from the notification. Outside agents have no chat, so their steps ask with Allow and Don’t Allow.")
-                        case .confirm: Text("With Confirmation, you tap Allow or Don’t Allow on the Live Activity, in a notification, or here in Poki.")
+                        case .reply: Text("With Message Reply, kaka asks you in the chat and your yes lets the step through. Away from kaka you can answer from the notification. Outside agents have no chat, so their steps ask with Allow and Don’t Allow.")
+                        case .confirm: Text("With Confirmation, you tap Allow or Don’t Allow on the Live Activity, in a notification, or here in kaka.")
                         case .off: Text("Optional steps continue without asking. Payments, deletions and actions in Wallet still need your confirmation.")
                         }
                         Text("Sensitive steps are paying, deleting, sending a message, placing a call, typing a password and anything in Wallet.")
-                        Text("Changes apply right away, starting from Poki’s next step.")
+                        Text("Changes apply right away, starting from kaka’s next step.")
                     } else {
                         Button("Learn More") { withAnimation(.snappy) { more = true } }
                             .font(.footnote.weight(.semibold))
@@ -641,9 +610,9 @@ struct ApprovalsSettingsView: View {
                     Text("Sensitivity").textCase(nil)
                 } footer: {
                     switch model.classifierLevel {
-                    case .permissive: Text("Permissive. Your chat model approves a step in Poki’s own chat unless it clearly has nothing to do with what you asked, or you said no.")
-                    case .balanced: Text("Balanced. Your chat model approves a step in Poki’s own chat when it directly serves what you asked for. You are asked about the rest.")
-                    case .strict: Text("Strict. Your chat model approves a step in Poki’s own chat only when you asked for that exact action. You are asked about the rest.")
+                    case .permissive: Text("Permissive. Your chat model approves a step in kaka’s own chat unless it clearly has nothing to do with what you asked, or you said no.")
+                    case .balanced: Text("Balanced. Your chat model approves a step in kaka’s own chat when it directly serves what you asked for. You are asked about the rest.")
+                    case .strict: Text("Strict. Your chat model approves a step in kaka’s own chat only when you asked for that exact action. You are asked about the rest.")
                     case .everything: Text("Ask All. Nothing is approved automatically. Each request needs your answer.")
                     }
                 }
@@ -663,7 +632,7 @@ struct AgentsAndRelayView: View {
     private var relayLine: String {
         if model.relayAddress == nil { return AppLocalization.text(LocalizedStringResource("Set an address first")) }
         if !model.relayEnabled { return AppLocalization.text(LocalizedStringResource("Off, agents can’t reach this iPhone")) }
-        if !model.sessionOn { return AppLocalization.text(LocalizedStringResource("Waiting for Poki, turn Poki on and agents can connect")) }
+        if !model.sessionOn { return AppLocalization.text(LocalizedStringResource("Waiting for kaka, turn kaka on and agents can connect")) }
         return Health.relay(model).word
     }
 
@@ -695,7 +664,7 @@ struct AgentsAndRelayView: View {
             } header: {
                 SettingsHeader("MCP Relay")
             } footer: {
-                Text("The relay forwards agents’ requests to this iPhone while Poki is open or in the background. It stores nothing.")
+                Text("The relay forwards agents’ requests to this iPhone while kaka is open or in the background. It stores nothing.")
             }
 
             Section {
@@ -752,7 +721,7 @@ extension SetupStep {
         case .pairing: "Pair This iPhone"
         case .automation: "UI Automation"
         case .background: "Stay On in Background"
-        case .runner: "Poki Runner"
+        case .runner: "kaka Runner"
         }
     }
 }

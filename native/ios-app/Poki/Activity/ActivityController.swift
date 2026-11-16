@@ -102,7 +102,7 @@ final class ActivityController {
         wanted = deviceName
         guard activity == nil else { return }
         if state.isQuiet, hidesWhenIdle() { lastError = nil; return }
-        guard enabled else { lastError = "Live Activities are off for Poki (Settings > Poki > Live Activities)."; return }
+        guard enabled else { lastError = "Live Activities are off for kaka (Settings > kaka > Live Activities)."; return }
         // A Live Activity left from an earlier run of the app is replaced.
         for old in Activity<PokiActivityAttributes>.activities { Task { await old.end(nil, dismissalPolicy: .immediate) } }
         do {
@@ -287,11 +287,11 @@ final class ActivityController {
         }
         if let pin = state.pin, pin != old.pin {
             setEvent(.code, "Code ready")
-            alert = critical(String(activity: "Pairing code \(pin)"), String(activity: "Type it on the Pair with Poki screen in Settings"))
+            alert = critical(String(activity: "Pairing code \(pin)"), String(activity: "Type it on the Pair with kaka screen in Settings"))
         }
         if old.phase == .pairing, state.phase == .idle, state.headline == "Paired" {
             setEvent(.paired, "Pairing complete")
-            alert = critical(String(activity: "Poki’s paired"), String(activity: "This iPhone is ready for Poki"))
+            alert = critical(String(activity: "kaka’s paired"), String(activity: "This iPhone is ready for kaka"))
         }
 
         // A step began (AppModel sets the headline to the step's words): shown, never popped up.
@@ -372,7 +372,7 @@ final class ActivityController {
             try? await Task.sleep(for: .seconds(3))
             guard let self else { return }
             let t = self.tally, held = self.held.map { "\($0.phase.rawValue) step \($0.step)" } ?? "nothing reported"
-            AppLog.shared.add("activity", "run \(how) at step \(steps): \(t.sent) updates sent, \(t.answered) answered, iOS reported \(t.reported) and holds \(held); \(t.withoutActivity) with no Live Activity; longest wait for the update budget \(String(format: "%.1f", t.longestWait)) s; \(self.activity.map { "\($0.activityState)" } ?? "no activity"), \(Activity<PokiActivityAttributes>.activities.count) Poki activities")
+            AppLog.shared.add("activity", "run \(how) at step \(steps): \(t.sent) updates sent, \(t.answered) answered, iOS reported \(t.reported) and holds \(held); \(t.withoutActivity) with no Live Activity; longest wait for the update budget \(String(format: "%.1f", t.longestWait)) s; \(self.activity.map { "\($0.activityState)" } ?? "no activity"), \(Activity<PokiActivityAttributes>.activities.count) kaka activities")
         }
     }
 
@@ -462,7 +462,7 @@ final class ActivityController {
                 // For the Activity Log: iOS opens the island for an alert, but not while Poki itself is in
                 // front, and late if the update waited behind others.
                 let state = switch UIApplication.shared.applicationState { case .active: "active"; case .inactive: "inactive"; default: "background" }
-                AppLog.shared.add("activity", "alert sent with \(content.state.phase.rawValue) \(String(format: "%.1f", Date().timeIntervalSince(queued))) s after it was queued; \(activity.activityState); Poki \(state)")
+                AppLog.shared.add("activity", "alert sent with \(content.state.phase.rawValue) \(String(format: "%.1f", Date().timeIntervalSince(queued))) s after it was queued; \(activity.activityState); kaka \(state)")
             }
             guard seconds > 2 else { return }
             AppLog.shared.add("activity", "the update to \(content.state.phase.rawValue) step \(content.state.stepCount) took \(String(format: "%.1f", seconds)) s; \(activity.activityState)")

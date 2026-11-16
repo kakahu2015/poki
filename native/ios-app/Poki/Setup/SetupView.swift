@@ -90,15 +90,15 @@ struct SetupView: View {
         switch step {
         case .runner:
             InstructionsCard(lines: [
-                "Install **Poki Runner** (poki-runner-unsigned.ipa) with the same tool and Apple ID you used for Poki.",
+                "Install **kaka Runner** (poki-runner-unsigned.ipa) with the same tool and Apple ID you used for kaka.",
                 "Open **Settings › General › VPN & Device Management**, tap your Apple ID, then tap **Trust**.",
-                "Don’t open Poki Runner yourself. Poki starts it when an agent needs this iPhone.",
+                "Don’t open kaka Runner yourself. kaka starts it when an agent needs this iPhone.",
             ])
-            SetupFootnote(text: "With a free Apple ID, self-signed apps expire after 7 days and are limited to 3 at a time; Poki and Poki Runner use 2. For free Apple ID signing, install the external-connection build and use LocalDevVPN or a compatible VPN app.")
-            ConfirmCard(step: .runner, title: "Poki Runner is installed and trusted", isOn: binding(\.runnerInstalled))
+            SetupFootnote(text: "With a free Apple ID, self-signed apps expire after 7 days and are limited to 3 at a time; kaka and kaka Runner use 2. For free Apple ID signing, install the external-connection build and use LocalDevVPN or a compatible VPN app.")
+            ConfirmCard(step: .runner, title: "kaka Runner is installed and trusted", isOn: binding(\.runnerInstalled))
         case .developerMode:
             InstructionsCard(lines: [
-                SetupStep.inProcess ? "Open **Settings › Privacy & Security › Developer Mode**." : "Open **Settings › Privacy & Security › Developer Mode**. It appears once Poki Runner is installed.",
+                SetupStep.inProcess ? "Open **Settings › Privacy & Security › Developer Mode**." : "Open **Settings › Privacy & Security › Developer Mode**. It appears once kaka Runner is installed.",
                 "Turn on Developer Mode, then tap **Restart**.",
                 "After restarting, unlock this iPhone and tap **Turn On**.",
             ])
@@ -153,23 +153,23 @@ extension SetupStep {
     /// The page's title (board 03: title case).
     var pageTitle: String {
         switch self {
-        case .runner: AppLocalization.text("Install Poki Runner")
+        case .runner: AppLocalization.text("Install kaka Runner")
         case .developerMode: AppLocalization.text("Turn On Developer Mode")
         case .loopback: AppLocalization.text("Turn On Loopback")
         case .pairing: AppLocalization.text("Pair This iPhone")
         case .automation: AppLocalization.text("Allow UI Automation")
-        case .background: AppLocalization.text("Keep Poki Running")
+        case .background: AppLocalization.text("Keep kaka Running")
         }
     }
 
     var pageSummary: LocalizedStringKey {
         switch self {
-        case .runner: "The helper app that taps and types for your agent. Poki starts it; you never open it."
-        case .developerMode: SetupStep.inProcess ? "Allows Poki to use this iPhone’s developer services." : "Allows this iPhone to run Poki Runner."
-        case .loopback: "Allows Poki to reach this iPhone’s developer services through your proxy app."
-        case .pairing: "Gives Poki its own key to this iPhone. The key stays on this device."
-        case .automation: SetupStep.inProcess ? "Allows Poki to control other apps." : "Allows Poki Runner to control other apps."
-        case .background: "Keeps Poki connected in the background and shows its activity on the Lock Screen."
+        case .runner: "The helper app that taps and types for your agent. kaka starts it; you never open it."
+        case .developerMode: SetupStep.inProcess ? "Allows kaka to use this iPhone’s developer services." : "Allows this iPhone to run kaka Runner."
+        case .loopback: "Allows kaka to reach this iPhone’s developer services through your proxy app."
+        case .pairing: "Gives kaka its own key to this iPhone. The key stays on this device."
+        case .automation: SetupStep.inProcess ? "Allows kaka to control other apps." : "Allows kaka Runner to control other apps."
+        case .background: "Keeps kaka connected in the background and shows its activity on the Lock Screen."
         }
     }
 }
@@ -317,7 +317,7 @@ private struct LoopbackPage: View {
             Text("Status")
         } footer: {
             if model.servicesSilent, monitor.isWorking {
-                Text("10.7.0.1 takes the connection, but the phone's remote pairing service does not answer through it, so this page can show Working while Poki cannot connect. Reconnect your proxy app or LocalDevVPN, then pair again in Setup › Pairing.")
+                Text("10.7.0.1 takes the connection, but the phone's remote pairing service does not answer through it, so this page can show Working while kaka cannot connect. Reconnect your proxy app or LocalDevVPN, then pair again in Setup › Pairing.")
             }
         }
 
@@ -361,7 +361,7 @@ private struct LoopbackPage: View {
             } header: {
                 Text("Other Ways")
             } footer: {
-                Text(model.connectionInUse ? "Stop Poki and finish pairing before changing the local connection." : "No extra app needed. Poki connects only to this iPhone; your normal traffic and DNS stay on their usual routes. iOS shows it as a VPN, so it may disconnect another VPN app.")
+                Text(model.connectionInUse ? "Stop kaka and finish pairing before changing the local connection." : "No extra app needed. kaka connects only to this iPhone; your normal traffic and DNS stay on their usual routes. iOS shows it as a VPN, so it may disconnect another VPN app.")
             }
         }
     }
@@ -435,7 +435,7 @@ private struct ProxyAppPage: View {
             Section {
                 switch app.install {
                 case .url(let url):
-                    Button(app.id == "surge" ? "Install Poki Module" : "Install Poki Plugin") { choose(); open(url) }
+                    Button(app.id == "surge" ? "Install kaka Module" : "Install kaka Plugin") { choose(); open(url) }
                 case .toggle:
                     Button("Open \(app.name)") { choose(); openApp() }
                 case .snippet(let line):
@@ -478,7 +478,7 @@ private struct LocalDevVPNPage: View {
         Form {
             Section("How To") {
                 Label("No proxy app? Install LocalDevVPN, a free loopback app built for this.", systemImage: "1.circle")
-                Label("Open it and tap Connect, then return to Poki. It may disconnect another VPN app.", systemImage: "2.circle")
+                Label("Open it and tap Connect, then return to kaka. It may disconnect another VPN app.", systemImage: "2.circle")
             }
             Section {
                 Button("Get LocalDevVPN on the App Store") {
@@ -554,10 +554,10 @@ private struct PairingPage: View {
             Section { Button("Cancel Pairing", role: .destructive) { model.cancelPairing() } }
         case .advertising?:
             Section {
-                Label("Waiting for Settings. Tap Pair with Poki there.", systemImage: "dot.radiowaves.left.and.right")
+                Label("Waiting for Settings. Tap Pair with kaka there.", systemImage: "dot.radiowaves.left.and.right")
                     .symbolEffect(.pulse, options: .repeating)
                 Label("Open **Settings › Privacy & Security › Developer Mode**.", systemImage: "1.circle")
-                Label("Tap **Pair with Poki** and enter the code shown here and on the Lock Screen.", systemImage: "2.circle")
+                Label("Tap **Pair with kaka** and enter the code shown here and on the Lock Screen.", systemImage: "2.circle")
             }
             Section {
                 Button("Open Settings", systemImage: "gear") { openSettings(model, for: .pairing) }
@@ -570,7 +570,7 @@ private struct PairingPage: View {
                 Section {
                     Label(AppLocalization.text(LocalizedStringResource("The phone no longer accepts this pairing: \(trouble)")), systemImage: "exclamationmark.triangle")
                 } footer: {
-                    Text(SetupStep.onDevicePairing ? "This happens after a restore, a reset of Location & Privacy, or when the phone forgot Poki. Pair again; the old key is replaced." : "This happens after a restore, a reset of Location & Privacy, or when the phone forgot Poki. Pair again from Poki Setup on your computer and send the new file here; the old key is replaced.")
+                    Text(SetupStep.onDevicePairing ? "This happens after a restore, a reset of Location & Privacy, or when the phone forgot kaka. Pair again; the old key is replaced." : "This happens after a restore, a reset of Location & Privacy, or when the phone forgot kaka. Pair again from kaka Setup on your computer and send the new file here; the old key is replaced.")
                 }
             } else if model.pairingPath != nil {
                 Section {
@@ -580,18 +580,18 @@ private struct PairingPage: View {
             } else if SetupStep.onDevicePairing {
                 Section("How To") {
                     Label("Connect to Wi‑Fi and tap **Start Pairing**. Allow local network access when prompted.", systemImage: "1.circle")
-                    Label("Poki opens the main Settings page. Go to **Privacy & Security › Developer Mode** and tap **Pair with Poki**.", systemImage: "2.circle")
+                    Label("kaka opens the main Settings page. Go to **Privacy & Security › Developer Mode** and tap **Pair with kaka**.", systemImage: "2.circle")
                     Label("Enter the code shown here and on the Lock Screen.", systemImage: "3.circle")
                 }
             } else {
                 Section {
                     Label("Pairing on the phone itself needs iOS 27; this iPhone runs iOS \(UIDevice.current.systemVersion). Pair it from a computer instead.", systemImage: "1.circle")
-                    Label("Open **Poki Setup** on your Mac or PC, connect this iPhone by cable, and tap **Pair**. Tap **Trust** on the iPhone when asked.", systemImage: "2.circle")
-                    Label("Send the pairing file here: tap **Scan Pairing Code** below (or scan Poki Setup's code with the Camera), AirDrop the file to this iPhone and open it with Poki, or tap **Import Pairing File** below.", systemImage: "3.circle")
+                    Label("Open **kaka Setup** on your Mac or PC, connect this iPhone by cable, and tap **Pair**. Tap **Trust** on the iPhone when asked.", systemImage: "2.circle")
+                    Label("Send the pairing file here: tap **Scan Pairing Code** below (or scan kaka Setup's code with the Camera), AirDrop the file to this iPhone and open it with kaka, or tap **Import Pairing File** below.", systemImage: "3.circle")
                 } header: {
                     Text("How To")
                 } footer: {
-                    Text("No Poki Setup yet? Any lockdown pairing file works: pymobiledevice3, jitterbugpair or StikPair make one.")
+                    Text("No kaka Setup yet? Any lockdown pairing file works: pymobiledevice3, jitterbugpair or StikPair make one.")
                 }
             }
         }
@@ -664,10 +664,10 @@ private struct BackgroundPage: View {
                 Button("Open Settings", systemImage: "gear") { openSettings(model, for: .background) }
             }
         } footer: {
-            Text(model.background.always ? "Poki stays active in the background without the location indicator, and never records your location."
-                 : model.background.allowed ? "Poki keeps itself running with silent audio. Always Allow makes that sturdier, and iOS shows no location indicator for it. Poki never records your location."
-                 : model.background.denied ? "Location Services is off for Poki. It keeps itself running with silent audio, which iOS may stop during calls or other audio."
-                 : "iOS needs a background mode to keep apps running. Poki uses lowest-accuracy location with Always Allow, which shows no location indicator, and never records your location.")
+            Text(model.background.always ? "kaka stays active in the background without the location indicator, and never records your location."
+                 : model.background.allowed ? "kaka keeps itself running with silent audio. Always Allow makes that sturdier, and iOS shows no location indicator for it. kaka never records your location."
+                 : model.background.denied ? "Location Services is off for kaka. It keeps itself running with silent audio, which iOS may stop during calls or other audio."
+                 : "iOS needs a background mode to keep apps running. kaka uses lowest-accuracy location with Always Allow, which shows no location indicator, and never records your location.")
         }
         Section {
             LabeledContent {
@@ -680,10 +680,10 @@ private struct BackgroundPage: View {
                 Button("Open Settings", systemImage: "gear") { openSettings(model, for: .background) }
             }
         } footer: {
-            Text(model.activitiesEnabled ? "Poki shows steps, pairing codes and approvals on the Lock Screen." : "Turn them on to see the agent’s steps and approve sensitive actions.")
+            Text(model.activitiesEnabled ? "kaka shows steps, pairing codes and approvals on the Lock Screen." : "Turn them on to see the agent’s steps and approve sensitive actions.")
         }
         Section { EmptyView() } footer: {
-            Text(SetupStep.inProcess ? "The first time Poki turns on after a restart, iOS asks for your passcode to allow automation. Enter it once; Poki never sees it." : "The first time Poki Runner starts after a restart, iOS asks for your passcode to allow automation. Enter it once; Poki never sees it.")
+            Text(SetupStep.inProcess ? "The first time kaka turns on after a restart, iOS asks for your passcode to allow automation. Enter it once; kaka never sees it." : "The first time kaka Runner starts after a restart, iOS asks for your passcode to allow automation. Enter it once; kaka never sees it.")
         }
     }
 }
@@ -703,7 +703,7 @@ struct SetupChecklist: View {
                     NavigationLink(value: step) { SetupStepRow(step: step) }
                 }
             } footer: {
-                Text(model.setupComplete ? "Everything Poki needs is in place." : "Poki needs every item ticked before an agent or the chat can use this iPhone. Items tick themselves when the phone can check them.")
+                Text(model.setupComplete ? "Everything kaka needs is in place." : "kaka needs every item ticked before an agent or the chat can use this iPhone. Items tick themselves when the phone can check them.")
             }
             Section {
                 Button { guiding = true } label: { Label("Setup Guide", systemImage: "list.number") }
@@ -785,7 +785,7 @@ struct SetupStepPage: View {
                 Button("Open Settings", systemImage: "gear") { openSettings(model, for: step) }
                 Toggle(confirmTitle, isOn: confirmBinding)
             } footer: {
-                Text("iOS doesn’t let Poki check this one, so turn the switch on once it’s done.")
+                Text("iOS doesn’t let kaka check this one, so turn the switch on once it’s done.")
             }
         }
         .navigationTitle(step.pageTitle)
@@ -796,12 +796,12 @@ struct SetupStepPage: View {
     private var lines: [String] {
         switch step {
         case .runner: [
-            "Install **Poki Runner** (poki-runner-unsigned.ipa) with the same tool and Apple ID you used for Poki.",
+            "Install **kaka Runner** (poki-runner-unsigned.ipa) with the same tool and Apple ID you used for kaka.",
             "Open **Settings › General › VPN & Device Management**, tap your Apple ID, then tap **Trust**.",
-            "Don’t open Poki Runner yourself. Poki starts it when an agent needs this iPhone.",
+            "Don’t open kaka Runner yourself. kaka starts it when an agent needs this iPhone.",
         ]
         case .developerMode: [
-            SetupStep.inProcess ? "Open **Settings › Privacy & Security › Developer Mode**." : "Open **Settings › Privacy & Security › Developer Mode**. It appears once Poki Runner is installed.",
+            SetupStep.inProcess ? "Open **Settings › Privacy & Security › Developer Mode**." : "Open **Settings › Privacy & Security › Developer Mode**. It appears once kaka Runner is installed.",
             "Turn on Developer Mode, then tap **Restart**.",
             "After restarting, unlock this iPhone and tap **Turn On**.",
         ]
@@ -814,7 +814,7 @@ struct SetupStepPage: View {
 
     private var confirmTitle: LocalizedStringKey {
         switch step {
-        case .runner: "Poki Runner Is Installed and Trusted"
+        case .runner: "kaka Runner Is Installed and Trusted"
         case .developerMode: "Developer Mode Is On"
         default: "UI Automation Is On"
         }
@@ -861,14 +861,14 @@ struct SetupStepPage: View {
         switch step {
         case .runner:
             InstructionsCard(lines: [
-                "Install **Poki Runner** (poki-runner-unsigned.ipa) with the same tool and Apple ID you used for Poki.",
+                "Install **kaka Runner** (poki-runner-unsigned.ipa) with the same tool and Apple ID you used for kaka.",
                 "Open **Settings › General › VPN & Device Management**, tap your Apple ID, then tap **Trust**.",
-                "Don’t open Poki Runner yourself. Poki starts it when an agent needs this iPhone.",
+                "Don’t open kaka Runner yourself. kaka starts it when an agent needs this iPhone.",
             ])
-            ConfirmCard(step: .runner, title: "Poki Runner is installed and trusted", isOn: binding(\.runnerInstalled))
+            ConfirmCard(step: .runner, title: "kaka Runner is installed and trusted", isOn: binding(\.runnerInstalled))
         case .developerMode:
             InstructionsCard(lines: [
-                SetupStep.inProcess ? "Open **Settings › Privacy & Security › Developer Mode**." : "Open **Settings › Privacy & Security › Developer Mode**. It appears once Poki Runner is installed.",
+                SetupStep.inProcess ? "Open **Settings › Privacy & Security › Developer Mode**." : "Open **Settings › Privacy & Security › Developer Mode**. It appears once kaka Runner is installed.",
                 "Turn on Developer Mode, then tap **Restart**.",
                 "After restarting, unlock this iPhone and tap **Turn On**.",
             ])

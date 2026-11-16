@@ -51,7 +51,7 @@ enum RemotePairingPort {
         func said(besides current: UInt16) -> String {
             if let found { return "the remote pairing service answers on port \(found) (Bonjour lists \(listed.map(String.init).joined(separator: ", ")))" }
             if let problem { return "port \(current) does not answer, and Bonjour could not be searched (\(problem))" }
-            if listed.isEmpty { return "port \(current) does not answer, and Bonjour lists no remote pairing service (is Wi-Fi on, and Local Network allowed for Poki?)" }
+            if listed.isEmpty { return "port \(current) does not answer, and Bonjour lists no remote pairing service (is Wi-Fi on, and Local Network allowed for kaka?)" }
             return "port \(current) does not answer, and no port Bonjour lists (\(listed.map(String.init).joined(separator: ", "))) answers at 10.7.0.1"
         }
     }

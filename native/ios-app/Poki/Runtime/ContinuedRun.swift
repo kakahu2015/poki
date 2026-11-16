@@ -47,7 +47,7 @@ final class ContinuedRun {
         register()
         guard registered.contains(wildcard) else { return false }
         let id = String(wildcard.dropLast()) + UUID().uuidString.prefix(8).lowercased()
-        let request = BGContinuedProcessingTaskRequest(identifier: id, title: AppLocalization.text(LocalizedStringResource("Poki is on")), subtitle: subtitle)
+        let request = BGContinuedProcessingTaskRequest(identifier: id, title: AppLocalization.text(LocalizedStringResource("kaka is on")), subtitle: subtitle)
         request.strategy = .fail
         identifier = id
         isRunning = true
@@ -86,11 +86,11 @@ final class ContinuedRun {
                 try? await Task.sleep(for: .seconds(5))
             }
         }
-        AppLog.shared.add("background", "continued run started: Poki keeps running without silent audio")
+        AppLog.shared.add("background", "continued run started: kaka keeps running without silent audio")
     }
 
     func update(subtitle: String) {
-        task?.updateTitle(AppLocalization.text(LocalizedStringResource("Poki is on")), subtitle: subtitle)
+        task?.updateTitle(AppLocalization.text(LocalizedStringResource("kaka is on")), subtitle: subtitle)
     }
 
     func end() { finish(success: true) }

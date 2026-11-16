@@ -69,10 +69,10 @@ index 5ffafa86..770ade81 100644
 +  UIImageView *bear = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"LaunchBear"]];
 +  bear.contentMode = UIViewContentModeScaleAspectFit;
 +  UILabel *title = [UILabel new];
-+  title.text = @"Poki is using this iPhone";
++  title.text = @"kaka is using this iPhone";
 +  title.font = [UIFont systemFontOfSize:28 weight:UIFontWeightBold];
 +  UILabel *body = [UILabel new];
-+  body.text = @"Leave Poki Runner open in the background while the agent works. Closing it stops the agent.\n\nTo stop, tap Stop runner in Poki or on the Live Activity. Poki also stops it by itself when the agent is idle.";
++  body.text = @"Leave kaka Runner open in the background while the agent works. Closing it stops the agent.\n\nTo stop, tap Stop runner in kaka or on the Live Activity. kaka also stops it by itself when the agent is idle.";
 +  body.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
 +  for (UILabel *label in @[title, body]) {
 +    label.textColor = UIColor.whiteColor;
@@ -84,7 +84,7 @@ index 5ffafa86..770ade81 100644
 +  style.baseForegroundColor = [UIColor colorWithRed:0x20/255.0 green:0x84/255.0 blue:0xFD/255.0 alpha:1];
 +  style.cornerStyle = UIButtonConfigurationCornerStyleCapsule;
 +  style.buttonSize = UIButtonConfigurationSizeLarge;
-+  UIButton *open = [UIButton buttonWithConfiguration:style primaryAction:[UIAction actionWithTitle:@"Open Poki" image:nil identifier:nil handler:^(__kindof UIAction *action) {
++  UIButton *open = [UIButton buttonWithConfiguration:style primaryAction:[UIAction actionWithTitle:@"Open kaka" image:nil identifier:nil handler:^(__kindof UIAction *action) {
 +    [UIApplication.sharedApplication openURL:[NSURL URLWithString:@"poki://"] options:@{} completionHandler:nil];
 +  }]];
 +  UIStackView *stack = [[UIStackView alloc] initWithArrangedSubviews:@[bear, title, body, open]];

@@ -54,6 +54,6 @@ struct ExpiryWarning {
 
     var message: String {
         let when = expiry.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(AppLocalization.locale))
-        return AppLocalization.text(LocalizedStringResource("Poki stops opening after \(when). Connect this iPhone to your Mac and ask your agent to renew it."))
+        return AppLocalization.text(LocalizedStringResource("kaka stops opening after \(when). Connect this iPhone to your Mac and ask your agent to renew it."))
     }
 }

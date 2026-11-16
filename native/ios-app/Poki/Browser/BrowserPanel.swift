@@ -28,7 +28,7 @@ struct BrowserCard: View {
             HStack(spacing: 10) {
                 BrowserIcon()
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(visit.host.isEmpty ? AppLocalization.text(LocalizedStringResource("Poki’s Browser")) : visit.host)
+                    Text(visit.host.isEmpty ? AppLocalization.text(LocalizedStringResource("kaka’s Browser")) : visit.host)
                         .font(.subheadline.weight(.semibold))
                         .lineLimit(1)
                     Text(visit.title.isEmpty ? AppLocalization.text(LocalizedStringResource("Done")) : visit.title)
@@ -75,7 +75,7 @@ struct BrowserPanel: View {
         HStack(spacing: 10) {
             BrowserIcon()
             VStack(alignment: .leading, spacing: 1) {
-                Text(browser.host.isEmpty ? AppLocalization.text(LocalizedStringResource("Poki’s Browser")) : browser.host)
+                Text(browser.host.isEmpty ? AppLocalization.text(LocalizedStringResource("kaka’s Browser")) : browser.host)
                     .font(.subheadline.weight(.semibold))
                     .lineLimit(1)
                 Text(status)
@@ -112,7 +112,7 @@ struct BrowserPanel: View {
             VStack(spacing: 6) {
                 Image(systemName: "hand.raised.fill").font(.title2).foregroundStyle(.secondary)
                 Text("You have the page").font(.subheadline.weight(.medium))
-                Text("Poki waits until you hand it back.").font(.caption).foregroundStyle(.secondary)
+                Text("kaka waits until you hand it back.").font(.caption).foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.tertiarySystemBackground))
@@ -120,14 +120,14 @@ struct BrowserPanel: View {
             // The owner watches; taps go to Take Over, so a stray tap cannot change the page under Poki.
             BrowserWebView(interactive: false)
                 .overlay { Color.clear.contentShape(Rectangle()).onTapGesture { browser.takeOver() } }
-                .accessibilityLabel(Text("The page Poki is using. Double-tap to take over."))
+                .accessibilityLabel(Text("The page kaka is using. Double-tap to take over."))
         }
     }
 
     private var status: String {
         if case .person(let reason?) = browser.owner, !reason.isEmpty { return AppLocalization.text(LocalizedStringResource("Waiting for you: \(reason)")) }
         if browser.ownerHasIt { return AppLocalization.text(LocalizedStringResource("You have the page")) }
-        if chat.running { return browser.steps.last?.text ?? AppLocalization.text(LocalizedStringResource("Poki is browsing")) }
+        if chat.running { return browser.steps.last?.text ?? AppLocalization.text(LocalizedStringResource("kaka is browsing")) }
         return browser.title.isEmpty ? AppLocalization.text(LocalizedStringResource("Done")) : browser.title
     }
 
@@ -186,14 +186,14 @@ struct BrowserTakeOverSheet: View {
             BrowserWebView(interactive: true)
                 .safeAreaInset(edge: .top, spacing: 0) {
                     if case .person(let reason?) = browser.owner, !reason.isEmpty {
-                        Label { Text("Poki asks: \(reason)") } icon: { Image(systemName: "hand.raised.fill") }
+                        Label { Text("kaka asks: \(reason)") } icon: { Image(systemName: "hand.raised.fill") }
                             .font(.footnote.weight(.medium))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 16).padding(.vertical, 10)
                             .background(.bar)
                     }
                 }
-                .navigationTitle(browser.host.isEmpty ? AppLocalization.text(LocalizedStringResource("Poki’s Browser")) : browser.host)
+                .navigationTitle(browser.host.isEmpty ? AppLocalization.text(LocalizedStringResource("kaka’s Browser")) : browser.host)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) {

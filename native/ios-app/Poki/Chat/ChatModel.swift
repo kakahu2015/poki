@@ -178,7 +178,7 @@ final class ChatModel {
 
     private var greeting: [ChatEntry] {
         [ChatEntry(.time(Date())),
-         ChatEntry(.poki(AppLocalization.text(LocalizedStringResource("Hi, I’m Poki. Tell me what to do on this iPhone.")))),
+         ChatEntry(.poki(AppLocalization.text(LocalizedStringResource("Hi, I’m kaka. Tell me what to do on this iPhone.")))),
          ChatEntry(.poki(app.asksBeforeSensitiveSteps ? AppLocalization.text(LocalizedStringResource("I’ll ask before anything you can’t undo."))
                          : AppLocalization.text(LocalizedStringResource("Payments, deletions, and Wallet actions always require your confirmation; other sensitive steps go ahead without asking."))))]
     }
@@ -302,7 +302,7 @@ final class ChatModel {
         // Another conversation (an outside agent's hand-off) is working the phone: one task at a time.
         if kind == .poki, let busy = ChatModel.delegatedBusy {
             entries.append(ChatEntry(.you(text, delivered: false)))
-            add(.note(.problem(AppLocalization.text(LocalizedStringResource("Poki is working on a task for \(busy). Try again when it’s done.")))))
+            add(.note(.problem(AppLocalization.text(LocalizedStringResource("kaka is working on a task for \(busy). Try again when it’s done.")))))
             return
         }
         // A pause of half an hour or more gets its own time line, as in Messages.
@@ -440,10 +440,10 @@ final class ChatModel {
             lines.append("result: \(taskResult.success ? "done" : "not done"): \(taskResult.summary)")
             if let answer = taskResult.answerLine { lines.append(answer) }
         }
-        if let last = replies.last { lines.append("Poki said: \(last)") }
+        if let last = replies.last { lines.append("kaka said: \(last)") }
         if case .failed(let why)? = lastOutcome { lines.append("error: \(why)") }
         if lastOutcome == nil, let tail = entries.last, case .note(.problem(let why)) = tail.kind { lines.append("error: \(why)") }
-        if lines.isEmpty { lines.append("Poki ended without an answer.") }
+        if lines.isEmpty { lines.append("kaka ended without an answer.") }
         return (lines.joined(separator: "\n"), taskResult?.success)
     }
 

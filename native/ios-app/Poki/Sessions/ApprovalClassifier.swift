@@ -106,7 +106,7 @@ enum ApprovalClassifier {
             default: break
             }
         }
-        let conversation = said.isEmpty ? "(the owner has said nothing in Poki; the request came from an outside agent)" : said.suffix(20).joined(separator: "\n")
+        let conversation = said.isEmpty ? "(the owner has said nothing in kaka; the request came from an outside agent)" : said.suffix(20).joined(separator: "\n")
         let instructions = """
         You decide, fast, whether an AI agent driving the owner's iPhone may do one sensitive step. \
         \(level.rule) A yes from the owner to a question about this step counts as asking for it. \

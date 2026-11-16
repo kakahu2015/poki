@@ -109,7 +109,7 @@ func runChecks() async -> [ProbeResult] {
     let inUse = await RemotePairingPort.current
     results.append(ProbeResult(label: "Remote pairing ports in Bonjour", target: "_remotepairing._tcp",
                                outcome: listed.ports.isEmpty ? "none" : listed.ports.map(String.init).joined(separator: ", "),
-                               detail: (listed.problem.map { "\($0). " } ?? "") + "Poki uses port \(inUse). Other iPhones on this network are listed too."))
+                               detail: (listed.problem.map { "\($0). " } ?? "") + "kaka uses port \(inUse). Other iPhones on this network are listed too."))
     for port in listed.ports where port != 49152 {
         results.append(await probe(label: "Reflected RemotePairing, Bonjour port (10.7.0.1)", host: "10.7.0.1", port: port))
     }

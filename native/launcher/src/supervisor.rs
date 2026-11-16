@@ -255,7 +255,7 @@ impl Launcher {
                 if ddi::mounted(&device) { break; }
                 tries += 1;
                 if tries > 3 {
-                    return Err(Failure::new("the developer disk image was installed but its services did not appear").fix("Restart the phone, then open Poki again."));
+                    return Err(Failure::new("the developer disk image was installed but its services did not appear").fix("Restart the phone, then open kaka again."));
                 }
                 drop(device);
                 tokio::time::sleep(Duration::from_secs(1)).await;

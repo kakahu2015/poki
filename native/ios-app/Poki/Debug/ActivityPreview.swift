@@ -184,7 +184,7 @@ struct ActivityPreview: View {
         idle.runnerPaused = true
         ready.runnerPaused = false
 
-        let title = AppModel.problemText(code: "loopback", fix: "Turn on the loopback in your proxy app: the Poki module in Surge or Loon.")
+        let title = AppModel.problemText(code: "loopback", fix: "Turn on the loopback in your proxy app: the kaka module in Surge or Loon.")
         var problem = PokiState(phase: .problem, headline: title, thumbnailVersion: 0)
         problem.label = "Runner Stopped"
         problem.stepCount = 6
@@ -193,7 +193,7 @@ struct ActivityPreview: View {
         var pairCode = PokiState(phase: .pairing, headline: "Pairing code", thumbnailVersion: 0)
         pairCode.pin = "482913"
 
-        var setup = PokiState(phase: .setup, headline: "Setting up Poki", thumbnailVersion: 0)
+        var setup = PokiState(phase: .setup, headline: "Setting up kaka", thumbnailVersion: 0)
         setup.guide = .init(number: 2, count: 6, title: SetupStep.developerMode.activityTitle)
 
         // The runner on its way up: one main line, the stage under it.
@@ -408,7 +408,7 @@ enum DemoActivity {
     static func alert() async {
         guard let (activity, state) = current else { return }
         await activity.update(.init(state: state, staleDate: nil, relevanceScore: 100),
-                              alertConfiguration: AlertConfiguration(title: "Poki", body: "\(state.headline)", sound: .default))
+                              alertConfiguration: AlertConfiguration(title: "kaka", body: "\(state.headline)", sound: .default))
         AppLog.shared.add("activity", "demo alert sent")
     }
 }

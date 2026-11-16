@@ -31,8 +31,8 @@ final class PokiEntry {
 
 /// Opens Poki's chat and starts voice there. A task Poki is already doing is shown, not interrupted.
 struct TalkToPokiIntent: AppIntent {
-    static let title = LocalizedStringResource("Talk to Poki", table: "Entry")
-    static let description = IntentDescription(LocalizedStringResource("Opens Poki and starts talking. If Poki is doing a task, it shows that task and leaves it running.", table: "Entry"))
+    static let title = LocalizedStringResource("Talk to kaka", table: "Entry")
+    static let description = IntentDescription(LocalizedStringResource("Opens kaka and starts talking. If kaka is doing a task, it shows that task and leaves it running.", table: "Entry"))
     static let openAppWhenRun = true
     @available(iOS 26.0, *)
     static var supportedModes: IntentModes { .foreground(.immediate) }

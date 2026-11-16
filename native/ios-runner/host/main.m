@@ -76,19 +76,19 @@ static UIView *PokiTip(NSString *symbol, NSString *text) {
   bear.layer.shadowOffset = CGSizeMake(0, 10);
 
   NSMutableArray<UIView *> *views = [NSMutableArray arrayWithObject:bear];
-  UILabel *title = PokiLabel(self.inUse ? @"Poki is using\nthis iPhone" : @"Poki Runner", PokiRounded(30, UIFontWeightBold), 1, NSTextAlignmentCenter);
+  UILabel *title = PokiLabel(self.inUse ? @"kaka is using\nthis iPhone" : @"kaka Runner", PokiRounded(30, UIFontWeightBold), 1, NSTextAlignmentCenter);
   [views addObject:title];
-  UILabel *body = PokiLabel(self.inUse ? @"An agent is working on this iPhone through Poki. Poki Runner can stay in the background."
-                                       : @"Poki starts this helper when an agent needs your iPhone. There's nothing to do here.",
+  UILabel *body = PokiLabel(self.inUse ? @"An agent is working on this iPhone through kaka. kaka Runner can stay in the background."
+                                       : @"kaka starts this helper when an agent needs your iPhone. There's nothing to do here.",
                             [UIFont preferredFontForTextStyle:UIFontTextStyleBody], 0.88, NSTextAlignmentCenter);
   [views addObject:body];
 
   UIView *card = nil;
   if (self.inUse) {
     UIStackView *tips = [[UIStackView alloc] initWithArrangedSubviews:@[
-      PokiTip(@"rectangle.stack.badge.minus", @"Don't close Poki Runner while the agent works. Closing it stops the agent."),
-      PokiTip(@"stop.circle", @"To stop, tap Stop in Poki or on the Live Activity."),
-      PokiTip(@"moon.zzz", @"When the agent goes quiet, Poki puts the runner to sleep by itself."),
+      PokiTip(@"rectangle.stack.badge.minus", @"Don't close kaka Runner while the agent works. Closing it stops the agent."),
+      PokiTip(@"stop.circle", @"To stop, tap Stop in kaka or on the Live Activity."),
+      PokiTip(@"moon.zzz", @"When the agent goes quiet, kaka puts the runner to sleep by itself."),
     ]];
     tips.axis = UILayoutConstraintAxisVertical;
     tips.spacing = 14;
@@ -118,7 +118,7 @@ static UIView *PokiTip(NSString *symbol, NSString *text) {
     out[NSFontAttributeName] = PokiRounded(17, UIFontWeightSemibold);
     return out;
   };
-  UIButton *open = [UIButton buttonWithConfiguration:style primaryAction:[UIAction actionWithTitle:@"Open Poki" image:nil identifier:nil handler:^(__kindof UIAction *action) {
+  UIButton *open = [UIButton buttonWithConfiguration:style primaryAction:[UIAction actionWithTitle:@"Open kaka" image:nil identifier:nil handler:^(__kindof UIAction *action) {
     PokiOpenPokiNow();
   }]];
   [views addObject:open];

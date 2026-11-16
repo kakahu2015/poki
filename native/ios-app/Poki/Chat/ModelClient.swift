@@ -45,7 +45,7 @@ func postJSON(_ url: URL, headers: [String: String], body: [String: Any], key: S
     do {
         (data, response) = try await URLSession.shared.data(for: request)
     } catch {
-        throw ModelFailure(errorDescription: AppLocalization.text(LocalizedStringResource("Poki could not reach \(provider). \(error.localizedDescription)")))
+        throw ModelFailure(errorDescription: AppLocalization.text(LocalizedStringResource("kaka could not reach \(provider). \(error.localizedDescription)")))
     }
     let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
     return ((response as? HTTPURLResponse)?.statusCode ?? 0, json, data)

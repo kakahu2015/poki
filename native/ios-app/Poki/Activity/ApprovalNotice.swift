@@ -78,7 +78,7 @@ enum ConnectionNotice {
     @MainActor static func post(_ ask: AppModel.ConnectionAsk) {
         let content = UNMutableNotificationContent()
         content.title = AppLocalization.text(LocalizedStringResource("Allow \(ask.client) to connect?"))
-        content.body = AppLocalization.text(LocalizedStringResource("A client Poki doesn’t know (\(ask.callback)) is signing in with \(ask.connector). Open Poki to allow or deny it."))
+        content.body = AppLocalization.text(LocalizedStringResource("A client kaka doesn’t know (\(ask.callback)) is signing in with \(ask.connector). Open kaka to allow or deny it."))
         content.sound = .default
         content.interruptionLevel = .timeSensitive
         content.threadIdentifier = "connections"
@@ -97,7 +97,7 @@ enum PairingNotice {
         let content = UNMutableNotificationContent()
         let shown = pin.count == 6 ? "\(pin.prefix(3)) \(pin.suffix(3))" : pin
         content.title = AppLocalization.text(LocalizedStringResource("Pairing code \(shown)"))
-        content.body = AppLocalization.text(LocalizedStringResource("Type it on the Pair with Poki screen in Settings."))
+        content.body = AppLocalization.text(LocalizedStringResource("Type it on the Pair with kaka screen in Settings."))
         content.sound = .default
         content.interruptionLevel = .timeSensitive
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [id])

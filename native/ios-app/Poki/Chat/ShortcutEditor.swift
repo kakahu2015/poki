@@ -83,7 +83,7 @@ struct ShortcutEditor: View {
             Text("Edit Shortcut").font(.headline).foregroundStyle(Color(.label))
                 .accessibilityAddTraits(.isHeader)
             VStack(spacing: 0) {
-                TextField("What Poki should do", text: $sentence, axis: .vertical)
+                TextField("What kaka should do", text: $sentence, axis: .vertical)
                     .lineLimit(1...3)
                     .submitLabel(.done)
                     .focused($writing)

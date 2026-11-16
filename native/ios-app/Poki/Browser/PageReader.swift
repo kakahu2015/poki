@@ -204,11 +204,11 @@ enum PageReader {
   }
 
   // Two kinds of box float over a page. A notice only informs and covers the page: a cookie or privacy
-  // banner, or a site's "by continuing to use this site you agree to our terms". Poki dismisses it,
+  // banner, or a site's "by continuing to use this site you agree to our terms". kaka dismisses it,
   // with its reject or necessary-only choice when it has one. A prompt that would give the owner an
   // obligation or an identity is the owner's: a sign-in or sign-up, a subscription, payment or free
   // trial, an age or birthday, a human check, a tick for "I agree to the terms", any email or password
-  // field. Such a prompt is never taken for a notice, and its go-ahead buttons are not Poki's to tap.
+  // field. Such a prompt is never taken for a notice, and its go-ahead buttons are not kaka's to tap.
   const ACCEPT = /\b(accept|agree|allow|ok|okay|got it|continue|understood|i understand|close)\b|同意|接受|允许|知道了|好的|关闭/i;
   const REJECT = /\b(reject|decline|deny|refuse|disagree|necessary only|only necessary|essential only|only essential|strictly necessary|necessary cookies|continue without accepting)\b|拒绝|仅必要|仅限必要|只接受必要|不同意/i;
   const GO = /\b(accept|agree|allow|ok|okay|got it|continue|understood|i understand|yes|next|submit|enter|confirm|proceed|start)\b|同意|接受|允许|知道了|好的|继续|确定|下一步|进入|确认|开始/i;
@@ -322,7 +322,7 @@ enum PageReader {
       ms: Math.round(performance.now() - started) };
   }
 
-  // A short ring where Poki taps, so the person watching sees it.
+  // A short ring where kaka taps, so the person watching sees it.
   function flash(el) {
     const r = el.getBoundingClientRect();
     if (el.ownerDocument !== document) return;
@@ -335,7 +335,7 @@ enum PageReader {
     setTimeout(() => ring.remove(), 1000);
   }
 
-  // While Poki works the page, a field it (or the page) focuses gets inputmode="none", so the phone's
+  // While kaka works the page, a field it (or the page) focuses gets inputmode="none", so the phone's
   // keyboard does not come up over the chat. The owner taking over (drive(false)) puts the fields back.
   let driving = true;
   const quieted = new Map();

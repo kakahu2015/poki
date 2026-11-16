@@ -26,7 +26,7 @@ pub async fn run(config: PairConfig, emit: impl Fn(Value) + Send + Sync + 'stati
     let detail = match tokio::time::timeout(PAIRING_LIMIT, pair(&config, &emit)).await {
         Ok(Ok(())) => return,
         Ok(Err(detail)) => detail,
-        Err(_) => "Pairing was not finished in Settings within 10 minutes, so Poki stopped waiting. Tap Try again to pair.".into(),
+        Err(_) => "Pairing was not finished in Settings within 10 minutes, so kaka stopped waiting. Tap Try again to pair.".into(),
     };
     emit(json!({"event": "failed", "detail": detail}));
 }

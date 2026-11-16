@@ -131,7 +131,7 @@ final class InProcessProbe: ObservableObject {
         defer { UIApplication.shared.endBackgroundTask(background) }
         note("waiting \(Int(seconds)) s; bring the app to try to the front", ["step": "wait", "seconds": seconds])
         try? await Task.sleep(for: .seconds(seconds))
-        note("app state: \(UIApplication.shared.applicationState == .active ? "Poki in front" : "Poki in the background")", ["step": "state", "active": UIApplication.shared.applicationState == .active])
+        note("app state: \(UIApplication.shared.applicationState == .active ? "kaka in front" : "kaka in the background")", ["step": "state", "active": UIApplication.shared.applicationState == .active])
         var point = CGPoint(x: Double(x) ?? 201, y: Double(y) ?? 437)
         if x == "field" {
             guard let found = await frontField() else { note("no text or search field in the front app's tree", ["step": "field_missing"]); return }
@@ -356,7 +356,7 @@ final class InProcessProbe: ObservableObject {
         let named = broken.text.contains("could not read the screen") || broken.text.contains("session_unreadable")
         check("unreadable session reported", broken.failed && named, "the read \(broken.failed ? "failed" : "did not fail") in \(String(format: "%.2f", broken.seconds)) s: \(broken.text.prefix(240))",
               ["seconds": broken.seconds, "text": String(broken.text.prefix(600))])
-        check("unreadable session not open", !model.hasOpenInProcessSession, "Poki \(model.hasOpenInProcessSession ? "took" : "did not take") the session as open")
+        check("unreadable session not open", !model.hasOpenInProcessSession, "kaka \(model.hasOpenInProcessSession ? "took" : "did not take") the session as open")
         try? await Task.sleep(for: .seconds(4))
         check("no late ready", !model.hasOpenInProcessSession, "4 s later the session is \(model.hasOpenInProcessSession ? "open" : "still not open")")
         let brokenGeneration = await generation()
@@ -411,21 +411,21 @@ final class InProcessProbe: ObservableObject {
         check("reopen", (opened["ok"] as? Bool) == true, "generation \(opened["generation"] ?? "?"), device \(opened["device"] as? String ?? "?")", opened)
         guard (opened["ok"] as? Bool) == true else { return }
         let first = await front()
-        check("front app", first == own, "read \(first.isEmpty ? "none" : first), Poki is in front", ["front": first])
+        check("front app", first == own, "read \(first.isEmpty ? "none" : first), kaka is in front", ["front": first])
         if let field {
             field.text = ""
             field.resignFirstResponder()
             try? await Task.sleep(for: .seconds(0.4))
             let frame = field.convert(field.bounds, to: nil)
             let point = CGPoint(x: frame.midX, y: frame.midY)
-            let tap = await touch([[PKTouchPoint.at(point, offset: 0), PKTouchPoint.at(point, offset: 0.05)]], "tap Poki's field at [\(Int(point.x)), \(Int(point.y))]")
+            let tap = await touch([[PKTouchPoint.at(point, offset: 0), PKTouchPoint.at(point, offset: 0.05)]], "tap kaka's field at [\(Int(point.x)), \(Int(point.y))]")
             try? await Task.sleep(for: .seconds(0.6))
-            check("tap in Poki", field.isFirstResponder, String(format: "field focused %@, answered in %.3f s", field.isFirstResponder ? "yes" : "no", tap.seconds), ["seconds": tap.seconds])
+            check("tap in kaka", field.isFirstResponder, String(format: "field focused %@, answered in %.3f s", field.isFirstResponder ? "yes" : "no", tap.seconds), ["seconds": tap.seconds])
             if field.isFirstResponder {
                 let typed = await type(Self.sample)
                 try? await Task.sleep(for: .seconds(0.6))
                 let same = field.text == Self.sample
-                check("type in Poki", same, String(format: "read back %@, answered in %.3f s", same ? "same as sent" : "differs", typed.seconds), ["seconds": typed.seconds])
+                check("type in kaka", same, String(format: "read back %@, answered in %.3f s", same ? "same as sent" : "differs", typed.seconds), ["seconds": typed.seconds])
                 field.text = ""
                 field.resignFirstResponder()
             }
@@ -456,7 +456,7 @@ final class InProcessProbe: ObservableObject {
         let back = await app("activate", own)
         try? await Task.sleep(for: .seconds(1))
         let last = await front()
-        check("back to Poki", back.code == nil && last == own,
+        check("back to kaka", back.code == nil && last == own,
               String(format: "%@ in %.3f s, front %@", back.code ?? "done", back.seconds, last.isEmpty ? "none" : last),
               ["seconds": back.seconds, "code": back.code ?? "", "front": last])
         note("delivery: \(passed) of \(checks) checks passed", ["step": "delivery_result", "passed": passed, "checks": checks])
@@ -517,7 +517,7 @@ final class InProcessProbe: ObservableObject {
     /// Mac), the owner sends a task, pi runs it with look and do on the phone, the session is saved; then an
     /// outside agent's `ask_poki` runs a second task as a hand-off. Into Documents/inprocess-probe.json.
     func chatCycle(model: AppModel) async {
-        guard begin("chat with Poki's agent") else { return }
+        guard begin("chat with kaka's agent") else { return }
         defer { end() }
         guard await prepare() else { return }
         model.inProcessReadyForProbe()
@@ -533,7 +533,7 @@ final class InProcessProbe: ObservableObject {
         AskPoki.refresh()
         guard let chat = AskPoki.chat else { note("no chat", ["step": "chat_missing"]); return }
         chat.newConversation()
-        let task = defaults.string(forKey: "pokiProbeTask") ?? "Open the Poki fixture app and tell me what it shows."
+        let task = defaults.string(forKey: "pokiProbeTask") ?? "Open the kaka fixture app and tell me what it shows."
         let t0 = ProcessInfo.processInfo.systemUptime
         chat.send(task)
         for _ in 0..<1200 where chat.running { try? await Task.sleep(for: .milliseconds(250)) }
@@ -549,7 +549,7 @@ final class InProcessProbe: ObservableObject {
         note("chat session saved: \(saved != nil)", ["step": "chat_saved", "saved": saved != nil, "entries": saved?.entries.count ?? 0, "calls": saved?.calls.count ?? 0])
         // An outside agent hands a task over.
         let t1 = ProcessInfo.processInfo.systemUptime
-        let handoff = await model.phoneToolWithPicture("ask_poki", arguments: "{\"task\":\"Open the Poki fixture app and tell me what it shows.\"}")
+        let handoff = await model.phoneToolWithPicture("ask_poki", arguments: "{\"task\":\"Open the kaka fixture app and tell me what it shows.\"}")
         note("ask_poki: \(handoff.isError ? "failed" : "ok") in \(String(format: "%.1f", ProcessInfo.processInfo.systemUptime - t1)) s",
              ["step": "ask_poki", "error": handoff.isError, "text": String(handoff.text.prefix(4000))])
         let handoffs = SessionStore.shared.sessions.filter { $0.kind == .handoff }
@@ -637,11 +637,11 @@ struct InProcessSection: View {
     var body: some View {
         Section {
             Picker("Agents' actions go through", selection: $path) {
-                Text("Poki Runner").tag(AutomationPath.runner.rawValue)
-                Text("Poki itself").tag(AutomationPath.inProcess.rawValue)
+                Text("kaka Runner").tag(AutomationPath.runner.rawValue)
+                Text("kaka itself").tag(AutomationPath.inProcess.rawValue)
             }
             if path != running.rawValue {
-                Text("Takes effect when Poki starts again.").font(.caption).foregroundStyle(.orange)
+                Text("Takes effect when kaka starts again.").font(.caption).foregroundStyle(.orange)
             }
             ProbeField(probe: probe).frame(height: 44)
             HStack {
@@ -671,7 +671,7 @@ struct InProcessSection: View {
         } header: {
             Text("In-process automation")
         } footer: {
-            Text("Taps and types from Poki itself, without Poki Runner. Self test taps the field above and types into it. Later waits, then taps the point (x, y) and types, in whatever app is in front.")
+            Text("Taps and types from kaka itself, without kaka Runner. Self test taps the field above and types into it. Later waits, then taps the point (x, y) and types, in whatever app is in front.")
         }
     }
 }

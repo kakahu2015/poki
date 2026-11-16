@@ -8,22 +8,37 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Poki"
+            "value" : "kaka"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki"
+            "value" : "kaka"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "kaka"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
             "value" : "Poki"
           }
         }
       }
+    },
+    "iPhone pairing file" : {
+
     },
     "NSCameraUsageDescription" : {
       "comment" : "Info.plist",
@@ -32,19 +47,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki uses the camera to take photos you send in a message, and to scan the pairing code from Poki Setup on your computer."
+            "value" : "kaka uses the camera to take photos you send in a message, and to scan the pairing code from kaka Setup on your computer."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 使用相机拍摄你在消息里发送的照片，以及扫描电脑上 Poki Setup 显示的配对码。"
+            "value" : "kaka 使用相机拍摄你在消息里发送的照片，以及扫描电脑上 kaka Setup 显示的配对码。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 使用相機拍攝你在訊息裡傳送的照片，以及掃描電腦上 Poki Setup 顯示的配對碼。"
+            "value" : "kaka 使用相機拍攝你在訊息裡傳送的照片，以及掃描電腦上 kaka Setup 顯示的配對碼。"
           }
         }
       }
@@ -56,19 +71,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki connects to developer services on this iPhone for pairing and automation, and to the voice bridge on your Mac."
+            "value" : "kaka connects to developer services on this iPhone for pairing and automation, and to the voice bridge on your Mac."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 会连接此 iPhone 的开发者服务以完成配对和自动化，并连接 Mac 上的语音桥接。"
+            "value" : "kaka 会连接此 iPhone 的开发者服务以完成配对和自动化，并连接 Mac 上的语音桥接。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 會連線此 iPhone 的開發者服務以完成配對與自動化，並連線 Mac 上的語音橋接。"
+            "value" : "kaka 會連線此 iPhone 的開發者服務以完成配對與自動化，並連線 Mac 上的語音橋接。"
           }
         }
       }
@@ -80,19 +95,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki stays active in the background while on so agents can reach this iPhone. Poki never records or sends your location."
+            "value" : "kaka stays active in the background while on so agents can reach this iPhone. kaka never records or sends your location."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 开启时会在后台保持运行，以便智能体连接此 iPhone。Poki 不会记录或发送你的位置。"
+            "value" : "kaka 开启时会在后台保持运行，以便智能体连接此 iPhone。kaka 不会记录或发送你的位置。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 開啟時會在背景保持執行，以便智慧體連線此 iPhone。Poki 不會記錄或傳送你的位置。"
+            "value" : "kaka 開啟時會在背景保持執行，以便智慧體連線此 iPhone。kaka 不會記錄或傳送你的位置。"
           }
         }
       }
@@ -104,19 +119,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki stays active in the background while on so agents can reach this iPhone. Poki never records or sends your location."
+            "value" : "kaka stays active in the background while on so agents can reach this iPhone. kaka never records or sends your location."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 开启时会在后台保持运行，以便智能体连接此 iPhone。Poki 不会记录或发送你的位置。"
+            "value" : "kaka 开启时会在后台保持运行，以便智能体连接此 iPhone。kaka 不会记录或发送你的位置。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki 開啟時會在背景保持執行，以便智慧體連線此 iPhone。Poki 不會記錄或傳送你的位置。"
+            "value" : "kaka 開啟時會在背景保持執行，以便智慧體連線此 iPhone。kaka 不會記錄或傳送你的位置。"
           }
         }
       }
@@ -128,19 +143,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poki listens when you talk in Voice and sends the audio to OpenAI to understand your request."
+            "value" : "kaka listens when you talk in Voice and sends the audio to OpenAI to understand your request."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "你在“语音”中与 Poki 交谈时，Poki 会收音并将音频发给 OpenAI 以理解你的请求。"
+            "value" : "你在“语音”中与 kaka 交谈时，kaka 会收音并将音频发给 OpenAI 以理解你的请求。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "你在「語音」中與 Poki 交談時，Poki 會收音並將音訊傳送給 OpenAI 以理解你的請求。"
+            "value" : "你在「語音」中與 kaka 交談時，kaka 會收音並將音訊傳送給 OpenAI 以理解你的請求。"
+          }
+        }
+      }
+    },
+    "NSSpeechRecognitionUsageDescription" : {
+      "comment" : "Privacy - Speech Recognition Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Without an OpenAI key, kaka turns what you say in Voice into text on this iPhone and sends the text to your chosen model."
           }
         }
       }

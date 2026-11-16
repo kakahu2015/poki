@@ -182,7 +182,7 @@ struct ActionLogView: View {
             }
             if log.entries.isEmpty {
                 ContentUnavailableView("No Actions Yet", systemImage: "list.bullet.rectangle",
-                                       description: Text("Every tap, swipe and keystroke Poki makes on this iPhone is listed here, whoever asked for it."))
+                                       description: Text("Every tap, swipe and keystroke kaka makes on this iPhone is listed here, whoever asked for it."))
                     .listRowBackground(Color.clear)
             } else if days.isEmpty {
                 ContentUnavailableView("Nothing Matches", systemImage: "line.3.horizontal.decrease.circle",
@@ -214,7 +214,7 @@ struct ActionLogView: View {
             }
             if !log.entries.isEmpty {
                 Section {} footer: {
-                    Text("Poki keeps its latest \(ActionLog.keep) entries on this iPhone. Entries can’t be deleted by hand.")
+                    Text("kaka keeps its latest \(ActionLog.keep) entries on this iPhone. Entries can’t be deleted by hand.")
                 }
             }
         }
@@ -227,7 +227,7 @@ struct ActionLogView: View {
                 Menu {
                     Picker("Asked By", selection: $who) {
                         Text("Everyone").tag(String?.none)
-                        Text("Poki").tag(String?.some(""))
+                        Text("kaka").tag(String?.some(""))
                         ForEach(agents, id: \.self) { Text(verbatim: $0).tag(String?.some($0)) }
                     }
                 } label: {
@@ -239,7 +239,7 @@ struct ActionLogView: View {
     }
 
     private func title(_ run: ActionLog.Run) -> String {
-        run.session.flatMap { SessionStore.shared.session($0)?.name } ?? run.caller ?? "Poki"
+        run.session.flatMap { SessionStore.shared.session($0)?.name } ?? run.caller ?? "kaka"
     }
 
     @ViewBuilder private func menu(_ run: ActionLog.Run) -> some View {

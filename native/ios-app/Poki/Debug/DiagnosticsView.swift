@@ -84,7 +84,7 @@ struct LogView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button("Copy Log", systemImage: "doc.on.doc") { UIPasteboard.general.string = log.text }
-                    ShareLink(item: log.text, subject: Text("Poki log")) { Label("Share Log", systemImage: "square.and.arrow.up") }
+                    ShareLink(item: log.text, subject: Text("kaka log")) { Label("Share Log", systemImage: "square.and.arrow.up") }
                     Button("Clear", systemImage: "trash", role: .destructive) { log.clear() }
                 } label: {
                     Image(systemName: "ellipsis.circle").accessibilityLabel(Text("More"))
@@ -108,7 +108,7 @@ struct TestingOptionsView: View {
             } header: {
                 Text("Agents")
             } footer: {
-                Text("Off by default. ask_poki lets outside agents hand a repetitive task to Poki's own agent. Changes take effect the next time Poki opens. The Auto-Classifier is in Settings › Approvals.")
+                Text("Off by default. ask_poki lets outside agents hand a repetitive task to kaka's own agent. Changes take effect the next time kaka opens. The Auto-Classifier is in Settings › Approvals.")
             }
             // The in-process path's switch and probes (ESP-173, ESP-175).
             InProcessSection()

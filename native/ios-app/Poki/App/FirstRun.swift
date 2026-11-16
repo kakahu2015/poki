@@ -86,7 +86,7 @@ struct FirstRunGuide: View {
 
     private var title: String {
         switch page {
-        case .hello: AppLocalization.text(LocalizedStringResource("Hello, I’m Poki"))
+        case .hello: AppLocalization.text(LocalizedStringResource("Hello, I’m kaka"))
         case .phone: AppLocalization.text(LocalizedStringResource("Set Up This iPhone"))
         case .model: AppLocalization.text(LocalizedStringResource("Pick a Model"))
         case .voice: AppLocalization.text(LocalizedStringResource("Talk Instead of Typing"))

@@ -57,7 +57,7 @@ final class ChatGPTBrowserLogin: NSObject, ASWebAuthenticationPresentationContex
             },
             signal: cancel,
             getDeviceId: { [id = ChatGPTAccount.installationID] in id },
-            agentName: "Poki"
+            agentName: "kaka"
         )
         defer { finish() }
         return try await loginOpenAIChatGPT(callbacks)
@@ -125,7 +125,7 @@ struct ChatGPTSignIn: View {
                     Button("Continue with ChatGPT") { login.inApp = true; run { try await login.signIn() } }.disabled(working)
                     Button("Continue in Safari") { login.inApp = false; run { try await login.signIn() } }.disabled(working)
                 } footer: {
-                    Text("Poki uses your ChatGPT Plus or Pro plan through OpenAI’s Sign in with ChatGPT. The sign-in stays in this iPhone’s Keychain. An OpenAI API key works too, as a backup: add it under OpenAI.")
+                    Text("kaka uses your ChatGPT Plus or Pro plan through OpenAI’s Sign in with ChatGPT. The sign-in stays in this iPhone’s Keychain. An OpenAI API key works too, as a backup: add it under OpenAI.")
                 }
                 if let problem { Text(verbatim: problem).foregroundStyle(Color(.systemRed)) }
                 if ChatGPTAccount.signedIn {

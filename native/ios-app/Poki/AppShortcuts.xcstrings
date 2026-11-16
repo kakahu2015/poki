@@ -2,6 +2,7 @@
   "sourceLanguage" : "en",
   "strings" : {
     "Give ${applicationName} a task" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -18,6 +19,7 @@
       }
     },
     "Send a task to ${applicationName}" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -34,6 +36,7 @@
       }
     },
     "Start talking to ${applicationName}" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -50,6 +53,7 @@
       }
     },
     "Talk to ${applicationName}" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
