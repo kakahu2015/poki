@@ -336,6 +336,7 @@ struct ChatGPTSignIn: View {
                 if let problem { Text(verbatim: problem).foregroundStyle(Color(.systemRed)) }
                 if ChatGPTAccount.signedIn {
                     Section {
+                        Button(working ? "Reading the Model List…" : "Refresh Model List") { refreshModels() }.disabled(working)
                         Link("Manage usage", destination: ChatGPTAccount.usageURL)
                         Button("Sign Out", role: .destructive) { signOut() }.disabled(working)
                     }
@@ -345,8 +346,15 @@ struct ChatGPTSignIn: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { login.cancel(); dismiss() } } }
             .alert("You're using your ChatGPT plan", isPresented: $showPlanWelcome) {
-                Button("Manage usage") { acknowledgePlanWelcome(); openURL(ChatGPTAccount.usageURL); dismiss() }
-                Button("Got it", role: .cancel) { acknowledgePlanWelcome(); dismiss() }
+                Button("Manage usage") {
+                    acknowledgePlanWelcome()
+                    openURL(ChatGPTAccount.usageURL)
+                    if problem == nil { dismiss() }
+                }
+                Button("Got it", role: .cancel) {
+                    acknowledgePlanWelcome()
+                    if problem == nil { dismiss() }
+                }
             } message: {
                 Text("Eligible requests in kaka use your ChatGPT plan or credits. You can review usage and manage limits in ChatGPT Settings.")
             }
@@ -362,9 +370,10 @@ struct ChatGPTSignIn: View {
                 let account = try await signIn()
                 try ChatGPTAccount.save(account)
                 ModelKeys.selectedProvider = .chatgpt
+                problem = await modelListProblem()
                 working = false
                 if UserDefaults.standard.bool(forKey: "chat.chatGPTPlanWelcomeSeen") {
-                    dismiss()
+                    if problem == nil { dismiss() }
                 } else {
                     showPlanWelcome = true
                 }
@@ -402,9 +411,31 @@ struct ChatGPTSignIn: View {
         }
         if ChatGPTAccount.isSignedIn(account) {
             ModelKeys.selectedProvider = .chatgpt
-            dismiss()
+            refreshModels()
         } else {
             run { try await login.signIn() }
+        }
+    }
+
+    private func refreshModels() {
+        problem = nil
+        working = true
+        Task {
+            problem = await modelListProblem()
+            working = false
+            if problem == nil { dismiss() }
+        }
+    }
+
+    private func modelListProblem() async -> String? {
+        do {
+            let count = try await ModelCatalog.refresh(.chatgpt)
+            guard count > 0 else {
+                return AppLocalization.text(LocalizedStringResource("OpenAI returned no available models for this ChatGPT account."))
+            }
+            return nil
+        } catch {
+            return AppLocalization.text(LocalizedStringResource("Could not load models for this ChatGPT account. Check the connection and refresh again."))
         }
     }
 

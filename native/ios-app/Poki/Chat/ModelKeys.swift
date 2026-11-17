@@ -88,12 +88,8 @@ enum ModelProvider: String, CaseIterable, Identifiable, Sendable {
             ChatModelChoice(id: "gpt-6.1-terra", name: "GPT-6.1 Terra"),
             ChatModelChoice(id: "gpt-6.1-sol", name: "GPT-6.1 Sol"),
         ]
-        // The ChatGPT plan's models on the OpenAI API; gpt-6.1-terra is also kaka
-        // Agent's default on the Mac (agent/model-config.mjs).
-        case .chatgpt: [
-            ChatModelChoice(id: "gpt-6.1-terra", name: "ChatGPT GPT-6.1 Terra"),
-            ChatModelChoice(id: "gpt-6.1-sol", name: "ChatGPT GPT-6.1 Sol"),
-        ]
+        // Sign in with ChatGPT supplies its account-specific choices from `/v1/models`.
+        case .chatgpt: []
         // DeepSeek's current names (api-docs.deepseek.com, 2026-11-07); deepseek-chat is retired. V4 Pro
         // reads text only, so it does not see the screenshots.
         case .deepseek: [
@@ -165,7 +161,8 @@ enum ModelProvider: String, CaseIterable, Identifiable, Sendable {
         // same API and inputs as gpt-6.1-sol.
         // A model from the provider's own list that pi's catalog lacks takes the shape of a built-in one of
         // the same provider (same API and inputs), with its own id.
-        let template = (self == .openai || self == .chatgpt) && id == "gpt-6.1-terra" ? "gpt-6.1-sol" : models.lazy.compactMap { getModel(provider: piProvider, modelId: $0.id) }.first?.id
+        let templateModels = self == .chatgpt ? ModelProvider.openai.models : models
+        let template = (self == .openai || self == .chatgpt) && id == "gpt-6.1-terra" ? "gpt-6.1-sol" : templateModels.lazy.compactMap { getModel(provider: piProvider, modelId: $0.id) }.first?.id
         guard let template, let base = getModel(provider: piProvider, modelId: template),
               var json = (try? JSONSerialization.jsonObject(with: JSONEncoder().encode(base))) as? [String: Any] else { return nil }
         json["id"] = id
@@ -174,7 +171,7 @@ enum ModelProvider: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-struct ChatModelChoice: Hashable, Identifiable, Sendable {
+struct ChatModelChoice: Codable, Hashable, Identifiable, Sendable {
     var id: String
     var name: String
 }

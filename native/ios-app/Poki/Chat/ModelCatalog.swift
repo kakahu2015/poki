@@ -9,7 +9,8 @@ enum ModelCatalog {
     static func defaults(_ provider: ModelProvider) -> Set<String> {
         switch provider {
         case .anthropic: ["claude-haiku-5-5", "claude-sonnet-5-5"]
-        case .openai, .chatgpt: ["gpt-6.1-terra"]
+        case .openai: ["gpt-6.1-terra"]
+        case .chatgpt: Set(listed(.chatgpt).prefix(1).map(\.id))
         case .deepseek: ["deepseek-flash"]
         case .gemini: ["gemini-3.8-flash"]
         case .openrouter: ["anthropic/claude-sonnet-5.5", "google/gemini-3.8-flash"]
@@ -19,6 +20,7 @@ enum ModelCatalog {
 
     /// The account's models: the built-in ones, fast first, then the listed ones.
     static func all(_ provider: ModelProvider) -> [ChatModelChoice] {
+        if provider == .chatgpt { return listed(provider) }
         let builtIn = provider.models.sorted { fast($0.id) && !fast($1.id) }
         let known = Set(builtIn.map(\.id))
         return builtIn + listed(provider).filter { !known.contains($0.id) }
@@ -30,14 +32,14 @@ enum ModelCatalog {
     }
 
     static func enabled(_ provider: ModelProvider) -> Set<String> {
-        if let saved = UserDefaults.standard.stringArray(forKey: "models.enabled.\(provider.rawValue)") { return Set(saved) }
+        if let saved = UserDefaults.standard.stringArray(forKey: enabledStorageKey(provider)) { return Set(saved) }
         return defaults(provider)
     }
 
     static func set(_ id: String, on: Bool, for provider: ModelProvider) {
         var ids = enabled(provider)
         if on { ids.insert(id) } else { ids.remove(id) }
-        UserDefaults.standard.set(Array(ids), forKey: "models.enabled.\(provider.rawValue)")
+        UserDefaults.standard.set(Array(ids), forKey: enabledStorageKey(provider))
         // The chat's model is always one that is switched on.
         if ModelKeys.selectedProvider == provider, !ids.contains(ModelKeys.selectedModel), let first = available(provider).first {
             ModelKeys.selectedModel = first.id
@@ -46,7 +48,29 @@ enum ModelCatalog {
     }
 
     static func listed(_ provider: ModelProvider) -> [ChatModelChoice] {
-        (UserDefaults.standard.stringArray(forKey: "models.listed.\(provider.rawValue)") ?? []).map { ChatModelChoice(id: $0, name: $0) }
+        if provider == .chatgpt {
+            guard let clientId = ChatGPTAccount.currentAccount()?.clientId,
+                  let data = UserDefaults.standard.data(forKey: chatGPTListKey(clientId)) else { return [] }
+            return (try? JSONDecoder().decode([ChatModelChoice].self, from: data)) ?? []
+        }
+        return (UserDefaults.standard.stringArray(forKey: "models.listed.\(provider.rawValue)") ?? []).map { ChatModelChoice(id: $0, name: $0) }
+    }
+
+    static func needsRefresh(_ provider: ModelProvider) -> Bool {
+        if provider == .chatgpt {
+            guard let clientId = ChatGPTAccount.currentAccount()?.clientId else { return false }
+            return UserDefaults.standard.data(forKey: chatGPTListKey(clientId)) == nil
+        }
+        return listed(provider).isEmpty
+    }
+
+    private static func chatGPTListKey(_ clientId: String) -> String { "models.listed.chatgpt.\(clientId)" }
+
+    private static func enabledStorageKey(_ provider: ModelProvider) -> String {
+        if provider == .chatgpt, let clientId = ChatGPTAccount.currentAccount()?.clientId {
+            return "models.enabled.chatgpt.\(clientId)"
+        }
+        return "models.enabled.\(provider.rawValue)"
     }
 
     static func supportsReasoning(_ id: String, for provider: ModelProvider) -> Bool {
@@ -61,11 +85,52 @@ enum ModelCatalog {
 
     /// Reads the provider's model list with the owner's key (sent only to that provider).
     static func refresh(_ provider: ModelProvider) async throws -> Int {
-        guard let request = request(provider) else { return 0 }
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let chatGPTClientId: String?
+        var modelListRequest: URLRequest
+        if provider == .chatgpt {
+            guard let clientId = ChatGPTAccount.currentAccount()?.clientId,
+                  let token = await ChatGPTAccount.accessToken() else { throw URLError(.userAuthenticationRequired) }
+            guard ChatGPTAccount.currentAccount()?.clientId == clientId else { throw URLError(.cancelled) }
+            chatGPTClientId = clientId
+            modelListRequest = URLRequest(url: URL(string: "https://api.openai.com/v1/models")!)
+            modelListRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            guard let providerRequest = request(provider) else { return 0 }
+            chatGPTClientId = nil
+            modelListRequest = providerRequest
+        }
+        modelListRequest.timeoutInterval = 15
+        let (data, response) = try await URLSession.shared.data(for: modelListRequest)
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
         guard (200..<300).contains(status) else { throw URLError(.badServerResponse) }
         let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+
+        if let chatGPTClientId {
+            let items = (json?["models"] as? [[String: Any]]) ?? []
+            let choices = items.compactMap { item -> ChatModelChoice? in
+                guard item["visibility"] as? String == "list",
+                      let slug = item["slug"] as? String, !slug.isEmpty else { return nil }
+                let name = (item["display_name"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+                return ChatModelChoice(id: slug, name: name.flatMap { $0.isEmpty ? nil : $0 } ?? slug)
+            }
+            let choiceData = try JSONEncoder().encode(choices)
+            UserDefaults.standard.set(choiceData, forKey: chatGPTListKey(chatGPTClientId))
+            let availableIDs = Set(choices.map(\.id))
+            let enabledKey = "models.enabled.chatgpt.\(chatGPTClientId)"
+            if let saved = UserDefaults.standard.stringArray(forKey: enabledKey) {
+                let valid = saved.filter(availableIDs.contains)
+                if !saved.isEmpty, valid.isEmpty, let first = choices.first?.id {
+                    UserDefaults.standard.set([first], forKey: enabledKey)
+                } else {
+                    UserDefaults.standard.set(valid, forKey: enabledKey)
+                }
+            } else if let first = choices.first?.id {
+                UserDefaults.standard.set([first], forKey: enabledKey)
+            }
+            ModelKeys.saved += 1
+            return choices.count
+        }
+
         let items = (json?["data"] as? [[String: Any]]) ?? (json?["models"] as? [[String: Any]]) ?? []
         var ids = items.compactMap { ($0["id"] as? String) ?? ($0["name"] as? String) }
             .map { $0.hasPrefix("models/") ? String($0.dropFirst(7)) : $0 }
@@ -132,7 +197,7 @@ enum ModelCatalog {
             request = URLRequest(url: url)
             if let key { request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization") }
         case .chatgpt:
-            // A ChatGPT sign-in has no model list; its plan's models are the built-in ones.
+            // ChatGPT plan model listing uses the selected account's OAuth token in refresh(_:).
             return nil
         }
         request.timeoutInterval = 15

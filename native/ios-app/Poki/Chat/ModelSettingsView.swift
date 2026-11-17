@@ -273,6 +273,7 @@ private struct TextChatFeature: View {
     @State private var version = ModelKeys.saved
     @State private var loading = false
     @State private var problem: String?
+    @State private var startedInitialRefresh = false
 
     var body: some View {
         Form {
@@ -285,13 +286,21 @@ private struct TextChatFeature: View {
                         }
                     }
                 }
-                if provider != .chatgpt {
-                    Button(loading ? "Reading the Model List…" : "Refresh Model List") { refresh() }.disabled(loading)
+                if ModelCatalog.all(provider).isEmpty {
+                    Text(loading ? "Reading the Model List…" : "No models loaded yet.")
+                        .font(.footnote).foregroundStyle(Color(.secondaryLabel))
                 }
+                Button(loading ? "Reading the Model List…" : "Refresh Model List") { refresh() }.disabled(loading)
             } header: {
                 Text("Models to Choose From")
             } footer: {
-                Text(problem ?? AppLocalization.text(LocalizedStringResource("Fast models without long thinking answer quickest on the phone. Models from \(provider.name)’s list start switched off.")))
+                if let problem {
+                    Text(verbatim: problem)
+                } else if provider == .chatgpt {
+                    Text("Model choices come from the selected ChatGPT account’s available models.")
+                } else {
+                    Text("Fast models without long thinking answer quickest on the phone. Models from \(provider.name)’s list start switched off.")
+                }
             }
         }
         // Reads the version so the page redraws with the new keys and models, without rebuilding it
@@ -301,14 +310,31 @@ private struct TextChatFeature: View {
         .navigationTitle(AppLocalization.text("Text Chat"))
         .navigationBarTitleDisplayMode(.inline)
         .onReceive(NotificationCenter.default.publisher(for: ModelKeys.changed)) { _ in version = ModelKeys.saved }
-        .task { if ModelCatalog.listed(provider).isEmpty, provider != .chatgpt { refresh() } }
+        .task {
+            if provider == .chatgpt {
+                guard !startedInitialRefresh else { return }
+                startedInitialRefresh = true
+                refresh()
+            } else if ModelCatalog.needsRefresh(provider) {
+                refresh()
+            }
+        }
     }
 
     private func refresh() {
         loading = true
         problem = nil
         Task {
-            do { _ = try await ModelCatalog.refresh(provider) } catch { problem = AppLocalization.text(LocalizedStringResource("\(provider.name) didn’t return its model list. The built-in models still work.")) }
+            do {
+                let count = try await ModelCatalog.refresh(provider)
+                if provider == .chatgpt, count == 0 {
+                    problem = AppLocalization.text(LocalizedStringResource("OpenAI returned no available models for this ChatGPT account."))
+                }
+            } catch {
+                problem = provider == .chatgpt
+                    ? AppLocalization.text(LocalizedStringResource("Could not load models for this ChatGPT account. Check the connection and refresh again."))
+                    : AppLocalization.text(LocalizedStringResource("\(provider.name) didn’t return its model list. The built-in models still work."))
+            }
             loading = false
         }
     }
