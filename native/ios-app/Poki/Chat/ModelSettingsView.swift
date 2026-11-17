@@ -280,10 +280,7 @@ private struct TextChatFeature: View {
             Section {
                 ForEach(ModelCatalog.all(provider)) { choice in
                     Toggle(isOn: Binding(get: { ModelCatalog.enabled(provider).contains(choice.id) }, set: { ModelCatalog.set(choice.id, on: $0, for: provider) })) {
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(choice.name)
-                            if ModelCatalog.fast(choice.id) { Text("Fast").font(.caption).foregroundStyle(Color(.secondaryLabel)) }
-                        }
+                        Text(choice.name)
                     }
                 }
                 if ModelCatalog.all(provider).isEmpty {
@@ -298,8 +295,6 @@ private struct TextChatFeature: View {
                     Text(verbatim: problem)
                 } else if provider == .chatgpt {
                     Text("Model choices come from the selected ChatGPT account’s available models.")
-                } else {
-                    Text("Fast models without long thinking answer quickest on the phone. Models from \(provider.name)’s list start switched off.")
                 }
             }
         }

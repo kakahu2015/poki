@@ -127,7 +127,7 @@ enum ModelCatalog {
             } else if let first = choices.first?.id {
                 UserDefaults.standard.set([first], forKey: enabledKey)
             }
-            ModelKeys.saved += 1
+            await MainActor.run { ModelKeys.saved += 1 }
             return choices.count
         }
 
@@ -150,7 +150,7 @@ enum ModelCatalog {
         }
         ids = Array(Set(ids)).sorted { fast($0) == fast($1) ? $0 < $1 : fast($0) }
         UserDefaults.standard.set(ids, forKey: "models.listed.\(provider.rawValue)")
-        ModelKeys.saved += 1
+        await MainActor.run { ModelKeys.saved += 1 }
         return ids.count
     }
 
